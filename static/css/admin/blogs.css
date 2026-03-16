@@ -1,0 +1,95 @@
+
+.card {
+    border-radius: 12px;
+}
+
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Mobile Horizontal Scroll Container */
+.mobile-horizontal-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+    padding-bottom: 10px;
+}
+
+.mobile-horizontal-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.mobile-horizontal-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.mobile-horizontal-scroll::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.mobile-horizontal-scroll::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.mobile-cards-container {
+    display: flex;
+    gap: 1rem;
+    padding: 0.25rem;
+    min-width: min-content;
+}
+
+/* Mobile Card Styles */
+.mobile-data-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    min-width: 280px;
+    max-width: 320px;
+    flex-shrink: 0;
+}
+
+.mobile-data-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.min-width-0 {
+    min-width: 0;
+}
+
+/* Mobile header adjustments */
+@media (max-width: 991.98px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch !important;
+    }
+
+    .card-header .btn {
+        width: 100%;
+    }
+
+    .card-header h5 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .mobile-data-card {
+        min-width: 260px;
+        max-width: 300px;
+    }
+}
+

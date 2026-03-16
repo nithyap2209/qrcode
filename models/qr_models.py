@@ -137,9 +137,21 @@ class QRText(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     qr_code_id = db.Column(db.Integer, db.ForeignKey('qr_code.id'), nullable=False, unique=True)
     text = db.Column(db.Text, nullable=False)
-    
+
     # Relationship to parent QR code
     qr_code = db.relationship('QRCode', backref=db.backref('text_detail', uselist=False))
+
+class QRImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    qr_code_id = db.Column(db.Integer, db.ForeignKey('qr_code.id'), nullable=False, unique=True)
+    image_path = db.Column(db.String(500), nullable=False)
+    caption = db.Column(db.String(255), nullable=True)
+    bg_color_1 = db.Column(db.String(20), nullable=True, default='#0a0a0a')
+    bg_color_2 = db.Column(db.String(20), nullable=True, default='#1a1a2e')
+    bg_direction = db.Column(db.String(30), nullable=True, default='to bottom')
+
+    # Relationship to parent QR code
+    qr_code = db.relationship('QRCode', backref=db.backref('image_detail', uselist=False))
 
 class QRLink(db.Model):
     id = db.Column(db.Integer, primary_key=True)

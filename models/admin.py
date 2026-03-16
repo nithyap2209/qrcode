@@ -206,7 +206,7 @@ def create_super_admin():
             "blogs",
             "blog_categories",
             "website_settings",
-            "webstories"
+            "webstory_management"   
         ],  
         is_active=True,
         created_at=datetime.utcnow()
@@ -1225,18 +1225,23 @@ def ensure_aware(dt):
 @admin_required
 def admin_subscribed_users():
     """Display all subscribed users with filtering options"""
-    
+
     # Get filter parameters
     status_filter = request.args.get('status', 'all')
     plan_filter = request.args.get('plan', 'all')
-    
+    email_filter = request.args.get('email', '').strip()
+
     # Base query
     query = db.session.query(SubscribedUser, User, Subscription).join(
         User, SubscribedUser.U_ID == User.id
     ).join(
         Subscription, SubscribedUser.S_ID == Subscription.S_ID
     )
-    
+
+    # Apply email filter
+    if email_filter:
+        query = query.filter(User.company_email.ilike(f'%{email_filter}%'))
+
     # Apply status filter
     now = datetime.now(UTC)
     if status_filter == 'active':
@@ -1251,7 +1256,7 @@ def admin_subscribed_users():
         )
     elif status_filter == 'expired':
         query = query.filter(SubscribedUser.end_date <= now)
-    
+
     # Apply plan filter
     if plan_filter != 'all':
         try:
@@ -1259,7 +1264,7 @@ def admin_subscribed_users():
             query = query.filter(Subscription.S_ID == plan_id)
         except ValueError:
             pass
-    
+
     # Get results ordered by most recent first
     subscribed_users = query.order_by(SubscribedUser.start_date.desc()).all()
     for sub, user, plan in subscribed_users:
@@ -1296,6 +1301,7 @@ def admin_subscribed_users():
         all_plans=all_plans,
         status_filter=status_filter,
         plan_filter=plan_filter,
+        email_filter=email_filter,
         now=now,
         hasattr=hasattr
     )
@@ -3312,7 +3318,7 @@ def admin_retry_email(log_id):
     try:
         # Create a simple retry email
         subject = f"[RETRY] {email_log.subject}"
-        logo_url = url_for('static', filename='images/qr.png', _external=True, _scheme='https')
+        logo_url = "https://qrdada.com/static/images/qr.png"
 
         # Plain text version
         body = f"""Dear {email_log.recipient_name or 'User'},
@@ -3391,7 +3397,7 @@ The QR Dada Support Team
                             </p>
 
                             <p style="margin: 20px 0 0 0; font-size: 12px; color: #94a3b8; text-align: center;">
-                                © 2025 QR Dada. All rights reserved.
+                                © {datetime.now().year} QR Dada. All rights reserved.
                             </p>
                         </td>
                     </tr>
@@ -3878,6 +3884,7 @@ class Blog(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('blog_categories.id'), nullable=True)
     status = db.Column(db.Boolean, default=True)  # Active/Inactive
     schema_data = db.Column(db.Text, nullable=True)  # JSON for FAQs and other schema data
+    publish_date = db.Column(db.Date, nullable=True)  # Blog publish date
     created_by = db.Column(db.String(100), nullable=True)  # Admin email or name
     created_at = db.Column(db.DateTime, default=datetime.now(UTC))
     updated_at = db.Column(db.DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC))
@@ -4185,13 +4192,15 @@ def admin_add_blog():
         try:
             title = request.form.get('title', '').strip()
             slug = request.form.get('slug', '').strip()
-            author_name = request.form.get('author_name', '').strip() 
+            author_name = request.form.get('author_name', '').strip()
             description = request.form.get('description', '').strip()
             meta_title = request.form.get('meta_title', '').strip()
             meta_keyword = request.form.get('meta_keyword', '').strip()
             meta_description = request.form.get('meta_description', '').strip()
             category_id = request.form.get('category_id')
             status = request.form.get('status') == 'on'
+            publish_date_str = request.form.get('publish_date', '').strip()
+            publish_date = datetime.strptime(publish_date_str, '%Y-%m-%d').date() if publish_date_str else None
             # Handle FAQ data
             faq_questions = request.form.getlist('faq_questions[]')
             faq_answers = request.form.getlist('faq_answers[]')
@@ -4245,6 +4254,7 @@ def admin_add_blog():
                 image=image_filename,
                 status=status,
                 schema_data=schema_data,
+                publish_date=publish_date,
                 created_by=email_id,
                 author_name=author_name
             )
@@ -4282,13 +4292,15 @@ def admin_edit_blog(id):
         try:
             title = request.form.get('title', '').strip()
             slug = request.form.get('slug', '').strip()
-            author_name = request.form.get('author_name', '').strip() 
+            author_name = request.form.get('author_name', '').strip()
             description = request.form.get('description', '').strip()
             meta_title = request.form.get('meta_title', '').strip()
             meta_keyword = request.form.get('meta_keyword', '').strip()
             meta_description = request.form.get('meta_description', '').strip()
             category_id = request.form.get('category_id')
             status = request.form.get('status') == 'on'
+            publish_date_str = request.form.get('publish_date', '').strip()
+            publish_date = datetime.strptime(publish_date_str, '%Y-%m-%d').date() if publish_date_str else None
             # Handle FAQ data
             faq_questions = request.form.getlist('faq_questions[]')
             faq_answers = request.form.getlist('faq_answers[]')
@@ -4301,7 +4313,7 @@ def admin_edit_blog(id):
                         'answer': a.strip()
                     })
             schema_data = json.dumps(faqs) if faqs else None
-        
+
             if not title:
                 flash('Blog title is required', 'danger')
                 return redirect(url_for('admin.admin_edit_blog', id=id))
@@ -4349,6 +4361,7 @@ def admin_edit_blog(id):
             blog.category_id = int(category_id) if category_id else None
             blog.status = status
             blog.schema_data = schema_data
+            blog.publish_date = publish_date
             blog.updated_at = datetime.now(UTC)
 
             db.session.commit()
@@ -4402,7 +4415,185 @@ def admin_delete_blog(id):
 
     return redirect(url_for('admin.admin_blogs'))
 
+# Add this route to your admin.py file
+# CKEditor 4 compatible image upload endpoint for blogs
 
+@admin_bp.route('/blog/upload-image-ckeditor4', methods=['POST'])
+@admin_required
+def admin_blog_upload_image_ckeditor4():
+    """Handle image uploads for CKEditor 4 (returns CKEditor 4 compatible format)"""
+    try:
+        email_id = session.get('email_id')
+        
+        # Check permission
+        if not Admin.check_permission(email_id, 'blog_management'):
+            # CKEditor 4 expects a specific error format or script callback
+            func_num = request.args.get('CKEditorFuncNum')
+            if func_num:
+                return f'''<script type="text/javascript">
+                    window.parent.CKEDITOR.tools.callFunction({func_num}, '', "You don't have permission to upload images.");
+                </script>'''
+            return jsonify({'uploaded': 0, 'error': {'message': "You don't have permission to upload images."}}), 403
+        
+        # CKEditor 4 sends file as 'upload' field
+        if 'upload' not in request.files:
+            func_num = request.args.get('CKEditorFuncNum')
+            if func_num:
+                return f'''<script type="text/javascript">
+                    window.parent.CKEDITOR.tools.callFunction({func_num}, '', 'No file uploaded');
+                </script>'''
+            return jsonify({'uploaded': 0, 'error': {'message': 'No file uploaded'}}), 400
+        
+        file = request.files['upload']
+        
+        if file.filename == '':
+            func_num = request.args.get('CKEditorFuncNum')
+            if func_num:
+                return f'''<script type="text/javascript">
+                    window.parent.CKEDITOR.tools.callFunction({func_num}, '', 'No file selected');
+                </script>'''
+            return jsonify({'uploaded': 0, 'error': {'message': 'No file selected'}}), 400
+        
+        # Check file extension
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'}
+        file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        
+        if file_ext not in allowed_extensions:
+            func_num = request.args.get('CKEditorFuncNum')
+            if func_num:
+                return f'''<script type="text/javascript">
+                    window.parent.CKEDITOR.tools.callFunction({func_num}, '', 'Invalid file type. Allowed: {", ".join(allowed_extensions)}');
+                </script>'''
+            return jsonify({'uploaded': 0, 'error': {'message': f'Invalid file type. Allowed: {", ".join(allowed_extensions)}'}}), 400
+        
+        # Generate unique filename
+        from werkzeug.utils import secure_filename
+        import uuid
+        unique_filename = str(uuid.uuid4()) + '_' + secure_filename(file.filename)
+        
+        # Create upload directory
+        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'blogs', 'content')
+        os.makedirs(upload_folder, exist_ok=True)
+        
+        # Save file
+        file_path = os.path.join(upload_folder, unique_filename)
+        file.save(file_path)
+        
+        # Generate URL
+        file_url = url_for('static', filename=f'uploads/blogs/content/{unique_filename}', _external=True)
+        
+        # Check if this is a callback request (CKEditor 4 dialog)
+        func_num = request.args.get('CKEditorFuncNum')
+        if func_num:
+            # Return script for CKEditor 4 dialog
+            return f'''<script type="text/javascript">
+                window.parent.CKEDITOR.tools.callFunction({func_num}, '{file_url}', '');
+            </script>'''
+        
+        # Return JSON for other requests (like paste/drop upload)
+        return jsonify({
+            'uploaded': 1,
+            'fileName': unique_filename,
+            'url': file_url
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error uploading image: {str(e)}")
+        func_num = request.args.get('CKEditorFuncNum')
+        if func_num:
+            return f'''<script type="text/javascript">
+                window.parent.CKEDITOR.tools.callFunction({func_num}, '', 'Upload failed: {str(e)}');
+            </script>'''
+        return jsonify({'uploaded': 0, 'error': {'message': f'Upload failed: {str(e)}'}}), 500
+
+
+# CKEditor 4 compatible image upload endpoint for webstories
+@admin_bp.route('/webstory/upload-image-ckeditor4', methods=['POST'])
+@admin_required
+def admin_webstory_upload_image_ckeditor4():
+    """Handle image uploads for CKEditor 4 in webstories (returns CKEditor 4 compatible format)"""
+    try:
+        email_id = session.get('email_id')
+        
+        # Check permission
+        if not Admin.check_permission(email_id, 'webstory_management'):
+            func_num = request.args.get('CKEditorFuncNum')
+            if func_num:
+                return f'''<script type="text/javascript">
+                    window.parent.CKEDITOR.tools.callFunction({func_num}, '', "You don't have permission to upload images.");
+                </script>'''
+            return jsonify({'uploaded': 0, 'error': {'message': "You don't have permission to upload images."}}), 403
+        
+        # CKEditor 4 sends file as 'upload' field
+        if 'upload' not in request.files:
+            func_num = request.args.get('CKEditorFuncNum')
+            if func_num:
+                return f'''<script type="text/javascript">
+                    window.parent.CKEDITOR.tools.callFunction({func_num}, '', 'No file uploaded');
+                </script>'''
+            return jsonify({'uploaded': 0, 'error': {'message': 'No file uploaded'}}), 400
+        
+        file = request.files['upload']
+        
+        if file.filename == '':
+            func_num = request.args.get('CKEditorFuncNum')
+            if func_num:
+                return f'''<script type="text/javascript">
+                    window.parent.CKEDITOR.tools.callFunction({func_num}, '', 'No file selected');
+                </script>'''
+            return jsonify({'uploaded': 0, 'error': {'message': 'No file selected'}}), 400
+        
+        # Check file extension
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'}
+        file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        
+        if file_ext not in allowed_extensions:
+            func_num = request.args.get('CKEditorFuncNum')
+            if func_num:
+                return f'''<script type="text/javascript">
+                    window.parent.CKEDITOR.tools.callFunction({func_num}, '', 'Invalid file type. Allowed: {", ".join(allowed_extensions)}');
+                </script>'''
+            return jsonify({'uploaded': 0, 'error': {'message': f'Invalid file type. Allowed: {", ".join(allowed_extensions)}'}}), 400
+        
+        # Generate unique filename
+        from werkzeug.utils import secure_filename
+        import uuid
+        unique_filename = str(uuid.uuid4()) + '_' + secure_filename(file.filename)
+        
+        # Create upload directory
+        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'webstories', 'content')
+        os.makedirs(upload_folder, exist_ok=True)
+        
+        # Save file
+        file_path = os.path.join(upload_folder, unique_filename)
+        file.save(file_path)
+        
+        # Generate URL
+        file_url = url_for('static', filename=f'uploads/webstories/content/{unique_filename}', _external=True)
+        
+        # Check if this is a callback request (CKEditor 4 dialog)
+        func_num = request.args.get('CKEditorFuncNum')
+        if func_num:
+            # Return script for CKEditor 4 dialog
+            return f'''<script type="text/javascript">
+                window.parent.CKEDITOR.tools.callFunction({func_num}, '{file_url}', '');
+            </script>'''
+        
+        # Return JSON for other requests
+        return jsonify({
+            'uploaded': 1,
+            'fileName': unique_filename,
+            'url': file_url
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error uploading image: {str(e)}")
+        func_num = request.args.get('CKEditorFuncNum')
+        if func_num:
+            return f'''<script type="text/javascript">
+                window.parent.CKEDITOR.tools.callFunction({func_num}, '', 'Upload failed: {str(e)}');
+            </script>'''
+        return jsonify({'uploaded': 0, 'error': {'message': f'Upload failed: {str(e)}'}}), 500
 # ==================== WEBSTORY ROUTES ====================
 
 @admin_bp.route('/webstories', methods=['GET'])
@@ -4604,14 +4795,32 @@ def admin_add_webstory():
                 # Get background color and size data
                 heading_bg = request.form.get(f'slide_{i}_heading_bg', '').strip()
                 text_bg = request.form.get(f'slide_{i}_text_bg', '').strip()
+                heading_no_bg = request.form.get(f'slide_{i}_heading_no_bg', '0').strip()
+                text_no_bg = request.form.get(f'slide_{i}_text_no_bg', '0').strip()
                 heading_width = request.form.get(f'slide_{i}_heading_width', '').strip()
                 heading_height = request.form.get(f'slide_{i}_heading_height', '').strip()
                 text_width = request.form.get(f'slide_{i}_text_width', '').strip()
                 text_height = request.form.get(f'slide_{i}_text_height', '').strip()
 
-                # Get font size data
+                # Get font size data - try hidden field first, then input field
                 heading_font_size = request.form.get(f'slide_{i}_heading_font_size', '').strip()
+                if not heading_font_size:
+                    heading_font_size_input = request.form.get(f'slide_{i}_heading_font_size_input', '').strip()
+                    if heading_font_size_input:
+                        heading_font_size = heading_font_size_input + 'px' if not heading_font_size_input.endswith('px') else heading_font_size_input
                 text_font_size = request.form.get(f'slide_{i}_text_font_size', '').strip()
+                if not text_font_size:
+                    text_font_size_input = request.form.get(f'slide_{i}_text_font_size_input', '').strip()
+                    if text_font_size_input:
+                        text_font_size = text_font_size_input + 'px' if not text_font_size_input.endswith('px') else text_font_size_input
+
+                # Get font family data
+                heading_font_family = request.form.get(f'slide_{i}_heading_font_family', '').strip()
+                text_font_family = request.form.get(f'slide_{i}_text_font_family', '').strip()
+
+                # Get text color data
+                heading_color = request.form.get(f'slide_{i}_heading_color', '').strip()
+                text_color = request.form.get(f'slide_{i}_text_color', '').strip()
 
                 # Get image position/zoom data
                 image_pos_x = request.form.get(f'slide_{i}_image_pos_x', '50').strip()
@@ -4645,6 +4854,9 @@ def admin_add_webstory():
                         slide_data['heading_bg'] = heading_bg
                     if text_bg:
                         slide_data['text_bg'] = text_bg
+                    # Add no background flags
+                    slide_data['heading_no_bg'] = heading_no_bg
+                    slide_data['text_no_bg'] = text_no_bg
                     if heading_width:
                         slide_data['heading_width'] = heading_width
                     if heading_height:
@@ -4659,6 +4871,18 @@ def admin_add_webstory():
                         slide_data['heading_font_size'] = heading_font_size
                     if text_font_size:
                         slide_data['text_font_size'] = text_font_size
+
+                    # Add font family data if available
+                    if heading_font_family:
+                        slide_data['heading_font_family'] = heading_font_family
+                    if text_font_family:
+                        slide_data['text_font_family'] = text_font_family
+
+                    # Add text color data if available
+                    if heading_color:
+                        slide_data['heading_color'] = heading_color
+                    if text_color:
+                        slide_data['text_color'] = text_color
 
                     # Add image position/zoom data
                     if image_pos_x:
@@ -4788,14 +5012,32 @@ def admin_edit_webstory(id):
                 # Get background color and size data
                 heading_bg = request.form.get(f'slide_{i}_heading_bg', '').strip()
                 text_bg = request.form.get(f'slide_{i}_text_bg', '').strip()
+                heading_no_bg = request.form.get(f'slide_{i}_heading_no_bg', '0').strip()
+                text_no_bg = request.form.get(f'slide_{i}_text_no_bg', '0').strip()
                 heading_width = request.form.get(f'slide_{i}_heading_width', '').strip()
                 heading_height = request.form.get(f'slide_{i}_heading_height', '').strip()
                 text_width = request.form.get(f'slide_{i}_text_width', '').strip()
                 text_height = request.form.get(f'slide_{i}_text_height', '').strip()
 
-                # Get font size data
+                # Get font size data - try hidden field first, then input field
                 heading_font_size = request.form.get(f'slide_{i}_heading_font_size', '').strip()
+                if not heading_font_size:
+                    heading_font_size_input = request.form.get(f'slide_{i}_heading_font_size_input', '').strip()
+                    if heading_font_size_input:
+                        heading_font_size = heading_font_size_input + 'px' if not heading_font_size_input.endswith('px') else heading_font_size_input
                 text_font_size = request.form.get(f'slide_{i}_text_font_size', '').strip()
+                if not text_font_size:
+                    text_font_size_input = request.form.get(f'slide_{i}_text_font_size_input', '').strip()
+                    if text_font_size_input:
+                        text_font_size = text_font_size_input + 'px' if not text_font_size_input.endswith('px') else text_font_size_input
+
+                # Get font family data
+                heading_font_family = request.form.get(f'slide_{i}_heading_font_family', '').strip()
+                text_font_family = request.form.get(f'slide_{i}_text_font_family', '').strip()
+
+                # Get text color data
+                heading_color = request.form.get(f'slide_{i}_heading_color', '').strip()
+                text_color = request.form.get(f'slide_{i}_text_color', '').strip()
 
                 # Get image position/zoom data
                 image_pos_x = request.form.get(f'slide_{i}_image_pos_x', '50').strip()
@@ -4829,6 +5071,9 @@ def admin_edit_webstory(id):
                         slide_data['heading_bg'] = heading_bg
                     if text_bg:
                         slide_data['text_bg'] = text_bg
+                    # Add no background flags
+                    slide_data['heading_no_bg'] = heading_no_bg
+                    slide_data['text_no_bg'] = text_no_bg
                     if heading_width:
                         slide_data['heading_width'] = heading_width
                     if heading_height:
@@ -4843,6 +5088,18 @@ def admin_edit_webstory(id):
                         slide_data['heading_font_size'] = heading_font_size
                     if text_font_size:
                         slide_data['text_font_size'] = text_font_size
+
+                    # Add font family data if available
+                    if heading_font_family:
+                        slide_data['heading_font_family'] = heading_font_family
+                    if text_font_family:
+                        slide_data['text_font_family'] = text_font_family
+
+                    # Add text color data if available
+                    if heading_color:
+                        slide_data['heading_color'] = heading_color
+                    if text_color:
+                        slide_data['text_color'] = text_color
 
                     # Add image position/zoom data
                     if image_pos_x:
@@ -4920,4 +5177,5 @@ def admin_delete_webstory(id):
         flash(f'Error deleting webstory: {str(e)}', 'danger')
 
     return redirect(url_for('admin.admin_webstories'))
+
 

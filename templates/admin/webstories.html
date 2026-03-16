@@ -1,4 +1,8 @@
 {% extends 'admin/base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/admin/webstories.css") }}">
+{% endblock %}
+
 
 {% block title %}Manage Web Stories - Admin Dashboard{% endblock %}
 
@@ -20,26 +24,27 @@
                 <div class="card-body">
                     <!-- Filters -->
                     <div class="row mb-4">
-                        <div class="col-md-12">
-                            <form method="GET" action="{{ url_for('admin.admin_webstories') }}" class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold">Filter by Status</label>
-                                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <div class="col-12">
+                            <form method="GET" action="{{ url_for('admin.admin_webstories') }}" class="row g-2 g-md-3">
+                                <div class="col-8 col-md-4">
+                                    <label class="form-label fw-semibold small">Filter by Status</label>
+                                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
                                         <option value="">All Status</option>
                                         <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Active</option>
                                         <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>Inactive</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <a href="{{ url_for('admin.admin_webstories') }}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-redo me-1"></i>Reset
+                                <div class="col-4 col-md-4 d-flex align-items-end">
+                                    <a href="{{ url_for('admin.admin_webstories') }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-redo me-1"></i><span class="d-none d-sm-inline">Reset</span>
                                     </a>
                                 </div>
                             </form>
                         </div>
                     </div>
 
-                    <div class="table-responsive">
+                    <!-- Desktop Table View -->
+                    <div class="table-responsive d-none d-lg-block">
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
@@ -128,6 +133,68 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Mobile Card View -->
+                    <div class="d-lg-none mobile-horizontal-scroll">
+                        <div class="mobile-cards-container">
+                        {% if webstories %}
+                            {% for webstory in webstories %}
+                            <div class="mobile-data-card">
+                                <div class="d-flex gap-3 mb-3">
+                                    {% if webstory.cover_image %}
+                                        <img src="{{ url_for('static', filename='uploads/webstories/' + webstory.cover_image) }}"
+                                             alt="{{ webstory.meta_title }}"
+                                             class="rounded"
+                                             style="width: 70px; height: 70px; object-fit: cover; flex-shrink: 0;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center rounded"
+                                             style="width: 70px; height: 70px; flex-shrink: 0;">
+                                            <i class="fas fa-image text-muted fa-lg"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-grow-1 min-width-0">
+                                        <h6 class="mb-1 fw-semibold text-truncate">{{ webstory.meta_title }}</h6>
+                                        <div class="d-flex flex-wrap gap-1 mb-1">
+                                            {% if webstory.status %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>{{ webstory.publish_date.strftime('%Y-%m-%d') if webstory.publish_date else 'N/A' }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('webstory_detail', slug=webstory.slug) }}"
+                                       class="btn btn-outline-success btn-sm flex-fill"
+                                       target="_blank">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
+                                    <a href="{{ url_for('admin.admin_edit_webstory', id=webstory.id) }}"
+                                       class="btn btn-outline-primary btn-sm flex-fill">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm flex-fill"
+                                            onclick="deleteWebstory({{ webstory.id }}, '{{ webstory.meta_title }}')">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No web stories found</p>
+                                <a href="{{ url_for('admin.admin_add_webstory') }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i>Add Your First Web Story
+                                </a>
+                            </div>
+                        {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -157,22 +224,7 @@
     </div>
 </div>
 
-<style>
-    .card {
-        border-radius: 12px;
-    }
 
-    .table thead th {
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        color: #495057;
-    }
-
-    .btn-group-sm .btn {
-        padding: 0.25rem 0.5rem;
-    }
-</style>
 
 <script>
     function deleteWebstory(webstoryId, webstoryTitle) {

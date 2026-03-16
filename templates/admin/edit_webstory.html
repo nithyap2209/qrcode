@@ -1,5 +1,8 @@
-{% extends 'admin/base.html' %}
 
+{% extends 'admin/base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/admin/edit-webstory.css") }}">
+{% endblock %}
 {% block title %}Edit Web Story - Admin Dashboard{% endblock %}
 
 {% block content %}
@@ -202,22 +205,68 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-12">
                                                     <label class="form-label fw-semibold">Heading</label>
+                                                    <div class="font-controls-row mb-2">
+                                                        <select class="form-select form-select-sm font-family-select" name="slide_{{ loop.index0 }}_heading_font_family" id="slide_{{ loop.index0 }}_heading_font_family" onchange="updatePreviewSlide({{ loop.index0 }})" title="Font Family">
+                                                            <option value="Poppins, sans-serif" {% if slide.heading_font_family == 'Poppins, sans-serif' or not slide.heading_font_family %}selected{% endif %}>Poppins</option>
+                                                            <option value="Arial, sans-serif" {% if slide.heading_font_family == 'Arial, sans-serif' %}selected{% endif %}>Arial</option>
+                                                            <option value="Georgia, serif" {% if slide.heading_font_family == 'Georgia, serif' %}selected{% endif %}>Georgia</option>
+                                                            <option value="Times New Roman, serif" {% if slide.heading_font_family == 'Times New Roman, serif' %}selected{% endif %}>Times New Roman</option>
+                                                            <option value="Roboto, sans-serif" {% if slide.heading_font_family == 'Roboto, sans-serif' %}selected{% endif %}>Roboto</option>
+                                                            <option value="Open Sans, sans-serif" {% if slide.heading_font_family == 'Open Sans, sans-serif' %}selected{% endif %}>Open Sans</option>
+                                                            <option value="Lato, sans-serif" {% if slide.heading_font_family == 'Lato, sans-serif' %}selected{% endif %}>Lato</option>
+                                                            <option value="Montserrat, sans-serif" {% if slide.heading_font_family == 'Montserrat, sans-serif' %}selected{% endif %}>Montserrat</option>
+                                                            <option value="Playfair Display, serif" {% if slide.heading_font_family == 'Playfair Display, serif' %}selected{% endif %}>Playfair Display</option>
+                                                            <option value="Oswald, sans-serif" {% if slide.heading_font_family == 'Oswald, sans-serif' %}selected{% endif %}>Oswald</option>
+                                                        </select>
+                                                        <input type="number" class="form-control form-control-sm font-size-input" name="slide_{{ loop.index0 }}_heading_font_size_input" id="slide_{{ loop.index0 }}_heading_font_size_input" value="{{ slide.heading_font_size|replace('px', '') if slide.heading_font_size else '18' }}" min="10" max="72" oninput="updateHeadingFontSizeFromInput({{ loop.index0 }})" title="Font Size (px)">
+                                                        <input type="color" class="form-control form-control-sm color-picker-input" name="slide_{{ loop.index0 }}_heading_color" id="slide_{{ loop.index0 }}_heading_color" value="{{ slide.heading_color or '#ffffff' }}" oninput="updatePreviewSlide({{ loop.index0 }})" title="Text Color">
+                                                    </div>
                                                     <div class="ck-editor-wrapper" id="heading_wrapper_{{ loop.index0 }}">
                                                         <textarea class="form-control slide-heading-editor" name="slide_{{ loop.index0 }}_heading" id="slide_{{ loop.index0 }}_heading"
                                                                placeholder="Slide Heading">{{ slide.heading }}</textarea>
                                                     </div>
-                                                    <input type="hidden" name="slide_{{ loop.index0 }}_heading_bg" id="slide_{{ loop.index0 }}_heading_bg" value="{{ slide.heading_bg or 'rgba(0,0,0,0.3)' }}">
+                                                    <div class="bg-controls">
+                                                        <input type="hidden" name="slide_{{ loop.index0 }}_heading_bg" id="slide_{{ loop.index0 }}_heading_bg" value="{{ slide.heading_bg or 'rgba(0,0,0,0.3)' }}">
+                                                        <input type="hidden" name="slide_{{ loop.index0 }}_heading_no_bg" id="slide_{{ loop.index0 }}_heading_no_bg" value="{{ slide.heading_no_bg or '0' }}">
+                                                        <div class="no-bg-toggle">
+                                                            <input type="checkbox" id="slide_{{ loop.index0 }}_heading_no_bg_check" onchange="toggleBackground({{ loop.index0 }}, 'heading', this.checked)" {% if slide.heading_no_bg == '1' %}checked{% endif %}>
+                                                            <label for="slide_{{ loop.index0 }}_heading_no_bg_check">No Background</label>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
                                             <div class="row mb-3">
                                                 <div class="col-md-12">
                                                     <label class="form-label fw-semibold">Text</label>
+                                                    <div class="font-controls-row mb-2">
+                                                        <select class="form-select form-select-sm font-family-select" name="slide_{{ loop.index0 }}_text_font_family" id="slide_{{ loop.index0 }}_text_font_family" onchange="updatePreviewSlide({{ loop.index0 }})" title="Font Family">
+                                                            <option value="Poppins, sans-serif" {% if slide.text_font_family == 'Poppins, sans-serif' or not slide.text_font_family %}selected{% endif %}>Poppins</option>
+                                                            <option value="Arial, sans-serif" {% if slide.text_font_family == 'Arial, sans-serif' %}selected{% endif %}>Arial</option>
+                                                            <option value="Georgia, serif" {% if slide.text_font_family == 'Georgia, serif' %}selected{% endif %}>Georgia</option>
+                                                            <option value="Times New Roman, serif" {% if slide.text_font_family == 'Times New Roman, serif' %}selected{% endif %}>Times New Roman</option>
+                                                            <option value="Roboto, sans-serif" {% if slide.text_font_family == 'Roboto, sans-serif' %}selected{% endif %}>Roboto</option>
+                                                            <option value="Open Sans, sans-serif" {% if slide.text_font_family == 'Open Sans, sans-serif' %}selected{% endif %}>Open Sans</option>
+                                                            <option value="Lato, sans-serif" {% if slide.text_font_family == 'Lato, sans-serif' %}selected{% endif %}>Lato</option>
+                                                            <option value="Montserrat, sans-serif" {% if slide.text_font_family == 'Montserrat, sans-serif' %}selected{% endif %}>Montserrat</option>
+                                                            <option value="Playfair Display, serif" {% if slide.text_font_family == 'Playfair Display, serif' %}selected{% endif %}>Playfair Display</option>
+                                                            <option value="Oswald, sans-serif" {% if slide.text_font_family == 'Oswald, sans-serif' %}selected{% endif %}>Oswald</option>
+                                                        </select>
+                                                        <input type="number" class="form-control form-control-sm font-size-input" name="slide_{{ loop.index0 }}_text_font_size_input" id="slide_{{ loop.index0 }}_text_font_size_input" value="{{ slide.text_font_size|replace('px', '') if slide.text_font_size else '14' }}" min="10" max="72" oninput="updateTextFontSizeFromInput({{ loop.index0 }})" title="Font Size (px)">
+                                                        <input type="color" class="form-control form-control-sm color-picker-input" name="slide_{{ loop.index0 }}_text_color" id="slide_{{ loop.index0 }}_text_color" value="{{ slide.text_color or '#ffffff' }}" oninput="updatePreviewSlide({{ loop.index0 }})" title="Text Color">
+                                                    </div>
                                                     <div class="ck-editor-wrapper" id="text_wrapper_{{ loop.index0 }}">
                                                         <textarea class="form-control slide-text-editor" name="slide_{{ loop.index0 }}_text" id="slide_{{ loop.index0 }}_text" rows="3"
                                                                   placeholder="Slide Text Content">{{ slide.text }}</textarea>
                                                     </div>
-                                                    <input type="hidden" name="slide_{{ loop.index0 }}_text_bg" id="slide_{{ loop.index0 }}_text_bg" value="{{ slide.text_bg or 'rgba(0,0,0,0.3)' }}">
+                                                    <div class="bg-controls">
+                                                        <input type="hidden" name="slide_{{ loop.index0 }}_text_bg" id="slide_{{ loop.index0 }}_text_bg" value="{{ slide.text_bg or 'rgba(0,0,0,0.3)' }}">
+                                                        <input type="hidden" name="slide_{{ loop.index0 }}_text_no_bg" id="slide_{{ loop.index0 }}_text_no_bg" value="{{ slide.text_no_bg or '0' }}">
+                                                        <div class="no-bg-toggle">
+                                                            <input type="checkbox" id="slide_{{ loop.index0 }}_text_no_bg_check" onchange="toggleBackground({{ loop.index0 }}, 'text', this.checked)" {% if slide.text_no_bg == '1' %}checked{% endif %}>
+                                                            <label for="slide_{{ loop.index0 }}_text_no_bg_check">No Background</label>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -242,16 +291,20 @@
                                             </div>
 
                                             <!-- Hidden position fields -->
-                                            <input type="hidden" name="slide_{{ loop.index0 }}_heading_left" value="{{ slide.heading_left or '' }}">
-                                            <input type="hidden" name="slide_{{ loop.index0 }}_heading_bottom" value="{{ slide.heading_bottom or '' }}">
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_heading_left" id="slide_{{ loop.index0 }}_heading_left" value="{{ slide.heading_left or '' }}">
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_heading_bottom" id="slide_{{ loop.index0 }}_heading_bottom" value="{{ slide.heading_bottom or '' }}">
                                             <input type="hidden" name="slide_{{ loop.index0 }}_heading_width" id="slide_{{ loop.index0 }}_heading_width" value="{{ slide.heading_width or '85%' }}">
                                             <input type="hidden" name="slide_{{ loop.index0 }}_heading_height" id="slide_{{ loop.index0 }}_heading_height" value="{{ slide.heading_height or 'auto' }}">
-                                            <input type="hidden" name="slide_{{ loop.index0 }}_heading_font_size" id="slide_{{ loop.index0 }}_heading_font_size" value="{{ slide.heading_font_size or '18px' }}">
-                                            <input type="hidden" name="slide_{{ loop.index0 }}_text_left" value="{{ slide.text_left or '' }}">
-                                            <input type="hidden" name="slide_{{ loop.index0 }}_text_bottom" value="{{ slide.text_bottom or '' }}">
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_heading_font_size" id="slide_{{ loop.index0 }}_heading_font_size" value="{{ slide.heading_font_size or '24px' }}">
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_text_left" id="slide_{{ loop.index0 }}_text_left" value="{{ slide.text_left or '' }}">
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_text_bottom" id="slide_{{ loop.index0 }}_text_bottom" value="{{ slide.text_bottom or '' }}">
                                             <input type="hidden" name="slide_{{ loop.index0 }}_text_width" id="slide_{{ loop.index0 }}_text_width" value="{{ slide.text_width or '85%' }}">
                                             <input type="hidden" name="slide_{{ loop.index0 }}_text_height" id="slide_{{ loop.index0 }}_text_height" value="{{ slide.text_height or 'auto' }}">
-                                            <input type="hidden" name="slide_{{ loop.index0 }}_text_font_size" id="slide_{{ loop.index0 }}_text_font_size" value="{{ slide.text_font_size or '14px' }}">
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_text_font_size" id="slide_{{ loop.index0 }}_text_font_size" value="{{ slide.text_font_size or '16px' }}">
+                                            <!-- Image zoom and position -->
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_image_zoom" id="slide_{{ loop.index0 }}_image_zoom" value="{{ slide.image_zoom or '100' }}">
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_image_position_x" id="slide_{{ loop.index0 }}_image_position_x" value="{{ slide.image_position_x or slide.image_pos_x or '50' }}">
+                                            <input type="hidden" name="slide_{{ loop.index0 }}_image_position_y" id="slide_{{ loop.index0 }}_image_position_y" value="{{ slide.image_position_y or slide.image_pos_y or '50' }}">
                                         </div>
                                         {% endfor %}
                                     {% endif %}
@@ -290,588 +343,11 @@
     </div>
 </div>
 
-<style>
-    /* Live Preview Styles */
-    .sticky-preview {
-        position: sticky;
-        top: 20px;
-        max-height: calc(100vh - 40px);
-        overflow: hidden;
-    }
 
-    .preview-container {
-        background: #000;
-        position: relative;
-        width: 100%;
-        padding-bottom: 177.78%; /* 9:16 aspect ratio */
-        overflow: hidden;
-    }
-
-    .story-preview-viewer {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .story-preview-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        background: #000;
-    }
-
-    .preview-slide {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: none;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
-
-    .preview-slide.active {
-        display: block;
-    }
-
-    /* Draggable preview slide */
-    .preview-slide {
-        cursor: grab;
-    }
-
-    .preview-slide:active {
-        cursor: grabbing;
-    }
-
-    .preview-slide.dragging {
-        cursor: grabbing !important;
-    }
-
-    .preview-slide.dragging .preview-image-hint {
-        opacity: 0;
-    }
-
-    /* Image adjustment hint in preview */
-    .preview-image-hint {
-        position: absolute;
-        top: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: rgba(0, 0, 0, 0.75);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        z-index: 25;
-        opacity: 0;
-        transition: opacity 0.3s;
-        white-space: nowrap;
-    }
-
-    .preview-slide:hover .preview-image-hint {
-        opacity: 1;
-    }
-
-    .preview-reset-btn {
-        background: rgba(255, 255, 255, 0.2);
-        border: none;
-        color: white;
-        padding: 4px 10px;
-        border-radius: 12px;
-        cursor: pointer;
-        font-size: 11px;
-        transition: background 0.2s;
-    }
-
-    .preview-reset-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-    }
-
-    /* Preview Header Styles */
-    .preview-header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        z-index: 15;
-        padding: 0.75rem;
-        color: #fff;
-    }
-
-    .preview-progress {
-        flex: 1;
-        display: flex;
-        gap: 4px;
-    }
-
-    .preview-progress-bar {
-        flex: 1;
-        height: 3px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 2px;
-        overflow: hidden;
-    }
-
-    .preview-progress-bar.active .preview-progress-fill {
-        width: 100%;
-    }
-
-    .preview-progress-bar.completed .preview-progress-fill {
-        width: 100%;
-    }
-
-    .preview-progress-fill {
-        height: 100%;
-        background: #fff;
-        width: 0;
-        border-radius: 2px;
-    }
-
-    .preview-close-btn {
-        background: transparent;
-        border: none;
-        color: #fff;
-        font-size: 1rem;
-        cursor: default;
-        padding: 0.25rem;
-        opacity: 0.8;
-    }
-
-    .preview-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: transparent;
-        color: #fff;
-        pointer-events: none;
-    }
-
-    .preview-content {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-    }
-
-    .preview-heading {
-        position: absolute;
-        font-size: 18px;
-        font-weight: 400;
-        line-height: 1.25;
-        color: #fff;
-        text-align: center;
-        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-        padding: 8px;
-        cursor: move;
-        pointer-events: auto;
-        left: 50%;
-        bottom: 12%;
-        transform: translateX(-50%);
-        width: 85%;
-        min-width: 50px;
-        min-height: 30px;
-        user-select: none;
-        border: 2px dashed transparent;
-        transition: border-color 0.2s;
-        box-sizing: border-box;
-        overflow: hidden;
-    }
-
-    .preview-heading:hover,
-    .preview-heading.dragging,
-    .preview-heading.resizing {
-        border-color: rgba(255, 255, 255, 0.5);
-    }
-
-    .preview-text {
-        position: absolute;
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 1.35;
-        color: #fff;
-        text-align: center;
-        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-        padding: 8px;
-        cursor: move;
-        pointer-events: auto;
-        left: 50%;
-        bottom: 6%;
-        transform: translateX(-50%);
-        width: 85%;
-        min-width: 50px;
-        min-height: 30px;
-        user-select: none;
-        border: 2px dashed transparent;
-        transition: border-color 0.2s;
-        box-sizing: border-box;
-        overflow: hidden;
-    }
-
-    .preview-text:hover,
-    .preview-text.dragging,
-    .preview-text.resizing {
-        border-color: rgba(255, 255, 255, 0.5);
-    }
-
-    /* Text content wrapper for auto-scaling */
-    .text-content-wrapper {
-        display: block;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        word-wrap: break-word;
-        word-break: break-word;
-    }
-
-    /* Remove paragraph margins inside preview elements */
-    .preview-heading p,
-    .preview-text p {
-        margin: 0;
-        padding: 0;
-    }
-
-    .preview-heading .text-content-wrapper p,
-    .preview-text .text-content-wrapper p {
-        margin: 0;
-        padding: 0;
-    }
-
-    /* Formatting styles for CKEditor content in preview */
-    .preview-heading strong,
-    .preview-heading b,
-    .preview-text strong,
-    .preview-text b,
-    .preview-heading .text-content-wrapper strong,
-    .preview-heading .text-content-wrapper b,
-    .preview-text .text-content-wrapper strong,
-    .preview-text .text-content-wrapper b {
-        font-weight: 700 !important;
-    }
-
-    .preview-heading i,
-    .preview-heading em,
-    .preview-text i,
-    .preview-text em,
-    .preview-heading .text-content-wrapper i,
-    .preview-heading .text-content-wrapper em,
-    .preview-text .text-content-wrapper i,
-    .preview-text .text-content-wrapper em {
-        font-style: italic !important;
-    }
-
-    .preview-heading a,
-    .preview-text a,
-    .preview-heading .text-content-wrapper a,
-    .preview-text .text-content-wrapper a {
-        color: #93c5fd !important;
-        text-decoration: underline !important;
-    }
-
-    /* List styles for preview */
-    .preview-heading ul,
-    .preview-text ul,
-    .preview-heading .text-content-wrapper ul,
-    .preview-text .text-content-wrapper ul {
-        list-style-type: disc !important;
-        list-style-position: inside;
-        padding-left: 0.5rem;
-        margin: 0.25rem 0;
-        text-align: left;
-    }
-
-    .preview-heading ol,
-    .preview-text ol,
-    .preview-heading .text-content-wrapper ol,
-    .preview-text .text-content-wrapper ol {
-        list-style-type: decimal !important;
-        list-style-position: inside;
-        padding-left: 0.5rem;
-        margin: 0.25rem 0;
-        text-align: left;
-    }
-
-    .preview-heading li,
-    .preview-text li,
-    .preview-heading .text-content-wrapper li,
-    .preview-text .text-content-wrapper li {
-        display: list-item !important;
-        margin-bottom: 0.15rem;
-    }
-
-    /* Resize Handle Styles */
-    .resize-handle {
-        position: absolute;
-        background: #fff;
-        border: 2px solid #007bff;
-        z-index: 100;
-        opacity: 0;
-        transition: opacity 0.2s;
-        pointer-events: auto;
-    }
-
-    .preview-heading:hover .resize-handle,
-    .preview-text:hover .resize-handle,
-    .preview-heading.resizing .resize-handle,
-    .preview-text.resizing .resize-handle {
-        opacity: 1;
-    }
-
-    .resize-handle-e {
-        width: 10px;
-        height: 30px;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: ew-resize;
-        border-radius: 0 4px 4px 0;
-    }
-
-    .resize-handle-w {
-        width: 10px;
-        height: 30px;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: ew-resize;
-        border-radius: 4px 0 0 4px;
-    }
-
-    .resize-handle-s {
-        width: 30px;
-        height: 10px;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        cursor: ns-resize;
-        border-radius: 0 0 4px 4px;
-    }
-
-    .resize-handle-se {
-        width: 14px;
-        height: 14px;
-        right: 0;
-        bottom: 0;
-        cursor: nwse-resize;
-        border-radius: 0 0 4px 0;
-    }
-
-    .resize-handle-sw {
-        width: 14px;
-        height: 14px;
-        left: 0;
-        bottom: 0;
-        cursor: nesw-resize;
-        border-radius: 0 0 0 4px;
-    }
-
-    .preview-link-container {
-        position: absolute;
-        left: 50%;
-        bottom: 3%;
-        transform: translateX(-50%);
-        pointer-events: auto;
-    }
-
-    .preview-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.35rem;
-        background: #fff;
-        color: #273879;
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.85rem;
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
-        margin: 0 auto;
-        width: fit-content;
-    }
-
-    .preview-empty-state {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        color: #666;
-    }
-
-    .preview-navigation {
-        position: absolute;
-        bottom: 15px;
-        left: 10px;
-        right: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px;
-        z-index: 20;
-    }
-
-    .preview-nav-btn {
-        background: rgba(255, 255, 255, 0.95);
-        border: none;
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-        min-height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s;
-        color: #273879;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        flex-shrink: 0;
-    }
-
-    .preview-nav-btn:hover {
-        background: #fff;
-        transform: scale(1.1);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
-
-    .preview-nav-btn i {
-        font-size: 14px;
-    }
-
-    .preview-slide-indicator {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 0.35rem 0.75rem;
-        border-radius: 1rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #273879;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Form Styles */
-    .form-label {
-        color: #495057;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #4895ef;
-        box-shadow: 0 0 0 0.2rem rgba(72, 149, 239, 0.25);
-    }
-
-    .card {
-        border-radius: 12px;
-    }
-
-    .slide-card {
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        background: #f8f9fa;
-        position: relative;
-    }
-
-    .slide-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #dee2e6;
-    }
-
-    .slide-header .btn-danger {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }
-
-    .drag-handle {
-        cursor: move;
-        color: #6c757d;
-    }
-
-    .ck-editor__editable {
-        min-height: 100px;
-    }
-
-    /* Custom Color Picker Button Styles */
-    .ck-editor-wrapper {
-        position: relative;
-    }
-
-    .ck-color-picker-btn {
-        position: absolute;
-        top: 1px;
-        right: 1px;
-        z-index: 10;
-        width: 32px;
-        height: 32px;
-        border: none;
-        background: #f0f0f0;
-        border-radius: 0 4px 0 0;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.2s;
-    }
-
-    .ck-color-picker-btn:hover {
-        background: #e0e0e0;
-    }
-
-    .ck-color-picker-btn input[type="color"] {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    .ck-color-picker-btn .color-icon {
-        width: 18px;
-        height: 18px;
-        border-radius: 3px;
-        border: 1px solid #ccc;
-        pointer-events: none;
-    }
-
-    .color-picker-label {
-        font-size: 11px;
-        color: #666;
-        margin-top: 2px;
-    }
-
-    /* Adjust CKEditor toolbar to make room for color picker */
-    .ck-editor-wrapper .ck.ck-toolbar {
-        padding-right: 40px !important;
-    }
-</style>
 
 <!-- CKEditor 5 -->
-<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
+<!-- CKEditor 4 with full plugins -->
+<script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
 
 <script>
     let slideCounter = {{ webstory.slides|length if webstory.slides else 0 }};
@@ -964,12 +440,39 @@
                 hiddenInput.value = rgbaColor;
             }
 
+            // Uncheck "No Background" when color is selected
+            const noBgCheck = document.getElementById(`slide_${slideIndex}_${type}_no_bg_check`);
+            const noBgHidden = document.getElementById(`slide_${slideIndex}_${type}_no_bg`);
+            if (noBgCheck && noBgCheck.checked) {
+                noBgCheck.checked = false;
+                if (noBgHidden) noBgHidden.value = '0';
+            }
+
             // Update color icon
             colorIcon.style.backgroundColor = rgbaColor;
 
             // Update preview with debouncing
             debouncedUpdatePreview(slideIndex);
         });
+    }
+
+    // Toggle background on/off for heading or text
+    function toggleBackground(slideIndex, type, isChecked) {
+        const noBgHidden = document.getElementById(`slide_${slideIndex}_${type}_no_bg`);
+        const colorPickerBtn = document.querySelector(`#${type}_wrapper_${slideIndex} .ck-color-picker-btn`);
+
+        if (noBgHidden) {
+            noBgHidden.value = isChecked ? '1' : '0';
+        }
+
+        // Disable/enable color picker visually
+        if (colorPickerBtn) {
+            colorPickerBtn.style.opacity = isChecked ? '0.4' : '1';
+            colorPickerBtn.style.pointerEvents = isChecked ? 'none' : 'auto';
+        }
+
+        // Update preview
+        debouncedUpdatePreview(slideIndex);
     }
 
     // Auto-scale text to fit container
@@ -1061,57 +564,163 @@
         {% if webstory.slides %}
         {% for slide in webstory.slides %}
         // Add preview slide for existing slide {{ loop.index0 }}
-        addPreviewSlide({{ loop.index0 }}, '{{ slide.image }}', `{{ slide.heading|safe|replace('`', '\\`') }}`, `{{ slide.text|safe|replace('`', '\\`') }}`, '{{ slide.learn_more_url }}', '{{ slide.heading_left or '' }}', '{{ slide.heading_bottom or '' }}', '{{ slide.text_left or '' }}', '{{ slide.text_bottom or '' }}', '{{ slide.heading_bg or 'rgba(0,0,0,0.3)' }}', '{{ slide.text_bg or 'rgba(0,0,0,0.3)' }}', '{{ slide.heading_width or '85%' }}', '{{ slide.heading_height or 'auto' }}', '{{ slide.text_width or '85%' }}', '{{ slide.text_height or 'auto' }}', '{{ slide.heading_font_size or '18px' }}', '{{ slide.text_font_size or '14px' }}');
+        addPreviewSlide({{ loop.index0 }}, '{{ slide.image }}', `{{ slide.heading|safe|replace('`', '\\`') }}`, `{{ slide.text|safe|replace('`', '\\`') }}`, '{{ slide.learn_more_url }}', '{{ slide.heading_left or '' }}', '{{ slide.heading_bottom or '' }}', '{{ slide.text_left or '' }}', '{{ slide.text_bottom or '' }}', '{{ slide.heading_bg or 'rgba(0,0,0,0.3)' }}', '{{ slide.text_bg or 'rgba(0,0,0,0.3)' }}', '{{ slide.heading_width or '85%' }}', '{{ slide.heading_height or 'auto' }}', '{{ slide.text_width or '85%' }}', '{{ slide.text_height or 'auto' }}', '{{ slide.heading_font_size or '18px' }}', '{{ slide.text_font_size or '14px' }}', '{{ slide.image_zoom or '100' }}', '{{ slide.image_position_x or slide.image_pos_x or '50' }}', '{{ slide.image_position_y or slide.image_pos_y or '50' }}', '{{ slide.heading_font_family or 'Poppins, sans-serif' }}', '{{ slide.text_font_family or 'Poppins, sans-serif' }}', '{{ slide.heading_color or '#ffffff' }}', '{{ slide.text_color or '#ffffff' }}');
 
-        // Initialize heading editor for slide {{ loop.index0 }}
-        ClassicEditor
-            .create(document.querySelector('#slide_{{ loop.index0 }}_heading'), {
-                toolbar: ['bold', 'italic', 'link', '|', 'undo', 'redo'],
-                placeholder: 'Enter slide heading...'
-            })
-            .then(editor => {
-                editorInstances['heading_{{ loop.index0 }}'] = editor;
-                // Listen for changes with debouncing
-                editor.model.document.on('change:data', () => {
+        // Initialize heading editor for slide {{ loop.index0 }} with CKEditor 4
+        CKEDITOR.replace('slide_{{ loop.index0 }}_heading', {
+            // Disable version check to suppress security warning popup
+            versionCheck: false,
+            toolbar: [
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                { name: 'links', items: ['Link', 'Unlink'] },
+                { name: 'insert', items: ['Image'] },
+                { name: 'tools', items: ['Maximize'] }
+            ],
+            height: 100,
+            filebrowserUploadUrl: '{{ url_for("admin.admin_webstory_upload_image_ckeditor4") }}',
+            filebrowserImageUploadUrl: '{{ url_for("admin.admin_webstory_upload_image_ckeditor4") }}',
+            filebrowserUploadMethod: 'form',
+            allowedContent: true,
+            image_previewText: ' ',
+            on: {
+                instanceReady: function(evt) {
+                    editorInstances['heading_{{ loop.index0 }}'] = evt.editor;
+                    // Add color picker button to heading toolbar
+                    addColorPickerToEditor('heading_wrapper_{{ loop.index0 }}', 'slide_{{ loop.index0 }}_heading_bg', {{ loop.index0 }}, 'heading');
+                },
+                change: function() {
                     debouncedUpdatePreview({{ loop.index0 }});
-                });
-                // Add color picker button to heading toolbar
-                addColorPickerToEditor('heading_wrapper_{{ loop.index0 }}', 'slide_{{ loop.index0 }}_heading_bg', {{ loop.index0 }}, 'heading');
-            })
-            .catch(error => {
-                console.error('Error initializing heading editor for slide {{ loop.index0 }}:', error);
-            });
+                }
+            }
+        });
 
-        // Initialize text editor for slide {{ loop.index0 }}
-        ClassicEditor
-            .create(document.querySelector('#slide_{{ loop.index0 }}_text'), {
-                toolbar: [
-                    'bold', 'italic', 'link', '|',
-                    'bulletedList', 'numberedList', '|',
-                    'undo', 'redo'
-                ],
-                placeholder: 'Enter slide text content...'
-            })
-            .then(editor => {
-                editorInstances['text_{{ loop.index0 }}'] = editor;
-                // Listen for changes with debouncing
-                editor.model.document.on('change:data', () => {
+        // Initialize text editor for slide {{ loop.index0 }} with CKEditor 4
+        CKEDITOR.replace('slide_{{ loop.index0 }}_text', {
+            // Disable version check to suppress security warning popup
+            versionCheck: false,
+            toolbar: [
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Blockquote'] },
+                { name: 'links', items: ['Link', 'Unlink'] },
+                { name: 'insert', items: ['Image'] },
+                { name: 'tools', items: ['Maximize'] }
+            ],
+            height: 150,
+            filebrowserUploadUrl: '{{ url_for("admin.admin_webstory_upload_image_ckeditor4") }}',
+            filebrowserImageUploadUrl: '{{ url_for("admin.admin_webstory_upload_image_ckeditor4") }}',
+            filebrowserUploadMethod: 'form',
+            allowedContent: true,
+            image_previewText: ' ',
+            on: {
+                instanceReady: function(evt) {
+                    editorInstances['text_{{ loop.index0 }}'] = evt.editor;
+                    // Add color picker button to text toolbar
+                    addColorPickerToEditor('text_wrapper_{{ loop.index0 }}', 'slide_{{ loop.index0 }}_text_bg', {{ loop.index0 }}, 'text');
+                },
+                change: function() {
                     debouncedUpdatePreview({{ loop.index0 }});
-                });
-                // Add color picker button to text toolbar
-                addColorPickerToEditor('text_wrapper_{{ loop.index0 }}', 'slide_{{ loop.index0 }}_text_bg', {{ loop.index0 }}, 'text');
-            })
-            .catch(error => {
-                console.error('Error initializing text editor for slide {{ loop.index0 }}:', error);
-            });
+                }
+            }
+        });
 
         // Add event listeners for other fields with debouncing
         document.querySelector('input[name="slide_{{ loop.index0 }}_learn_more_url"]').addEventListener('input', () => {
             debouncedUpdatePreview({{ loop.index0 }});
         });
         {% endfor %}
+        
+        // Re-apply saved backgrounds after all CKEditor instances are ready
+        // This ensures the preview shows correct colors even after CKEditor init
+        setTimeout(function() {
+            {% for slide in webstory.slides %}
+            reapplySavedPreviewStyles({{ loop.index0 }});
+            {% endfor %}
+        }, 500);
         {% endif %}
     });
+
+    // Function to re-apply saved preview styles (backgrounds, positions, etc.)
+    function reapplySavedPreviewStyles(slideIndex) {
+        const previewSlide = document.getElementById(`preview_slide_${slideIndex}`);
+        const headingElement = document.getElementById(`preview_heading_${slideIndex}`);
+        const textElement = document.getElementById(`preview_text_${slideIndex}`);
+        
+        // Re-apply image zoom and position
+        if (previewSlide) {
+            const zoomInput = document.getElementById(`slide_${slideIndex}_image_zoom`);
+            const posXInput = document.getElementById(`slide_${slideIndex}_image_position_x`);
+            const posYInput = document.getElementById(`slide_${slideIndex}_image_position_y`);
+            
+            const zoom = zoomInput ? parseFloat(zoomInput.value) || 100 : 100;
+            const posX = posXInput ? parseFloat(posXInput.value) || 50 : 50;
+            const posY = posYInput ? parseFloat(posYInput.value) || 50 : 50;
+            
+            previewSlide.style.backgroundPosition = `${posX}% ${posY}%`;
+            previewSlide.style.backgroundSize = zoom === 100 ? 'cover' : `${zoom}%`;
+            
+            // Store for drag/zoom functionality
+            previewSlide.dataset.imageZoom = zoom;
+            previewSlide.dataset.imagePosX = posX;
+            previewSlide.dataset.imagePosY = posY;
+            
+            // Update the imageAdjustments object if it exists
+            if (typeof imageAdjustments !== 'undefined') {
+                imageAdjustments[slideIndex] = {
+                    zoom: zoom,
+                    posX: posX,
+                    posY: posY
+                };
+            }
+        }
+        
+        // Re-apply heading styles
+        if (headingElement) {
+            const headingBgInput = document.getElementById(`slide_${slideIndex}_heading_bg`);
+            const headingLeftInput = document.querySelector(`input[name="slide_${slideIndex}_heading_left"]`);
+            const headingBottomInput = document.querySelector(`input[name="slide_${slideIndex}_heading_bottom"]`);
+            const headingWidthInput = document.getElementById(`slide_${slideIndex}_heading_width`);
+            
+            if (headingBgInput && headingBgInput.value) {
+                headingElement.style.background = headingBgInput.value;
+            }
+            if (headingLeftInput && headingLeftInput.value) {
+                headingElement.style.left = headingLeftInput.value;
+                headingElement.style.transform = 'none';
+            }
+            if (headingBottomInput && headingBottomInput.value) {
+                headingElement.style.bottom = headingBottomInput.value;
+            }
+            if (headingWidthInput && headingWidthInput.value) {
+                headingElement.style.width = headingWidthInput.value;
+            }
+        }
+        
+        // Re-apply text styles
+        if (textElement) {
+            const textBgInput = document.getElementById(`slide_${slideIndex}_text_bg`);
+            const textLeftInput = document.querySelector(`input[name="slide_${slideIndex}_text_left"]`);
+            const textBottomInput = document.querySelector(`input[name="slide_${slideIndex}_text_bottom"]`);
+            const textWidthInput = document.getElementById(`slide_${slideIndex}_text_width`);
+            
+            if (textBgInput && textBgInput.value) {
+                textElement.style.background = textBgInput.value;
+            }
+            if (textLeftInput && textLeftInput.value) {
+                textElement.style.left = textLeftInput.value;
+                textElement.style.transform = 'none';
+            }
+            if (textBottomInput && textBottomInput.value) {
+                textElement.style.bottom = textBottomInput.value;
+            }
+            if (textWidthInput && textWidthInput.value) {
+                textElement.style.width = textWidthInput.value;
+            }
+        }
+        
+        // Re-process images
+        processPreviewImages(slideIndex);
+    }
 
     // Debounce function to avoid too many API calls
     let slugCheckTimeout;
@@ -1220,22 +829,68 @@
             <div class="row mb-3">
                 <div class="col-md-12">
                     <label class="form-label fw-semibold">Heading</label>
+                    <div class="font-controls-row mb-2">
+                        <select class="form-select form-select-sm font-family-select" name="slide_${slideCounter}_heading_font_family" id="slide_${slideCounter}_heading_font_family" onchange="updatePreviewSlide(${slideCounter})" title="Font Family">
+                            <option value="Poppins, sans-serif" selected>Poppins</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Times New Roman, serif">Times New Roman</option>
+                            <option value="Roboto, sans-serif">Roboto</option>
+                            <option value="Open Sans, sans-serif">Open Sans</option>
+                            <option value="Lato, sans-serif">Lato</option>
+                            <option value="Montserrat, sans-serif">Montserrat</option>
+                            <option value="Playfair Display, serif">Playfair Display</option>
+                            <option value="Oswald, sans-serif">Oswald</option>
+                        </select>
+                        <input type="number" class="form-control form-control-sm font-size-input" name="slide_${slideCounter}_heading_font_size_input" id="slide_${slideCounter}_heading_font_size_input" value="24" min="10" max="72" oninput="updateHeadingFontSizeFromInput(${slideCounter})" title="Font Size (px)">
+                        <input type="color" class="form-control form-control-sm color-picker-input" name="slide_${slideCounter}_heading_color" id="slide_${slideCounter}_heading_color" value="#ffffff" oninput="updatePreviewSlide(${slideCounter})" title="Text Color">
+                    </div>
                     <div class="ck-editor-wrapper" id="heading_wrapper_${slideCounter}">
                         <textarea class="form-control slide-heading-editor" name="slide_${slideCounter}_heading" id="slide_${slideCounter}_heading"
                                placeholder="Slide Heading"></textarea>
                     </div>
-                    <input type="hidden" name="slide_${slideCounter}_heading_bg" id="slide_${slideCounter}_heading_bg" value="rgba(0,0,0,0.3)">
+                    <div class="bg-controls">
+                        <input type="hidden" name="slide_${slideCounter}_heading_bg" id="slide_${slideCounter}_heading_bg" value="rgba(0,0,0,0.3)">
+                        <input type="hidden" name="slide_${slideCounter}_heading_no_bg" id="slide_${slideCounter}_heading_no_bg" value="0">
+                        <div class="no-bg-toggle">
+                            <input type="checkbox" id="slide_${slideCounter}_heading_no_bg_check" onchange="toggleBackground(${slideCounter}, 'heading', this.checked)">
+                            <label for="slide_${slideCounter}_heading_no_bg_check">No Background</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="row mb-3">
                 <div class="col-md-12">
                     <label class="form-label fw-semibold">Text</label>
+                    <div class="font-controls-row mb-2">
+                        <select class="form-select form-select-sm font-family-select" name="slide_${slideCounter}_text_font_family" id="slide_${slideCounter}_text_font_family" onchange="updatePreviewSlide(${slideCounter})" title="Font Family">
+                            <option value="Poppins, sans-serif" selected>Poppins</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Times New Roman, serif">Times New Roman</option>
+                            <option value="Roboto, sans-serif">Roboto</option>
+                            <option value="Open Sans, sans-serif">Open Sans</option>
+                            <option value="Lato, sans-serif">Lato</option>
+                            <option value="Montserrat, sans-serif">Montserrat</option>
+                            <option value="Playfair Display, serif">Playfair Display</option>
+                            <option value="Oswald, sans-serif">Oswald</option>
+                        </select>
+                        <input type="number" class="form-control form-control-sm font-size-input" name="slide_${slideCounter}_text_font_size_input" id="slide_${slideCounter}_text_font_size_input" value="16" min="10" max="72" oninput="updateTextFontSizeFromInput(${slideCounter})" title="Font Size (px)">
+                        <input type="color" class="form-control form-control-sm color-picker-input" name="slide_${slideCounter}_text_color" id="slide_${slideCounter}_text_color" value="#ffffff" oninput="updatePreviewSlide(${slideCounter})" title="Text Color">
+                    </div>
                     <div class="ck-editor-wrapper" id="text_wrapper_${slideCounter}">
                         <textarea class="form-control slide-text-editor" name="slide_${slideCounter}_text" id="slide_${slideCounter}_text" rows="3"
                               placeholder="Slide Text Content"></textarea>
                     </div>
-                    <input type="hidden" name="slide_${slideCounter}_text_bg" id="slide_${slideCounter}_text_bg" value="rgba(0,0,0,0.3)">
+                    <div class="bg-controls">
+                        <input type="hidden" name="slide_${slideCounter}_text_bg" id="slide_${slideCounter}_text_bg" value="rgba(0,0,0,0.3)">
+                        <input type="hidden" name="slide_${slideCounter}_text_no_bg" id="slide_${slideCounter}_text_no_bg" value="0">
+                        <div class="no-bg-toggle">
+                            <input type="checkbox" id="slide_${slideCounter}_text_no_bg_check" onchange="toggleBackground(${slideCounter}, 'text', this.checked)">
+                            <label for="slide_${slideCounter}_text_no_bg_check">No Background</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1260,64 +915,80 @@
             </div>
 
             <!-- Hidden position fields -->
-            <input type="hidden" name="slide_${slideCounter}_heading_left" value="">
-            <input type="hidden" name="slide_${slideCounter}_heading_bottom" value="">
+            <input type="hidden" name="slide_${slideCounter}_heading_left" id="slide_${slideCounter}_heading_left" value="">
+            <input type="hidden" name="slide_${slideCounter}_heading_bottom" id="slide_${slideCounter}_heading_bottom" value="">
             <input type="hidden" name="slide_${slideCounter}_heading_width" id="slide_${slideCounter}_heading_width" value="85%">
             <input type="hidden" name="slide_${slideCounter}_heading_height" id="slide_${slideCounter}_heading_height" value="auto">
-            <input type="hidden" name="slide_${slideCounter}_heading_font_size" id="slide_${slideCounter}_heading_font_size" value="18px">
-            <input type="hidden" name="slide_${slideCounter}_text_left" value="">
-            <input type="hidden" name="slide_${slideCounter}_text_bottom" value="">
+            <input type="hidden" name="slide_${slideCounter}_heading_font_size" id="slide_${slideCounter}_heading_font_size" value="24px">
+            <input type="hidden" name="slide_${slideCounter}_text_left" id="slide_${slideCounter}_text_left" value="">
+            <input type="hidden" name="slide_${slideCounter}_text_bottom" id="slide_${slideCounter}_text_bottom" value="">
             <input type="hidden" name="slide_${slideCounter}_text_width" id="slide_${slideCounter}_text_width" value="85%">
             <input type="hidden" name="slide_${slideCounter}_text_height" id="slide_${slideCounter}_text_height" value="auto">
-            <input type="hidden" name="slide_${slideCounter}_text_font_size" id="slide_${slideCounter}_text_font_size" value="14px">
+            <input type="hidden" name="slide_${slideCounter}_text_font_size" id="slide_${slideCounter}_text_font_size" value="16px">
         `;
 
         container.appendChild(slideDiv);
 
-        // Initialize CKEditor for the new slide's heading and text
+        // Initialize CKEditor 4 for the new slide's heading and text
         const currentSlideIndex = slideCounter;
 
-        // Initialize heading editor
-        ClassicEditor
-            .create(document.querySelector(`#slide_${currentSlideIndex}_heading`), {
-                toolbar: ['bold', 'italic', 'link', '|', 'undo', 'redo'],
-                placeholder: 'Enter slide heading...'
-            })
-            .then(editor => {
-                editorInstances[`heading_${currentSlideIndex}`] = editor;
-                // Listen for changes with debouncing
-                editor.model.document.on('change:data', () => {
+        // Initialize heading editor with CKEditor 4
+        CKEDITOR.replace(`slide_${currentSlideIndex}_heading`, {
+            // Disable version check to suppress security warning popup
+            versionCheck: false,
+            toolbar: [
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                { name: 'links', items: ['Link', 'Unlink'] },
+                { name: 'insert', items: ['Image'] },
+                { name: 'tools', items: ['Maximize'] }
+            ],
+            height: 100,
+            filebrowserUploadUrl: '{{ url_for("admin.admin_webstory_upload_image_ckeditor4") }}',
+            filebrowserImageUploadUrl: '{{ url_for("admin.admin_webstory_upload_image_ckeditor4") }}',
+            filebrowserUploadMethod: 'form',
+            allowedContent: true,
+            image_previewText: ' ',
+            on: {
+                instanceReady: function(evt) {
+                    editorInstances[`heading_${currentSlideIndex}`] = evt.editor;
+                    // Add color picker button to heading toolbar
+                    addColorPickerToEditor(`heading_wrapper_${currentSlideIndex}`, `slide_${currentSlideIndex}_heading_bg`, currentSlideIndex, 'heading');
+                },
+                change: function() {
                     debouncedUpdatePreview(currentSlideIndex);
-                });
-                // Add color picker button to heading toolbar
-                addColorPickerToEditor(`heading_wrapper_${currentSlideIndex}`, `slide_${currentSlideIndex}_heading_bg`, currentSlideIndex, 'heading');
-            })
-            .catch(error => {
-                console.error('Error initializing heading editor:', error);
-            });
+                }
+            }
+        });
 
-        // Initialize text editor
-        ClassicEditor
-            .create(document.querySelector(`#slide_${currentSlideIndex}_text`), {
-                toolbar: [
-                    'bold', 'italic', 'link', '|',
-                    'bulletedList', 'numberedList', '|',
-                    'undo', 'redo'
-                ],
-                placeholder: 'Enter slide text content...'
-            })
-            .then(editor => {
-                editorInstances[`text_${currentSlideIndex}`] = editor;
-                // Listen for changes with debouncing
-                editor.model.document.on('change:data', () => {
+        // Initialize text editor with CKEditor 4
+        CKEDITOR.replace(`slide_${currentSlideIndex}_text`, {
+            // Disable version check to suppress security warning popup
+            versionCheck: false,
+            toolbar: [
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Blockquote'] },
+                { name: 'links', items: ['Link', 'Unlink'] },
+                { name: 'insert', items: ['Image'] },
+                { name: 'tools', items: ['Maximize'] }
+            ],
+            height: 150,
+            filebrowserUploadUrl: '{{ url_for("admin.admin_webstory_upload_image_ckeditor4") }}',
+            filebrowserImageUploadUrl: '{{ url_for("admin.admin_webstory_upload_image_ckeditor4") }}',
+            filebrowserUploadMethod: 'form',
+            allowedContent: true,
+            image_previewText: ' ',
+            on: {
+                instanceReady: function(evt) {
+                    editorInstances[`text_${currentSlideIndex}`] = evt.editor;
+                    // Add color picker button to text toolbar
+                    addColorPickerToEditor(`text_wrapper_${currentSlideIndex}`, `slide_${currentSlideIndex}_text_bg`, currentSlideIndex, 'text');
+                },
+                change: function() {
                     debouncedUpdatePreview(currentSlideIndex);
-                });
-                // Add color picker button to text toolbar
-                addColorPickerToEditor(`text_wrapper_${currentSlideIndex}`, `slide_${currentSlideIndex}_text_bg`, currentSlideIndex, 'text');
-            })
-            .catch(error => {
-                console.error('Error initializing text editor:', error);
-            });
+                }
+            }
+        });
 
         // Add event listeners for other fields with debouncing
         document.querySelector(`input[name="slide_${currentSlideIndex}_learn_more_url"]`).addEventListener('input', () => {
@@ -1380,7 +1051,9 @@
     }
 
     // Live Preview Functions
-    function addPreviewSlide(slideIndex, imageUrl = '', headingContent = '', textContent = '', learnMoreUrl = '', headingLeft = '', headingBottom = '', textLeft = '', textBottom = '', headingBg = 'rgba(0,0,0,0.3)', textBg = 'rgba(0,0,0,0.3)', headingWidth = '85%', headingHeight = 'auto', textWidth = '85%', textHeight = 'auto', headingFontSize = '18px', textFontSize = '14px') {
+    function addPreviewSlide(slideIndex, imageUrl = '', headingContent = '', textContent = '', learnMoreUrl = '', headingLeft = '', headingBottom = '', textLeft = '', textBottom = '', headingBg = 'rgba(0,0,0,0.3)', textBg = 'rgba(0,0,0,0.3)', headingWidth = '85%', headingHeight = 'auto', textWidth = '85%', textHeight = 'auto', headingFontSize = '24px', textFontSize = '16px', imageZoom = '100', imagePosX = '50', imagePosY = '50', headingFontFamily = 'Poppins, sans-serif', textFontFamily = 'Poppins, sans-serif', headingColor = '#ffffff', textColor = '#ffffff') {
+        // Scale factor for preview (preview is smaller than actual display)
+        const PREVIEW_SCALE = 0.6;
         const container = document.getElementById('previewSlidesContainer');
         const emptyState = document.getElementById('previewEmptyState');
 
@@ -1393,6 +1066,17 @@
         previewSlide.id = `preview_slide_${slideIndex}`;
         if (imageUrl) {
             previewSlide.style.backgroundImage = `url('${imageUrl}')`;
+            // Apply saved zoom and position
+            const zoom = parseFloat(imageZoom) || 100;
+            const posX = parseFloat(imagePosX) || 50;
+            const posY = parseFloat(imagePosY) || 50;
+            previewSlide.style.backgroundPosition = `${posX}% ${posY}%`;
+            previewSlide.style.backgroundSize = zoom === 100 ? 'cover' : `${zoom}%`;
+            
+            // Store the adjustment values on the element for later use
+            previewSlide.dataset.imageZoom = zoom;
+            previewSlide.dataset.imagePosX = posX;
+            previewSlide.dataset.imagePosY = posY;
         }
 
         // Build heading style with saved positions
@@ -1413,7 +1097,15 @@
             headingStyle += ` height: ${headingHeight};`;
         }
         if (headingFontSize) {
-            headingStyle += ` font-size: ${headingFontSize};`;
+            // Scale font size for preview
+            const scaledHeadingSize = Math.round(parseFloat(headingFontSize) * PREVIEW_SCALE);
+            headingStyle += ` font-size: ${scaledHeadingSize}px;`;
+        }
+        if (headingFontFamily) {
+            headingStyle += ` font-family: ${headingFontFamily};`;
+        }
+        if (headingColor) {
+            headingStyle += ` color: ${headingColor};`;
         }
 
         // Build text style with saved positions
@@ -1434,7 +1126,15 @@
             textStyle += ` height: ${textHeight};`;
         }
         if (textFontSize) {
-            textStyle += ` font-size: ${textFontSize};`;
+            // Scale font size for preview
+            const scaledTextSize = Math.round(parseFloat(textFontSize) * PREVIEW_SCALE);
+            textStyle += ` font-size: ${scaledTextSize}px;`;
+        }
+        if (textFontFamily) {
+            textStyle += ` font-family: ${textFontFamily};`;
+        }
+        if (textColor) {
+            textStyle += ` color: ${textColor};`;
         }
 
         previewSlide.innerHTML = `
@@ -1510,7 +1210,109 @@
             const textEl = document.getElementById(`preview_text_${slideIndex}`);
             if (headingContent && headingEl) fitTextToContainer(headingEl, 'heading');
             if (textContent && textEl) fitTextToContainer(textEl, 'text');
+            
+            // Process images in preview content (handle border, hspace, vspace attributes)
+            processPreviewImages(slideIndex);
         }, 100);
+    }
+
+    // Process images in preview to handle CKEditor 4 deprecated attributes
+    function processPreviewImages(slideIndex) {
+        const headingEl = document.getElementById(`preview_heading_${slideIndex}`);
+        const textEl = document.getElementById(`preview_text_${slideIndex}`);
+        
+        [headingEl, textEl].forEach(function(element) {
+            if (!element) return;
+            const images = element.querySelectorAll('img');
+            images.forEach(function(img) {
+                // Handle border attribute
+                const border = img.getAttribute('border');
+                if (border && border !== '0') {
+                    const borderWidth = parseInt(border) || 1;
+                    img.style.border = borderWidth + 'px solid #3b82f6'; // Blue border
+                    img.style.boxSizing = 'border-box';
+                    img.style.borderRadius = '4px';
+                }
+
+                // Handle hspace attribute
+                const hspace = img.getAttribute('hspace');
+                if (hspace) {
+                    const hspaceValue = parseInt(hspace) || 0;
+                    img.style.marginLeft = hspaceValue + 'px';
+                    img.style.marginRight = hspaceValue + 'px';
+                }
+
+                // Handle vspace attribute
+                const vspace = img.getAttribute('vspace');
+                if (vspace) {
+                    const vspaceValue = parseInt(vspace) || 0;
+                    img.style.marginTop = vspaceValue + 'px';
+                    img.style.marginBottom = vspaceValue + 'px';
+                }
+
+                // Handle width attribute - ALWAYS apply if attribute exists
+                const width = img.getAttribute('width');
+                if (width) {
+                    const widthValue = width.toString();
+                    if (widthValue.includes('%')) {
+                        img.style.width = widthValue;
+                    } else {
+                        img.style.width = parseInt(widthValue) + 'px';
+                    }
+                    img.style.maxWidth = '100%';
+                    img.style.boxSizing = 'border-box';
+                }
+
+                // Handle height attribute - ALWAYS apply if attribute exists
+                const height = img.getAttribute('height');
+                if (height) {
+                    const heightValue = height.toString();
+                    if (heightValue.includes('%')) {
+                        img.style.height = heightValue;
+                    } else {
+                        img.style.height = parseInt(heightValue) + 'px';
+                    }
+                }
+
+                // If no width/height attributes, check for inline style dimensions
+                // CKEditor sometimes only saves inline styles
+                if (!width && !height) {
+                    const inlineStyle = img.getAttribute('style');
+                    if (inlineStyle) {
+                        // Parse width from inline style
+                        const widthMatch = inlineStyle.match(/width:\s*(\d+)(px|%)?/i);
+                        if (widthMatch) {
+                            img.style.width = widthMatch[1] + (widthMatch[2] || 'px');
+                            img.style.maxWidth = '100%';
+                        }
+                        // Parse height from inline style
+                        const heightMatch = inlineStyle.match(/height:\s*(\d+)(px|%)?/i);
+                        if (heightMatch) {
+                            img.style.height = heightMatch[1] + (heightMatch[2] || 'px');
+                        }
+                    }
+                }
+
+                // Handle align attribute
+                const align = img.getAttribute('align');
+                if (align) {
+                    if (align === 'left') {
+                        img.style.float = 'left';
+                        img.style.marginRight = img.style.marginRight || '8px';
+                    } else if (align === 'right') {
+                        img.style.float = 'right';
+                        img.style.marginLeft = img.style.marginLeft || '8px';
+                    } else if (align === 'middle' || align === 'center') {
+                        img.style.display = 'block';
+                        img.style.marginLeft = 'auto';
+                        img.style.marginRight = 'auto';
+                    }
+                }
+
+                // Ensure proper display
+                img.style.boxSizing = 'border-box';
+            });
+        });
     }
 
     // Make elements draggable (both horizontal and vertical)
@@ -1678,14 +1480,12 @@
         // Store in hidden input fields
         const widthInput = document.getElementById(`slide_${slideIndex}_${type}_width`);
         const heightInput = document.getElementById(`slide_${slideIndex}_${type}_height`);
-        const fontSizeInput = document.getElementById(`slide_${slideIndex}_${type}_font_size`);
 
         if (widthInput) widthInput.value = widthPx + 'px';
         if (heightInput) heightInput.value = heightPx + 'px';
 
-        // Save font size
-        const computedFontSize = window.getComputedStyle(element).fontSize;
-        if (fontSizeInput && computedFontSize) fontSizeInput.value = computedFontSize;
+        // Don't override font size here - it's managed by the font size input field
+        // The font size input field value is synced to the hidden field on form submit
     }
 
     // Save element position as percentage (both horizontal and vertical)
@@ -1698,19 +1498,39 @@
 
         const containerWidth = container.offsetWidth;
         const containerHeight = container.offsetHeight;
-        
+
         const leftPx = parseFloat(element.style.left) || 0;
         const bottomPx = parseFloat(element.style.bottom) || 0;
-        
+
         const leftPercent = (leftPx / containerWidth) * 100;
         const bottomPercent = (bottomPx / containerHeight) * 100;
 
         // Store in hidden input fields as percentage
-        const leftInput = document.querySelector(`input[name="slide_${slideIndex}_${positionType}_left"]`);
-        const bottomInput = document.querySelector(`input[name="slide_${slideIndex}_${positionType}_bottom"]`);
+        const leftInput = document.getElementById(`slide_${slideIndex}_${positionType}_left`);
+        const bottomInput = document.getElementById(`slide_${slideIndex}_${positionType}_bottom`);
 
         if (leftInput) leftInput.value = leftPercent.toFixed(2) + '%';
         if (bottomInput) bottomInput.value = bottomPercent.toFixed(2) + '%';
+    }
+
+    // Update font size for heading from number input
+    function updateHeadingFontSizeFromInput(slideIndex) {
+        const fontSizeInput = document.getElementById(`slide_${slideIndex}_heading_font_size_input`);
+        const fontSizeHidden = document.getElementById(`slide_${slideIndex}_heading_font_size`);
+        if (fontSizeInput && fontSizeHidden) {
+            fontSizeHidden.value = fontSizeInput.value + 'px';
+        }
+        updatePreviewSlide(slideIndex);
+    }
+
+    // Update font size for text from number input
+    function updateTextFontSizeFromInput(slideIndex) {
+        const fontSizeInput = document.getElementById(`slide_${slideIndex}_text_font_size_input`);
+        const fontSizeHidden = document.getElementById(`slide_${slideIndex}_text_font_size`);
+        if (fontSizeInput && fontSizeHidden) {
+            fontSizeHidden.value = fontSizeInput.value + 'px';
+        }
+        updatePreviewSlide(slideIndex);
     }
 
     function updatePreviewSlide(slideIndex) {
@@ -1732,16 +1552,35 @@
                 // Preserve resize handles when updating content
                 updateElementContent(headingElement, headingContent);
                 headingElement.style.display = 'block';
-                
+
                 // Apply text fitting after content update
                 setTimeout(() => fitTextToContainer(headingElement, 'heading'), 10);
             } else {
                 headingElement.style.display = 'none';
             }
-            // Apply heading background color
+            // Apply heading background color (check for no-background option)
+            const headingNoBg = document.getElementById(`slide_${slideIndex}_heading_no_bg`);
             const headingBgInput = document.getElementById(`slide_${slideIndex}_heading_bg`);
-            if (headingBgInput && headingBgInput.value) {
+            if (headingNoBg && headingNoBg.value === '1') {
+                headingElement.style.background = 'transparent';
+            } else if (headingBgInput && headingBgInput.value) {
                 headingElement.style.background = headingBgInput.value;
+            }
+            // Apply heading font family
+            const headingFontFamilySelect = document.getElementById(`slide_${slideIndex}_heading_font_family`);
+            if (headingFontFamilySelect && headingFontFamilySelect.value) {
+                headingElement.style.fontFamily = headingFontFamilySelect.value;
+            }
+            // Apply heading font size (scaled down for preview - 0.6 ratio)
+            const headingFontSizeInput = document.getElementById(`slide_${slideIndex}_heading_font_size_input`);
+            if (headingFontSizeInput && headingFontSizeInput.value) {
+                const scaledSize = Math.round(parseFloat(headingFontSizeInput.value) * 0.6);
+                headingElement.style.fontSize = scaledSize + 'px';
+            }
+            // Apply heading text color
+            const headingColorInput = document.getElementById(`slide_${slideIndex}_heading_color`);
+            if (headingColorInput && headingColorInput.value) {
+                headingElement.style.color = headingColorInput.value;
             }
             // Apply heading size
             const headingWidthInput = document.getElementById(`slide_${slideIndex}_heading_width`);
@@ -1763,16 +1602,35 @@
                 // Preserve resize handles when updating content
                 updateElementContent(textElement, textContent);
                 textElement.style.display = 'block';
-                
+
                 // Apply text fitting after content update
                 setTimeout(() => fitTextToContainer(textElement, 'text'), 10);
             } else {
                 textElement.style.display = 'none';
             }
-            // Apply text background color
+            // Apply text background color (check for no-background option)
+            const textNoBg = document.getElementById(`slide_${slideIndex}_text_no_bg`);
             const textBgInput = document.getElementById(`slide_${slideIndex}_text_bg`);
-            if (textBgInput && textBgInput.value) {
+            if (textNoBg && textNoBg.value === '1') {
+                textElement.style.background = 'transparent';
+            } else if (textBgInput && textBgInput.value) {
                 textElement.style.background = textBgInput.value;
+            }
+            // Apply text font family
+            const textFontFamilySelect = document.getElementById(`slide_${slideIndex}_text_font_family`);
+            if (textFontFamilySelect && textFontFamilySelect.value) {
+                textElement.style.fontFamily = textFontFamilySelect.value;
+            }
+            // Apply text font size (scaled down for preview - 0.6 ratio)
+            const textFontSizeInput = document.getElementById(`slide_${slideIndex}_text_font_size_input`);
+            if (textFontSizeInput && textFontSizeInput.value) {
+                const scaledSize = Math.round(parseFloat(textFontSizeInput.value) * 0.6);
+                textElement.style.fontSize = scaledSize + 'px';
+            }
+            // Apply text color
+            const textColorInput = document.getElementById(`slide_${slideIndex}_text_color`);
+            if (textColorInput && textColorInput.value) {
+                textElement.style.color = textColorInput.value;
             }
             // Apply text size
             const textWidthInput = document.getElementById(`slide_${slideIndex}_text_width`);
@@ -1795,6 +1653,9 @@
                 linkElement.innerHTML = '';
             }
         }
+
+        // Process images in preview content (handle border, hspace, vspace attributes)
+        setTimeout(() => processPreviewImages(slideIndex), 20);
     }
 
     // Update element content while preserving resize handles
@@ -1928,10 +1789,15 @@
 
         initImageAdjustment(slideIndex);
 
-        // Load saved values if available
-        const posXInput = document.querySelector(`input[name="slide_${slideIndex}_image_pos_x"]`);
-        const posYInput = document.querySelector(`input[name="slide_${slideIndex}_image_pos_y"]`);
-        const zoomInput = document.querySelector(`input[name="slide_${slideIndex}_image_zoom"]`);
+        // Load saved values if available (check both naming conventions)
+        const posXInput = document.getElementById(`slide_${slideIndex}_image_position_x`) || 
+                         document.querySelector(`input[name="slide_${slideIndex}_image_position_x"]`) ||
+                         document.querySelector(`input[name="slide_${slideIndex}_image_pos_x"]`);
+        const posYInput = document.getElementById(`slide_${slideIndex}_image_position_y`) || 
+                         document.querySelector(`input[name="slide_${slideIndex}_image_position_y"]`) ||
+                         document.querySelector(`input[name="slide_${slideIndex}_image_pos_y"]`);
+        const zoomInput = document.getElementById(`slide_${slideIndex}_image_zoom`) || 
+                         document.querySelector(`input[name="slide_${slideIndex}_image_zoom"]`);
 
         if (posXInput && posXInput.value) imageAdjustments[slideIndex].posX = parseFloat(posXInput.value);
         if (posYInput && posYInput.value) imageAdjustments[slideIndex].posY = parseFloat(posYInput.value);
@@ -2024,29 +1890,35 @@
         previewSlide.style.backgroundPosition = `${adj.posX}% ${adj.posY}%`;
         previewSlide.style.backgroundSize = adj.zoom === 100 ? 'cover' : `${adj.zoom}%`;
 
-        // Store in hidden inputs for form submission
-        let posXInput = document.querySelector(`input[name="slide_${slideIndex}_image_pos_x"]`);
-        let posYInput = document.querySelector(`input[name="slide_${slideIndex}_image_pos_y"]`);
-        let zoomInput = document.querySelector(`input[name="slide_${slideIndex}_image_zoom"]`);
+        // Store in hidden inputs for form submission (use id first, then name)
+        let posXInput = document.getElementById(`slide_${slideIndex}_image_position_x`) ||
+                       document.querySelector(`input[name="slide_${slideIndex}_image_position_x"]`);
+        let posYInput = document.getElementById(`slide_${slideIndex}_image_position_y`) ||
+                       document.querySelector(`input[name="slide_${slideIndex}_image_position_y"]`);
+        let zoomInput = document.getElementById(`slide_${slideIndex}_image_zoom`) ||
+                       document.querySelector(`input[name="slide_${slideIndex}_image_zoom"]`);
 
         const slideCard = document.querySelector(`#slide_${slideIndex}`);
         if (slideCard) {
             if (!posXInput) {
                 posXInput = document.createElement('input');
                 posXInput.type = 'hidden';
-                posXInput.name = `slide_${slideIndex}_image_pos_x`;
+                posXInput.name = `slide_${slideIndex}_image_position_x`;
+                posXInput.id = `slide_${slideIndex}_image_position_x`;
                 slideCard.appendChild(posXInput);
             }
             if (!posYInput) {
                 posYInput = document.createElement('input');
                 posYInput.type = 'hidden';
-                posYInput.name = `slide_${slideIndex}_image_pos_y`;
+                posYInput.name = `slide_${slideIndex}_image_position_y`;
+                posYInput.id = `slide_${slideIndex}_image_position_y`;
                 slideCard.appendChild(posYInput);
             }
             if (!zoomInput) {
                 zoomInput = document.createElement('input');
                 zoomInput.type = 'hidden';
                 zoomInput.name = `slide_${slideIndex}_image_zoom`;
+                zoomInput.id = `slide_${slideIndex}_image_zoom`;
                 slideCard.appendChild(zoomInput);
             }
 
@@ -2058,16 +1930,29 @@
 
     // Form submit handler - sync CKEditor content before submission
     document.getElementById('webstoryForm').addEventListener('submit', function(e) {
-        // Sync all CKEditor instances to their source elements
-        for (const [key, editor] of Object.entries(editorInstances)) {
-            if (editor && typeof editor.updateSourceElement === 'function') {
-                editor.updateSourceElement();
-            }
+        // Sync all CKEditor 4 instances to their source elements
+        for (const name in CKEDITOR.instances) {
+            CKEDITOR.instances[name].updateElement();
         }
 
         // Count actual slides and update slide_count
         const slideCards = document.querySelectorAll('.slide-card');
         document.getElementById('slide_count').value = slideCounter;
+
+        // Sync font size inputs to hidden fields for all slides
+        for (let i = 0; i < slideCounter; i++) {
+            const headingFontSizeInput = document.getElementById(`slide_${i}_heading_font_size_input`);
+            const headingFontSizeHidden = document.getElementById(`slide_${i}_heading_font_size`);
+            if (headingFontSizeInput && headingFontSizeHidden) {
+                headingFontSizeHidden.value = headingFontSizeInput.value + 'px';
+            }
+
+            const textFontSizeInput = document.getElementById(`slide_${i}_text_font_size_input`);
+            const textFontSizeHidden = document.getElementById(`slide_${i}_text_font_size`);
+            if (textFontSizeInput && textFontSizeHidden) {
+                textFontSizeHidden.value = textFontSizeInput.value + 'px';
+            }
+        }
 
         // Allow form to submit
         return true;

@@ -108,6 +108,11 @@ class SubscribedUser(db.Model):
     user_analytics_limit = db.Column(db.Integer, nullable=True)  # User-specific analytics limit
     user_qr_limit = db.Column(db.Integer, nullable=True)  # User-specific QR limit
     user_scan_limit = db.Column(db.Integer, nullable=True)  # User-specific scan limit
+
+    # Expiry notification tracking
+    expiry_notification_sent = db.Column(db.Boolean, default=False)  # Track if expiry notification was sent
+    expiry_notification_sent_at = db.Column(db.DateTime, nullable=True)  # When the notification was sent
+
     user = db.relationship('User', backref=db.backref('subscriptions', lazy=True))
     subscription = db.relationship('Subscription', backref=db.backref('subscribers', lazy=True))
 
@@ -715,7 +720,7 @@ Website: {host_url}
                             </p>
 
                             <p style="margin: 15px 0 0 0; font-size: 12px; color: #94a3b8; text-align: center;">
-                                © 2025 QR Dada. All rights reserved.<br>
+                                © {datetime.now().year} QR Dada. All rights reserved.<br>
                                 This is an automated email. Please do not reply.
                             </p>
                         </td>
@@ -1643,7 +1648,8 @@ def send_subscription_expiry_notification(user, subscription, hours_remaining=24
     try:
         from utils.email_service import email_service
         from .user import EmailLog
-        from flask import url_for, request, current_app
+        from flask import url_for, request, current_app, has_request_context
+        import os
 
         print(f"Sending expiry notification to: {user.company_email}")
         print(f"Subscription expires: {subscription.end_date}")
@@ -1654,9 +1660,19 @@ def send_subscription_expiry_notification(user, subscription, hours_remaining=24
 
         # Create email message
         subject = f"Your {plan.plan} Subscription Expires in {hours_remaining} Hours - QR Dada"
-        
+
+        # Get base URL - use config or environment variable for scheduler context
+        base_url = os.getenv('SITE_URL', 'https://qrdada.com')
+        if has_request_context():
+            # Get from request context if available
+            base_url = request.host_url.rstrip('/')
+
         # Generate renewal URL
-        renewal_url = url_for('subscription.user_subscriptions', _external=True)
+        if has_request_context():
+            renewal_url = url_for('subscription.user_subscriptions', _external=True)
+        else:
+            # No request context, build URL manually
+            renewal_url = f"{base_url}/subscription/subscriptions"
 
         # Email body content (keeping your existing content)
         body = f"""Dear {user.name},
@@ -1695,75 +1711,146 @@ Thank you for using QR Dada!
 
 Best regards,
 The QR Dada Team
-Website: {request.host_url}
+Website: {base_url}
 """
 
-        # HTML version (keeping your existing HTML content - abbreviated for space)
-        html = f"""
+        # HTML version - matching the verification email template style
+        logo_url = "https://qrdada.com/static/images/qr.png"
+        html = f'''
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscription Expiry Reminder</title>
-    <style>
-        /* Your existing CSS styles here */
-        body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }}
-    </style>
+    <title>Subscription Expiry Reminder - QR Dada</title>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="expiry-icon"></div>
-            <h1>Subscription Expiring Soon</h1>
-            <p>Your QR Dada subscription needs attention</p>
-        </div>
-        
-        <div class="content">
-            <div class="warning-box">
-                <h3>⚠️ Action Required</h3>
-                <p>Your subscription expires in:</p>
-                <div class="time-remaining">{hours_remaining} Hours</div>
-                <p><strong>Expires:</strong> {subscription.end_date.strftime('%B %d, %Y at %I:%M %p')}</p>
-            </div>
-            
-            <div class="section">
-                <h3>Hello {user.name}!</h3>
-                <p>This is a friendly reminder that your <strong>{plan.plan}</strong> subscription is about to expire.</p>
-            </div>
-            
-            <div class="section">
-                <h3>Renew Your Subscription</h3>
-                <p>Click the button below to renew your subscription and continue using all premium features without interruption.</p>
-                <a href="{renewal_url}" class="cta-button">Renew Subscription Now</a>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>If you have any questions or need assistance, please contact our support team.</p>
-            <p><strong>QR Dada</strong> | {request.host_url}</p>
-        </div>
-    </div>
+<body style="margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f8fafc;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Logo Header -->
+                    <tr>
+                        <td align="center" style="padding: 40px 40px 20px 40px; background: linear-gradient(-45deg, #0ea5e9, #8b5cf6); border-radius: 12px 12px 0 0;">
+                            <img src="{logo_url}" alt="QR Dada Logo" style="width: 80px; height: auto; display: block; background-color: #ffffff; padding: 10px; border-radius: 8px;">
+                        </td>
+                    </tr>
+
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <h1 style="margin: 0 0 20px 0; font-size: 28px; font-weight: 700; color: #1e293b; text-align: center;">
+                                Subscription Expiring Soon
+                            </h1>
+
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #475569;">
+                                Hi <strong>{user.name}</strong>,
+                            </p>
+
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #475569;">
+                                This is a friendly reminder that your <strong>{plan.plan}</strong> subscription is about to expire. To continue enjoying all premium features without interruption, please renew your subscription.
+                            </p>
+
+                            <!-- Warning Box -->
+                            <div style="margin: 30px 0; padding: 20px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px;">
+                                <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #92400e;">
+                                    <strong>⏰ Time Remaining:</strong> {hours_remaining} hours<br>
+                                    <strong>Expires:</strong> {subscription.end_date.strftime('%B %d, %Y at %I:%M %p')}
+                                </p>
+                            </div>
+
+                            <!-- Subscription Details Box -->
+                            <div style="margin: 20px 0; padding: 20px; background-color: #f1f5f9; border-radius: 8px;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #1e293b;">
+                                    Subscription Details
+                                </h3>
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px 0; font-size: 14px; color: #475569;">Plan:</td>
+                                        <td style="padding: 8px 0; font-size: 14px; color: #1e293b; font-weight: 600; text-align: right;">{plan.plan}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; font-size: 14px; color: #475569;">QR Codes Used:</td>
+                                        <td style="padding: 8px 0; font-size: 14px; color: #1e293b; font-weight: 600; text-align: right;">{subscription.qr_generated}/{plan.qr_count}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; font-size: 14px; color: #475569;">Analytics Used:</td>
+                                        <td style="padding: 8px 0; font-size: 14px; color: #1e293b; font-weight: 600; text-align: right;">{subscription.analytics_used}/{plan.analytics}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- CTA Button -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{renewal_url}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(-45deg, #0ea5e9, #8b5cf6); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(124, 58, 237, 0.3);">
+                                            Renew Subscription Now
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 20px 0; font-size: 14px; line-height: 1.6; color: #64748b; text-align: center;">
+                                Or copy and paste this link into your browser:
+                            </p>
+
+                            <p style="margin: 0 0 20px 0; font-size: 13px; line-height: 1.6; color: #8b5cf6; word-break: break-all; text-align: center; background-color: #f1f5f9; padding: 12px; border-radius: 6px;">
+                                {renewal_url}
+                            </p>
+
+                            <!-- What Happens Next Box -->
+                            <div style="margin: 20px 0; padding: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #1e293b;">
+                                    What happens after expiry?
+                                </h3>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #475569; line-height: 1.8;">
+                                    <li>You won't be able to create new QR codes</li>
+                                    <li>Your existing QR codes will continue to work</li>
+                                    <li>You can renew anytime to restore premium features</li>
+                                </ul>
+                            </div>
+
+                            <p style="margin: 20px 0 0 0; font-size: 14px; line-height: 1.6; color: #64748b;">
+                                If you have any questions or need assistance, please contact our support team.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f8fafc; border-radius: 0 0 12px 12px; border-top: 1px solid #e2e8f0;">
+                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #64748b; text-align: center;">
+                                Thanks,<br>
+                                <strong style="color: #1e293b;">The QR Dada Team</strong>
+                            </p>
+
+                            <p style="margin: 20px 0 0 0; font-size: 12px; color: #94a3b8; text-align: center;">
+                                © {datetime.now().year} QR Dada. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
-"""
+'''
 
         # Send the email using support email
         print("Attempting to send expiry notification email using SMTP...")
         from utils.email_service import email_service
-        email_service.send_support_email(
+        email_sent = email_service.send_support_email(
             to=user.company_email,
             subject=subject,
             body=body,
             html=html
         )
+
+        if not email_sent:
+            raise Exception(f"SMTP email service returned False for {user.company_email}")
+
         print(f"SUCCESS: Subscription expiry notification sent to {user.company_email}")
         
         # Log successful email
@@ -1822,33 +1909,53 @@ Website: {request.host_url}
 def find_expiring_subscriptions(hours_before=24):
     """
     Find subscriptions that are expiring within the specified hours
-    
+
     Args:
         hours_before: Number of hours before expiry to check (default 24)
-        
+
     Returns:
         List of SubscribedUser objects that are expiring soon
     """
     try:
-        now = datetime.now(UTC)
+        # Use naive datetime for comparison (database stores naive datetimes)
+        now = datetime.utcnow()
         expiry_threshold = now + timedelta(hours=hours_before)
-        
+
+        print(f"=== Finding Expiring Subscriptions ===")
+        print(f"Current UTC time: {now}")
+        print(f"Expiry threshold: {expiry_threshold}")
+        print(f"Looking for subscriptions expiring within {hours_before} hours")
+
         # Find subscriptions expiring within the threshold
+        # Also filter out subscriptions that already received notifications
         expiring_subscriptions = (
             SubscribedUser.query
             .filter(SubscribedUser._is_active == True)  # Only active subscriptions
             .filter(SubscribedUser.end_date > now)  # Not already expired
             .filter(SubscribedUser.end_date <= expiry_threshold)  # Expiring within threshold
+            .filter(
+                (SubscribedUser.expiry_notification_sent == False) |
+                (SubscribedUser.expiry_notification_sent == None)
+            )  # Only subscriptions that haven't received notification
             .join(User, SubscribedUser.U_ID == User.id)
             .join(Subscription, SubscribedUser.S_ID == Subscription.S_ID)
             .all()
         )
-        
-        print(f"Found {len(expiring_subscriptions)} subscriptions expiring within {hours_before} hours")
-        
+
+        print(f"Found {len(expiring_subscriptions)} subscriptions expiring within {hours_before} hours (not yet notified)")
+
+        # Debug: Print all active subscriptions and their end dates
+        all_active = SubscribedUser.query.filter(SubscribedUser._is_active == True).all()
+        print(f"Total active subscriptions: {len(all_active)}")
+        for sub in all_active[:5]:  # Print first 5 for debugging
+            print(f"  - Subscription {sub.id}: ends {sub.end_date}, notified: {sub.expiry_notification_sent}")
+
         return expiring_subscriptions
-        
+
     except Exception as e:
+        print(f"ERROR in find_expiring_subscriptions: {str(e)}")
+        import traceback
+        traceback.print_exc()
         current_app.logger.error(f"Error finding expiring subscriptions: {str(e)}")
         return []
 
@@ -1860,17 +1967,18 @@ def process_expiry_notifications():
     """
     try:
         print("=== PROCESSING SUBSCRIPTION EXPIRY NOTIFICATIONS ===")
+        print(f"Current UTC time: {datetime.utcnow()}")
 
         # Find subscriptions expiring in 48 hours
         expiring_subscriptions = find_expiring_subscriptions(hours_before=48)
 
         if not expiring_subscriptions:
-            print("No subscriptions expiring in the next 48 hours")
+            print("No subscriptions expiring in the next 48 hours (or already notified)")
             return True
-        
+
         successful_emails = 0
         failed_emails = 0
-        
+
         for subscription in expiring_subscriptions:
             try:
                 # Get user details
@@ -1878,53 +1986,69 @@ def process_expiry_notifications():
                 if not user:
                     print(f"Warning: User not found for subscription {subscription.id}")
                     continue
-                
+
                 # Check if user has valid email
-                if not user.company_email or not user.email_confirmed:
-                    print(f"Warning: User {user.id} has no valid email or unconfirmed email")
+                if not user.company_email:
+                    print(f"Warning: User {user.id} has no email address")
                     continue
-                
-                # Calculate hours remaining more precisely
-                now = datetime.now(UTC)
+
+                # Skip unconfirmed emails but log it
+                if not user.email_confirmed:
+                    print(f"Warning: User {user.id} ({user.company_email}) has unconfirmed email - sending anyway")
+
+                # Calculate hours remaining more precisely using naive datetime
+                now = datetime.utcnow()
                 time_remaining = subscription.end_date - now
-                hours_remaining = int(time_remaining.total_seconds() / 3600)
-                
+                hours_remaining = max(1, int(time_remaining.total_seconds() / 3600))
+
                 print(f"Processing user {user.company_email}: {hours_remaining} hours remaining")
-                
+                print(f"  Subscription ID: {subscription.id}")
+                print(f"  End date: {subscription.end_date}")
+
                 # Send expiry notification
                 email_sent = send_subscription_expiry_notification(
-                    user=user, 
+                    user=user,
                     subscription=subscription,
                     hours_remaining=hours_remaining
                 )
-                
+
                 if email_sent:
                     successful_emails += 1
                     print(f"✅ Notification sent to {user.company_email}")
+
+                    # Mark notification as sent
+                    subscription.expiry_notification_sent = True
+                    subscription.expiry_notification_sent_at = datetime.utcnow()
+                    db.session.commit()
+                    print(f"✅ Marked subscription {subscription.id} as notified")
                 else:
                     failed_emails += 1
                     print(f"❌ Failed to send notification to {user.company_email}")
-                
+
                 # Add a small delay between emails to avoid overwhelming the mail server
                 import time
                 time.sleep(1)
-                
+
             except Exception as e:
                 failed_emails += 1
                 print(f"❌ Error processing subscription {subscription.id}: {str(e)}")
+                import traceback
+                traceback.print_exc()
                 current_app.logger.error(f"Error processing expiry notification for subscription {subscription.id}: {str(e)}")
-        
+
         print(f"=== EXPIRY NOTIFICATIONS COMPLETE ===")
         print(f"Successful emails: {successful_emails}")
         print(f"Failed emails: {failed_emails}")
-        
+
         # Log summary
         current_app.logger.info(f"Processed {len(expiring_subscriptions)} expiring subscriptions: {successful_emails} success, {failed_emails} failed")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"ERROR in process_expiry_notifications: {str(e)}")
+        import traceback
+        traceback.print_exc()
         current_app.logger.error(f"Error in process_expiry_notifications: {str(e)}")
         return False
 

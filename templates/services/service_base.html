@@ -1,46 +1,646 @@
-{% extends "base2.html" %}
 
-{% block title %}{% block service_title %}QR Dada - Advanced QR Code Generator{% endblock %}{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T45KC6TB');</script>
+    <!-- End Google Tag Manager -->
 
-{% block extra_head %}
-<!-- Service-specific styles -->
-<style>
-    /* Additional service page animations */
-    .animate-shift {
-        animation: shift 3s ease infinite alternate;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}QR Dada - Advanced QR Code Generator{% endblock %}</title>
 
-    @keyframes shift {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(10px); }
-    }
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
 
-    .animate-fade-in {
-        animation: fadeInUp 0.5s ease-out forwards;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translate3d(0, 20px, 0);
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        accent: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(124, 58, 237, 0.4)',
+                        'glow-primary': '0 0 15px rgba(14, 165, 233, 0.4)'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'gradient': 'gradient 8s ease infinite',
+                        'shift': 'shift 3s ease infinite alternate',
+                        'fade-in': 'fadeInUp 0.5s ease-out forwards',
+                        'bounce-slow': 'bounce 3s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        gradient: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' },
+                        },
+                        shift: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(10px)' },
+                        },
+                        fadeInUp: {
+                            from: {
+                                opacity: 0,
+                                transform: 'translate3d(0, 20px, 0)'
+                            },
+                            to: {
+                                opacity: 1,
+                                transform: 'translate3d(0, 0, 0)'
+                            }
+                        }
+                    }
+                }
+            }
         }
-        to {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-        }
-    }
+    </script>
 
-    .animate-bounce-slow {
-        animation: bounce 3s infinite;
-    }
-</style>
-{% block service_extra_head %}{% endblock %}
-{% endblock %}
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-{% block content %}
-{% block service_content %}{% endblock %}
-{% endblock %}
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-{% block extra_js %}
-{% block service_extra_js %}{% endblock %}
-{% endblock %}
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/services/service-base.css') }}">
+</head>
+<body class="min-h-screen font-sans bg-gray-50 text-gray-800 flex flex-col">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T45KC6TB"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Toast notifications container -->
+    <div id="toast-container" class="toast-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast glass text-gray-800 shadow-lg rounded-lg flex items-center show" role="alert">
+                        {% if category == 'error' %}
+                            <i class="fa-solid fa-circle-exclamation text-red-500 mr-3"></i>
+                        {% elif category == 'success' %}
+                            <i class="fa-solid fa-circle-check text-green-500 mr-3"></i>
+                        {% else %}
+                            <i class="fa-solid fa-circle-info text-blue-500 mr-3"></i>
+                        {% endif %}
+                        <div>{{ message }}</div>
+                        <button onclick="this.parentElement.remove()" class="close-btn">
+                            <i class="fa-solid fa-xmark text-gray-500 hover:text-gray-700"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <header class="header bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <!-- Logo and Navigation -->
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="flex items-center space-x-3 focus-ring rounded-md">
+                        <div class="flex items-center justify-center">
+                            {% if website_settings and website_settings.website_logo_file %}
+                                <img src="{{ url_for('static', filename='uploads/' + website_settings.website_logo_file) }}"
+                                    alt="{{ website_settings.website_name if website_settings and website_settings.website_name else 'QR Dada' }} Logo"
+                                    class="h-12 w-auto object-contain">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='images/qr.png') }}"
+                                    alt="QR Dada Logo"
+                                    class="h-12 w-auto object-contain">
+                            {% endif %}
+                        </div>
+                    </a>
+                    <div class="hidden sm:ml-8 sm:flex sm:space-x-8 sm:justify-center">
+                        <a href="{{ url_for('index') }}#features" class="nav-item py-2 px-1 text-gray-700 hover:text-secondary-700 font-medium focus-ring rounded-md transition-colors">Features</a>
+                        <a href="{{ url_for('index') }}#how-it-works" class="nav-item py-2 px-1 text-gray-700 hover:text-secondary-700 font-medium focus-ring rounded-md transition-colors">How It Works</a>
+                        <a href="{{ url_for('index') }}#qr-types" class="nav-item py-2 px-1 text-gray-700 hover:text-secondary-700 font-medium focus-ring rounded-md transition-colors">QR Types</a>
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard') }}" class="nav-item py-2 px-1 text-gray-700 hover:text-secondary-700 font-medium focus-ring rounded-md {% if request.path == url_for('dashboard') %}text-secondary-700 active{% endif %}">Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('help_center') }}" class="nav-item py-2 px-1 text-gray-700 hover:text-secondary-700 font-medium focus-ring rounded-md {% if request.path == url_for('help_center') %}text-secondary-700 active{% endif %}">Help</a>
+                        {% endif %}
+
+                        <!-- Our Services Dropdown -->
+                        <div class="relative" id="services-dropdown">
+                            <button id="services-dropdown-btn" class="nav-item py-2 px-1 text-gray-700 hover:text-secondary-700 font-medium focus-ring rounded-md transition-colors flex items-center space-x-1">
+                                <span>Our Services</span>
+                                <i class="fas fa-chevron-down text-xs" id="services-chevron" style="transition: transform 0.3s ease;"></i>
+                            </button>
+                            <div id="services-menu" class="hidden absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                                <div class="py-2">
+                                    <a href="{{ url_for('service_qr_url') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-link w-5"></i> QR Code for URL
+                                    </a>
+                                    <a href="{{ url_for('service_qr_email') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-envelope w-5"></i> QR Code for Email
+                                    </a>
+                                    <a href="{{ url_for('service_qr_wifi') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-wifi w-5"></i> QR Code for WiFi
+                                    </a>
+                                    <a href="{{ url_for('service_qr_sms') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-comment w-5"></i> QR Code for SMS
+                                    </a>
+                                    <a href="{{ url_for('service_qr_event') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-calendar w-5"></i> QR Code for Event
+                                    </a>
+                                    <a href="{{ url_for('service_qr_image') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-image w-5"></i> QR Code for Image
+                                    </a>
+                                    <a href="{{ url_for('service_qr_call') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-phone w-5"></i> QR Code for Call
+                                    </a>
+                                    <a href="{{ url_for('service_qr_whatsapp') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fab fa-whatsapp w-5"></i> QR Code for WhatsApp
+                                    </a>
+                                    <a href="{{ url_for('service_qr_vcard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-address-card w-5"></i> QR Code for vCard
+                                    </a>
+                                    <a href="{{ url_for('service_qr_text') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary-50 hover:text-secondary-700 transition-colors">
+                                        <i class="fas fa-font w-5"></i> QR Code for Text
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <a href="{{ url_for('public_blogs') }}" class="nav-item py-2 px-1 text-gray-700 hover:text-secondary-700 font-medium focus-ring rounded-md transition-colors">Blog</a>
+                    <!-- <a href="{{ url_for('public_webstories') }}" class="nav-item py-2 px-1 text-gray-700 hover:text-secondary-700 font-medium focus-ring rounded-md transition-colors">Web Stories</a> -->
+                    
+                </div>
+                </div>
+
+                <!-- Right Side Actions -->
+                <div class="flex items-center space-x-4">
+                    <!-- User Menu or Auth Links -->
+                    {% if current_user.is_authenticated %}
+                        <!-- Desktop User Dropdown - Hidden on mobile -->
+                        <div class="dropdown-container hidden sm:block" id="user-dropdown">
+                            <button class="flex items-center space-x-2 rounded-full p-1 text-gray-800 hover:text-secondary-600 focus-ring" aria-expanded="false" aria-haspopup="true" aria-controls="user-dropdown-menu">
+                                <span class="avatar-circle h-10 w-10">
+                                    <span class="text-sm">{{ current_user.name[0].upper() }}</span>
+                                </span>
+                                <span class="hidden md:block font-medium text-sm">{{ current_user.name | title }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div id="user-dropdown-menu" class="dropdown-menu" role="menu" aria-labelledby="user-dropdown-button">
+                                {% if request.path != url_for('dashboard') %}
+                                <a href="{{ url_for('dashboard') }}" class="dropdown-item" role="menuitem">
+                                    <i class="fas fa-tachometer-alt w-5 mr-2"></i> Dashboard
+                                </a>
+                                {% endif %}
+                                {% if request.path != url_for('subscription.user_subscriptions') %}
+                                <a href="{{ url_for('subscription.user_subscriptions') }}" class="dropdown-item" role="menuitem">
+                                    <i class="fas fa-crown w-5 mr-2"></i> Subscription
+                                </a>
+                                {% endif %}
+                                {% if request.path != url_for('profile') %}
+                                <a href="{{ url_for('profile') }}" class="dropdown-item" role="menuitem">
+                                    <i class="fas fa-user w-5 mr-2"></i> Profile
+                                </a>
+                                {% endif %}
+                                <div class="dropdown-divider"></div>
+                                <a href="{{ url_for('logout') }}" class="dropdown-item danger" role="menuitem">
+                                    <i class="fas fa-sign-out-alt w-5 mr-2"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Auth Links -->
+                        <div class="hidden sm:flex items-center space-x-2">
+                            <a href="{{ url_for('login') }}" class="btn btn-outline text-gray-700 hover:bg-gray-50 hover:text-secondary-700 focus:ring focus:ring-secondary-200">Login</a>
+                            <a href="{{ url_for('signup') }}" class="btn btn-primary bg-secondary-600 text-white hover:bg-secondary-700 focus:ring focus:ring-secondary-200">Sign Up</a>
+                        </div>
+                    {% endif %}
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-button" class="sm:hidden p-2 rounded-md text-gray-800 hover:text-secondary-600 focus:ring focus:ring-secondary-200">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="mobile-menu sm:hidden" id="mobile-menu">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="{{ url_for('index') }}#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-secondary-700">
+                        <i class="fas fa-star w-5 mr-2"></i>Features
+                    </a>
+                    <a href="{{ url_for('index') }}#how-it-works" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-secondary-700">
+                        <i class="fas fa-tasks w-5 mr-2"></i>How It Works
+                    </a>
+                    <a href="{{ url_for('index') }}#qr-types" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-secondary-700">
+                        <i class="fas fa-qrcode w-5 mr-2"></i>QR Types
+                    </a>
+
+                    <!-- Mobile Services Dropdown -->
+                    <div class="mobile-services-dropdown">
+                        <button id="mobile-services-btn" class="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-secondary-700">
+                            <span><i class="fas fa-concierge-bell w-5 mr-2"></i>Our Services</span>
+                            <i class="fas fa-chevron-down text-xs transition-transform duration-300" id="mobile-services-chevron"></i>
+                        </button>
+                        <div id="mobile-services-menu" class="hidden pl-4 space-y-1 mt-1">
+                            <a href="{{ url_for('service_qr_url') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-link w-4 mr-2"></i>QR Code for URL
+                            </a>
+                            <a href="{{ url_for('service_qr_email') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-envelope w-4 mr-2"></i>QR Code for Email
+                            </a>
+                            <a href="{{ url_for('service_qr_wifi') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-wifi w-4 mr-2"></i>QR Code for WiFi
+                            </a>
+                            <a href="{{ url_for('service_qr_sms') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-comment w-4 mr-2"></i>QR Code for SMS
+                            </a>
+                            <a href="{{ url_for('service_qr_event') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-calendar w-4 mr-2"></i>QR Code for Event
+                            </a>
+                            <a href="{{ url_for('service_qr_image') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-image w-4 mr-2"></i>QR Code for Image
+                            </a>
+                            <a href="{{ url_for('service_qr_call') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-phone w-4 mr-2"></i>QR Code for Call
+                            </a>
+                            <a href="{{ url_for('service_qr_whatsapp') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fab fa-whatsapp w-4 mr-2"></i>QR Code for WhatsApp
+                            </a>
+                            <a href="{{ url_for('service_qr_vcard') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-address-card w-4 mr-2"></i>QR Code for vCard
+                            </a>
+                            <a href="{{ url_for('service_qr_text') }}" class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-secondary-700">
+                                <i class="fas fa-font w-4 mr-2"></i>QR Code for Text
+                            </a>
+                        </div>
+                    </div>
+
+                    <a href="{{ url_for('public_blogs') }}" class="mobile-menu-item block py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-blog mr-3 text-primary"></i>Blog
+                    </a>
+                    <!-- <a href="{{ url_for('public_webstories') }}" class="mobile-menu-item block py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-blog mr-3 text-primary"></i>Web Stories
+                    </a> -->
+                    <a href="{{ url_for('help_center') }}" class="mobile-menu-item block py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-blog mr-3 text-primary"></i>Help
+                    </a>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-secondary-700">
+                            <i class="fas fa-tachometer-alt w-5 mr-2"></i>Dashboard
+                        </a>
+                        <a href="{{ url_for('profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-secondary-700">
+                            <i class="fas fa-user w-5 mr-2"></i>Profile
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt w-5 mr-2"></i>Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-secondary-700">
+                            <i class="fas fa-sign-in-alt w-5 mr-2"></i>Login
+                        </a>
+                        <a href="{{ url_for('signup') }}" class="block px-3 py-2 rounded-md text-base font-medium text-secondary-700 hover:bg-secondary-50">
+                            <i class="fas fa-user-plus w-5 mr-2"></i>Sign Up
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Main Footer Content -->
+            <div class="py-16 md:py-20">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+
+                    <!-- Company Info -->
+                    <div>
+                        <div class="flex items-center mb-6">
+                            <div style="display: flex; align-items: center; justify-content: center;">
+                                <div style="background-color: white; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    {% if website_settings and website_settings.website_logo_file %}
+                                        <img src="{{ url_for('static', filename='uploads/' + website_settings.website_logo_file) }}"
+                                            alt="{{ website_settings.website_name if website_settings and website_settings.website_name else 'QR Dada' }} Logo"
+                                            style="height: 64px; width: auto; object-fit: contain;">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='images/qr.png') }}"
+                                            alt="QR Dada Logo"
+                                            style="height: 64px; width: auto; object-fit: contain;">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 mb-6 leading-relaxed">
+                            Create stunning, customizable QR codes that capture attention and drive engagement. Your ultimate QR solution for modern businesses.
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary-600 rounded-lg flex items-center justify-center transition group" aria-label="Twitter">
+                                <i class="fab fa-twitter text-gray-300 group-hover:text-white"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary-600 rounded-lg flex items-center justify-center transition group" aria-label="Facebook">
+                                <i class="fab fa-facebook-f text-gray-300 group-hover:text-white"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary-600 rounded-lg flex items-center justify-center transition group" aria-label="LinkedIn">
+                                <i class="fab fa-linkedin-in text-gray-300 group-hover:text-white"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary-600 rounded-lg flex items-center justify-center transition group" aria-label="Instagram">
+                                <i class="fab fa-instagram text-gray-300 group-hover:text-white"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div>
+                        <h4 class="text-lg font-bold mb-6">Quick Links</h4>
+                        <ul class="space-y-3">
+                            {% if current_user.is_authenticated %}
+                                <li><a href="{{ url_for('dashboard') }}" class="footer-link">Dashboard</a></li>
+                                <li><a href="{{ url_for('create_qr') }}" class="footer-link">Create QR</a></li>
+                            {% else %}
+                                <li><a href="{{url_for('signup')}}" class="footer-link">Sign Up</a></li>
+                                <li><a href="{{ url_for('login') }}" class="footer-link">Login</a></li>
+                            {% endif %}
+                            <li><a href="{{ url_for('public_blogs') }}" class="footer-link">Blog</a></li>
+                            <li><a href="{{ url_for('public_webstories') }}" class="footer-link">Web Stories</a></li>
+                            <li><a href="{{url_for('pricing')}}" class="footer-link">Pricing</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Support -->
+                    <div>
+                        <h4 class="text-lg font-bold mb-6">Support</h4>
+                        <ul class="space-y-3">
+                            <li><a href="{{ url_for('contact') }}" class="footer-link">Contact Us</a></li>
+                            <li><a href="{{ url_for('help_center') }}" class="footer-link">Help center</a></li>
+                            <li><a href="{{ url_for('about')}}" class="footer-link">About Us</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Contact & Newsletter -->
+                    <div>
+                        <h4 class="text-lg font-bold mb-6">Get in Touch</h4>
+
+                        <!-- Contact Info -->
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-6 h-6 bg-primary-600 rounded-lg flex items-center justify-center mt-0.5">
+                                    <i class="fas fa-envelope text-white text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-300 text-sm">Email</p>
+                                    <a href="mailto:support@qrdada.com" class="text-white hover:text-primary-400 transition">support@qrdada.com</a>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="w-6 h-6 bg-primary-600 rounded-lg flex items-center justify-center mt-0.5">
+                                    <i class="fas fa-map-marker-alt text-white text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-300 text-sm">Address</p>
+                                    <p class="text-white">Shyamala Towers, 3rd floor<br>
+                                                                No. 136, Arcot Rd, Saligramam<br>
+                                                                Chennai, Tamil Nadu 600092</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-800 py-6">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+
+                    <p class="text-gray-400 text-sm">&copy; {{ current_year }} QR Dada. All rights reserved.</p>
+
+                    <div class="flex flex-wrap justify-center space-x-6 text-sm">
+                        <a href="{{url_for('privacy')}}" class="text-gray-400 hover:text-white transition">Privacy</a>
+                        <a href="{{ url_for('terms') }}" class="text-gray-400 hover:text-white transition">Terms</a>
+                        <a href="{{ url_for('cookie_policy') }}" class="text-gray-400 hover:text-white transition">Cookies</a>
+                    </div>
+
+                    <div class="flex items-center space-x-4 text-xs text-gray-400">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-shield-alt text-green-500"></i>
+                            <span>SSL Secured</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-globe text-blue-500"></i>
+                            <span>GDPR Compliant</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AOS Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+    <!-- Common JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize AOS
+            AOS.init({
+                duration: 800,
+                once: true
+            });
+
+            // Enhanced toast notification system
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 500);
+                }, 5000);
+
+                const closeButton = toast.querySelector('.close-btn');
+                if (closeButton) {
+                    closeButton.addEventListener('click', () => {
+                        toast.classList.remove('show');
+                        setTimeout(() => toast.remove(), 500);
+                    });
+                }
+            });
+
+            // Services dropdown functionality
+            const servicesDropdownBtn = document.getElementById('services-dropdown-btn');
+            const servicesMenu = document.getElementById('services-menu');
+            const servicesDropdown = document.getElementById('services-dropdown');
+            const servicesChevron = document.getElementById('services-chevron');
+
+            if (servicesDropdownBtn && servicesMenu) {
+                servicesDropdownBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    servicesMenu.classList.toggle('hidden');
+
+                    if (servicesChevron) {
+                        if (servicesMenu.classList.contains('hidden')) {
+                            servicesChevron.style.transform = 'rotate(0deg)';
+                        } else {
+                            servicesChevron.style.transform = 'rotate(180deg)';
+                        }
+                    }
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (servicesDropdown && !servicesDropdown.contains(event.target)) {
+                        servicesMenu.classList.add('hidden');
+                        if (servicesChevron) {
+                            servicesChevron.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+
+                const servicesLinks = servicesMenu.querySelectorAll('a');
+                servicesLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        servicesMenu.classList.add('hidden');
+                        if (servicesChevron) {
+                            servicesChevron.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                });
+            }
+
+            // User dropdown functionality
+            const userDropdown = document.getElementById('user-dropdown');
+            if (userDropdown) {
+                const dropdownButton = userDropdown.querySelector('button');
+                const dropdownMenu = document.getElementById('user-dropdown-menu');
+                const chevronIcon = dropdownButton.querySelector('i.fa-chevron-down');
+
+                dropdownButton.addEventListener('click', function() {
+                    const expanded = dropdownButton.getAttribute('aria-expanded') === 'true';
+
+                    if (expanded) {
+                        dropdownMenu.classList.remove('visible');
+                        dropdownButton.setAttribute('aria-expanded', 'false');
+                        chevronIcon.style.transform = 'rotate(0deg)';
+                    } else {
+                        dropdownMenu.classList.add('visible');
+                        dropdownButton.setAttribute('aria-expanded', 'true');
+                        chevronIcon.style.transform = 'rotate(180deg)';
+                    }
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userDropdown.contains(event.target)) {
+                        dropdownMenu.classList.remove('visible');
+                        dropdownButton.setAttribute('aria-expanded', 'false');
+                        chevronIcon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            }
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    const expanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+
+                    if (expanded) {
+                        mobileMenu.classList.remove('visible');
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    } else {
+                        mobileMenu.classList.add('visible');
+                        mobileMenuButton.setAttribute('aria-expanded', 'true');
+                    }
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+                        mobileMenu.classList.remove('visible');
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
+            // Mobile services dropdown toggle
+            const mobileServicesBtn = document.getElementById('mobile-services-btn');
+            const mobileServicesMenu = document.getElementById('mobile-services-menu');
+            const mobileServicesChevron = document.getElementById('mobile-services-chevron');
+
+            if (mobileServicesBtn && mobileServicesMenu) {
+                mobileServicesBtn.addEventListener('click', function() {
+                    mobileServicesMenu.classList.toggle('hidden');
+                    if (mobileServicesChevron) {
+                        if (mobileServicesMenu.classList.contains('hidden')) {
+                            mobileServicesChevron.style.transform = 'rotate(0deg)';
+                        } else {
+                            mobileServicesChevron.style.transform = 'rotate(180deg)';
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

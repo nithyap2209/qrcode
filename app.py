@@ -31,13 +31,14 @@ import razorpay
 from decimal import Decimal, ROUND_HALF_UP
 from flask_caching import Cache
 import uuid
-from models.qr_models import QRCode, Scan, QREmail, QRPhone, QRSms, QRWhatsApp, QRWifi, QRVCard, QREvent, QRText, QRLink
+from models.qr_models import QRCode, Scan, QREmail, QRPhone, QRSms, QRWhatsApp, QRWifi, QRVCard, QREvent, QRText, QRLink, QRImage
 
 import logging
 from datetime import datetime, UTC, timedelta
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 import json
+import requests
 from utils.email_service import email_service, init_email_service
 from PIL import Image, ImageDraw, ImageFont
 import math
@@ -133,6 +134,7 @@ def create_app():
     os.makedirs(os.path.join(upload_folder, 'logos'), exist_ok=True)
     os.makedirs(os.path.join(upload_folder, 'temp'), exist_ok=True)
     os.makedirs(os.path.join(upload_folder, 'vcard'), exist_ok=True)
+    os.makedirs(os.path.join(upload_folder, 'qr_images'), exist_ok=True)
 
     print(f"Upload directories created: {upload_folder}")
 
@@ -142,6 +144,23 @@ def create_app():
     # Create tables within app context
     with app.app_context():
         db.create_all()
+
+        # Add gradient columns to qr_image table if missing
+        from sqlalchemy import inspect as sa_inspect, text
+        try:
+            insp = sa_inspect(db.engine)
+            if insp.has_table('qr_image'):
+                existing_cols = [c['name'] for c in insp.get_columns('qr_image')]
+                with db.engine.connect() as conn:
+                    if 'bg_color_1' not in existing_cols:
+                        conn.execute(text("ALTER TABLE qr_image ADD COLUMN bg_color_1 VARCHAR(20) DEFAULT '#0a0a0a'"))
+                    if 'bg_color_2' not in existing_cols:
+                        conn.execute(text("ALTER TABLE qr_image ADD COLUMN bg_color_2 VARCHAR(20) DEFAULT '#1a1a2e'"))
+                    if 'bg_direction' not in existing_cols:
+                        conn.execute(text("ALTER TABLE qr_image ADD COLUMN bg_direction VARCHAR(30) DEFAULT 'to bottom'"))
+                    conn.commit()
+        except Exception as e:
+            print(f"Migration check for qr_image: {e}")
 
     # Register blueprints with proper URL prefixes
     app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -552,7 +571,7 @@ def send_verification_email(user):
         token = user.get_email_confirm_token()
         subject = 'Email Verification - QR Dada'
         verification_url = url_for('verify_email', token=token, _external=True)
-        logo_url = url_for('static', filename='images/qr.png', _external=True, _scheme='https')
+        logo_url = "https://qrdada.com/static/images/qr.png"
 
         # Plain text version
         body = f'''Hi {user.name},
@@ -646,7 +665,7 @@ The QR Dada Team
                             </p>
 
                             <p style="margin: 20px 0 0 0; font-size: 12px; color: #94a3b8; text-align: center;">
-                                © 2025 QR Dada. All rights reserved.
+                                © {datetime.now().year} QR Dada. All rights reserved.
                             </p>
                         </td>
                     </tr>
@@ -700,7 +719,7 @@ def send_reset_email(user):
         token = user.get_reset_token()
         subject = 'Password Reset Request - QR Dada'
         reset_url = url_for('reset_token', token=token, _external=True)
-        logo_url = url_for('static', filename='images/qr.png', _external=True, _scheme='https')
+        logo_url = "https://qrdada.com/static/images/qr.png"
 
         # Plain text version
         body = f'''Hi {user.name},
@@ -794,7 +813,7 @@ The QR Dada Support Team
                             </p>
 
                             <p style="margin: 20px 0 0 0; font-size: 12px; color: #94a3b8; text-align: center;">
-                                © 2025 QR Dada. All rights reserved.
+                                © {datetime.now().year} QR Dada. All rights reserved.
                             </p>
                         </td>
                     </tr>
@@ -898,8 +917,8 @@ def inject_website_settings():
             'website_tagline': website_tagline
         }
         
-        return dict(website_settings=website_settings)
-        
+        return dict(website_settings=website_settings, current_year=datetime.now().year)
+
     except Exception as e:
         # Comprehensive fallback to defaults if database is not available
         app.logger.error(f"Error loading website settings: {str(e)}")
@@ -908,7 +927,7 @@ def inject_website_settings():
             'website_icon': 'fas fa-qrcode',
             'website_logo_file': None,
             'website_tagline': 'Professional QR Code and Analytics Platform'
-        })
+        }, current_year=datetime.now().year)
 
 # ---------------------------------------
 # user login signup and reset password
@@ -1904,7 +1923,32 @@ def create_qr():
                 content['end_time'] = request.form.get('end_time', '')
                 print(f"Event QR - Title: {event_title}")
                 print(f"Event QR - Description from form: '{content['description']}'")
-            
+
+            elif qr_type == 'image':
+                if 'qr_image_file' not in request.files or not request.files['qr_image_file'].filename:
+                    flash('Please upload an image for image QR codes.', 'error')
+                    return redirect(url_for('create_qr'))
+
+                image_file = request.files['qr_image_file']
+                allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+                file_ext = image_file.filename.rsplit('.', 1)[-1].lower() if '.' in image_file.filename else ''
+                if file_ext not in allowed_extensions:
+                    flash('Invalid image format. Supported: JPG, PNG, GIF, WebP', 'error')
+                    return redirect(url_for('create_qr'))
+
+                import uuid as uuid_module
+                image_filename = f"{uuid_module.uuid4().hex}_{image_file.filename}"
+                image_filename = image_filename.replace(' ', '_')
+                image_save_path = os.path.join(app.config['UPLOAD_FOLDER'], 'qr_images', image_filename)
+                image_file.save(image_save_path)
+
+                content['image_path'] = os.path.join('qr_images', image_filename).replace('\\', '/')
+                content['caption'] = request.form.get('image_caption', '').strip()
+                content['bg_color_1'] = request.form.get('img_bg_color_1', '#0a0a0a').strip()
+                content['bg_color_2'] = request.form.get('img_bg_color_2', '#1a1a2e').strip()
+                content['bg_direction'] = request.form.get('img_bg_direction', 'to bottom').strip()
+                print(f"Image QR - Path: {content['image_path']}, Caption: {content['caption']}")
+
             # Basic QR code styling options with validation
             template = request.form.get('template', '')
             color = request.form.get('color', '#000000').strip()
@@ -2222,7 +2266,19 @@ def create_qr():
                     db.session.add(event_detail)
                     print(f"Event detail record created - Description: '{content.get('description', '')}'")
                     print("Event detail record created")
-            
+
+                elif qr_type == 'image':
+                    image_detail = QRImage(
+                        qr_code_id=new_qr.id,
+                        image_path=content.get('image_path', ''),
+                        caption=content.get('caption', ''),
+                        bg_color_1=content.get('bg_color_1', '#0a0a0a'),
+                        bg_color_2=content.get('bg_color_2', '#1a1a2e'),
+                        bg_direction=content.get('bg_direction', 'to bottom')
+                    )
+                    db.session.add(image_detail)
+                    print("Image detail record created")
+
             except Exception as detail_error:
                 print(f"Error creating detail record: {str(detail_error)}")
                 import traceback
@@ -2560,7 +2616,15 @@ def preview_qr():
                 content['location'] = request.form.get('location', '') if request.method == 'POST' else request.args.get('location', 'Event Location')
                 content['start_date'] = request.form.get('start_date', '') if request.method == 'POST' else request.args.get('start_date', '')
                 content['end_time'] = request.form.get('end_time', '') if request.method == 'POST' else request.args.get('end_time', '')
-        
+
+        elif qr_type == 'image':
+            if base_qr_code and hasattr(base_qr_code, 'image_detail') and base_qr_code.image_detail:
+                content['image_path'] = base_qr_code.image_detail.image_path or ''
+                content['caption'] = request.form.get('image_caption', base_qr_code.image_detail.caption or '') if request.method == 'POST' else (base_qr_code.image_detail.caption or '')
+            else:
+                content['image_path'] = ''
+                content['caption'] = request.form.get('image_caption', '') if request.method == 'POST' else ''
+
         # Handle logo preview
         logo_file = None
         logo_path_for_preview = None
@@ -3029,7 +3093,17 @@ def delete_qr(qr_id):
             QRVCard.query.filter_by(qr_code_id=qr_code.id).delete()
         elif qr_type == 'event':
             QREvent.query.filter_by(qr_code_id=qr_code.id).delete()
-            
+        elif qr_type == 'image':
+            image_detail = QRImage.query.filter_by(qr_code_id=qr_code.id).first()
+            if image_detail and image_detail.image_path:
+                img_path = os.path.join(app.config['UPLOAD_FOLDER'], image_detail.image_path)
+                if os.path.exists(img_path):
+                    try:
+                        os.remove(img_path)
+                    except:
+                        pass
+            QRImage.query.filter_by(qr_code_id=qr_code.id).delete()
+
         # Delete related scans
         Scan.query.filter_by(qr_code_id=qr_code.id).delete()
         
@@ -3610,7 +3684,22 @@ def redirect_qr(qr_id):
                     'description': content.get('description', '')
                 })()
             return render_template('event_display.html', detail=detail)
-            
+
+        elif qr_type == 'image':
+            detail = qr_code.image_detail
+            if not detail and content:
+                detail = type('ImageDetail', (), {
+                    'image_path': content.get('image_path', ''),
+                    'caption': content.get('caption', ''),
+                    'bg_color_1': content.get('bg_color_1', '#0a0a0a'),
+                    'bg_color_2': content.get('bg_color_2', '#1a1a2e'),
+                    'bg_direction': content.get('bg_direction', 'to bottom')
+                })()
+            if detail:
+                return render_template('image_display.html', detail=detail)
+            else:
+                return render_template('error.html', message="Image information not found")
+
         elif qr_type == 'text':
             # Use the direct relationship from the QR code to its detail
             detail = qr_code.text_detail
@@ -3815,6 +3904,11 @@ def service_qr_sms():
 def service_qr_event():
     """QR Code for Event service page"""
     return render_template('services/qr_event.html')
+
+@app.route('/services/qr-code-for-image')
+def service_qr_image():
+    """QR Code for Image service page"""
+    return render_template('services/qr_image.html')
 
 @app.route('/services/qr-code-for-call')
 def service_qr_call():
@@ -4041,7 +4135,11 @@ def generate_qr_data(qr_code):
         
         # For dynamic QR codes, always use the redirect URL regardless of type
         if qr_code.is_dynamic:
-            qr_data = url_for('redirect_qr', qr_id=qr_code.unique_id, _external=True)
+            site_url = os.getenv('SITE_URL', '').rstrip('/')
+            if site_url:
+                qr_data = f"{site_url}/r/{qr_code.unique_id}"
+            else:
+                qr_data = url_for('redirect_qr', qr_id=qr_code.unique_id, _external=True)
             return qr_data
             
         # For static QR codes, use the appropriate data format by type
@@ -4340,7 +4438,16 @@ def generate_qr_data(qr_code):
 
             qr_data = "\r\n".join(vevent)
             print(f"Event QR Data - Final iCalendar data:\n{qr_data}")
-        
+
+        elif qr_type == 'image':
+            # Image QR codes must use a URL since image data can't be embedded in QR
+            # Use SITE_URL from env so it works when scanned from any device
+            site_url = os.getenv('SITE_URL', '').rstrip('/')
+            if site_url:
+                qr_data = f"{site_url}/r/{qr_code.unique_id}"
+            else:
+                qr_data = url_for('redirect_qr', qr_id=qr_code.unique_id, _external=True)
+
         return qr_data
     except Exception as e:
         app.logger.error(f"Error generating QR data: {str(e)}")
@@ -5827,11 +5934,17 @@ def public_blogs():
         # Get all active categories for filter
         categories = BlogCategory.query.filter_by(status=True).order_by(BlogCategory.sort_order, BlogCategory.name).all()
 
+        # Get the selected category object for schema markup
+        selected_category_obj = None
+        if category_id:
+            selected_category_obj = BlogCategory.query.get(category_id)
+
         return render_template('blogs.html',
                              blogs=blogs,
                              categories=categories,
                              pagination=pagination,
-                             selected_category=category_id)
+                             selected_category=category_id,
+                             selected_category_obj=selected_category_obj)
     except Exception as e:
         app.logger.error(f"Error loading blogs: {str(e)}")
         flash('Error loading blogs', 'danger')
@@ -7245,7 +7358,69 @@ def update_qr_content_by_type(qr_code, form_data):
                 )
                 db.session.add(event_detail)
                 content_updated = True
-        
+
+        elif qr_type == 'image':
+            image_detail = qr_code.image_detail
+            new_caption = form_data.get('image_caption', '')
+            new_bg_color_1 = form_data.get('img_bg_color_1', '#0a0a0a')
+            new_bg_color_2 = form_data.get('img_bg_color_2', '#1a1a2e')
+            new_bg_direction = form_data.get('img_bg_direction', 'to bottom')
+
+            # Check if a new image file is uploaded
+            new_image_file = request.files.get('qr_image_file') if hasattr(request, 'files') else None
+
+            if new_image_file and new_image_file.filename:
+                import uuid as uuid_module
+                allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+                file_ext = new_image_file.filename.rsplit('.', 1)[-1].lower() if '.' in new_image_file.filename else ''
+                if file_ext in allowed_extensions:
+                    # Delete old image
+                    if image_detail and image_detail.image_path:
+                        old_path = os.path.join(app.config['UPLOAD_FOLDER'], image_detail.image_path)
+                        if os.path.exists(old_path):
+                            try:
+                                os.remove(old_path)
+                            except:
+                                pass
+                    image_filename = f"{uuid_module.uuid4().hex}_{new_image_file.filename}".replace(' ', '_')
+                    image_save_path = os.path.join(app.config['UPLOAD_FOLDER'], 'qr_images', image_filename)
+                    new_image_file.save(image_save_path)
+                    new_image_path = os.path.join('qr_images', image_filename).replace('\\', '/')
+
+                    if image_detail:
+                        image_detail.image_path = new_image_path
+                        image_detail.caption = new_caption
+                        image_detail.bg_color_1 = new_bg_color_1
+                        image_detail.bg_color_2 = new_bg_color_2
+                        image_detail.bg_direction = new_bg_direction
+                    else:
+                        image_detail = QRImage(
+                            qr_code_id=qr_code.id,
+                            image_path=new_image_path,
+                            caption=new_caption,
+                            bg_color_1=new_bg_color_1,
+                            bg_color_2=new_bg_color_2,
+                            bg_direction=new_bg_direction
+                        )
+                        db.session.add(image_detail)
+                    content_updated = True
+            elif image_detail:
+                changed = False
+                if new_caption != (image_detail.caption or ''):
+                    image_detail.caption = new_caption
+                    changed = True
+                if new_bg_color_1 != (image_detail.bg_color_1 or '#0a0a0a'):
+                    image_detail.bg_color_1 = new_bg_color_1
+                    changed = True
+                if new_bg_color_2 != (image_detail.bg_color_2 or '#1a1a2e'):
+                    image_detail.bg_color_2 = new_bg_color_2
+                    changed = True
+                if new_bg_direction != (image_detail.bg_direction or 'to bottom'):
+                    image_detail.bg_direction = new_bg_direction
+                    changed = True
+                if changed:
+                    content_updated = True
+
         app.logger.info(f"Content update completed for {qr_type}, changed: {content_updated}")
         return content_updated
         
@@ -7330,7 +7505,28 @@ def contact():
             name = request.form.get('name')
             email = request.form.get('email')
             message = request.form.get('message')
-            
+
+            # Verify reCAPTCHA
+            recaptcha_response = request.form.get('g-recaptcha-response')
+            if not recaptcha_response:
+                flash('Please complete the reCAPTCHA verification.', 'warning')
+                return render_template('contact.html', name=name, email=email, message=message)
+
+            # Verify with Google
+            recaptcha_secret = os.getenv('RECAPTCHA_SECRET_KEY', '6LcjljssAAAAAFEZpDSSgtugawtx6-wjpAnKyHeG')
+            recaptcha_verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+            recaptcha_data = {
+                'secret': recaptcha_secret,
+                'response': recaptcha_response,
+                'remoteip': request.remote_addr
+            }
+            recaptcha_result = requests.post(recaptcha_verify_url, data=recaptcha_data)
+            recaptcha_result_json = recaptcha_result.json()
+
+            if not recaptcha_result_json.get('success'):
+                flash('reCAPTCHA verification failed. Please try again.', 'danger')
+                return render_template('contact.html', name=name, email=email, message=message)
+
             # Validate required fields
             if not all([name, email, message]):
                 flash('Please fill in all required fields.', 'warning')
@@ -7535,9 +7731,195 @@ def run_sync_command():
     Run this as a separate Python script or Flask command
     """
     # from your_app import app  # Import your Flask app
-    
+
     with app.app_context():
         sync_all_subscription_data()
+
+
+@app.route('/sitemap')
+def sitemap_page():
+    """Display sitemap categories page"""
+    blogs_count = 0
+    webstories_count = 0
+    website_settings = None
+    pages_count = 19  # Main pages + services + legal pages
+
+    try:
+        blogs_count = Blog.query.filter_by(status=True).count()
+    except Exception as e:
+        print(f"Error fetching blogs count: {e}")
+
+    try:
+        webstories_count = WebStory.query.filter_by(status=True).count()
+    except Exception as e:
+        print(f"Error fetching webstories count: {e}")
+
+    try:
+        website_settings = WebsiteSettings.query.first()
+    except Exception as e:
+        print(f"Error fetching website settings: {e}")
+
+    return render_template(
+        'sitemap_index.html',
+        blogs_count=blogs_count,
+        webstories_count=webstories_count,
+        pages_count=pages_count,
+        website_settings=website_settings
+    )
+
+
+@app.route('/page-sitemap')
+def sitemap_pages():
+    """Display all website pages"""
+    website_settings = None
+    base_url = request.url_root.rstrip('/')
+    current_date = datetime.now().strftime('%b %d, %Y')
+
+    try:
+        website_settings = WebsiteSettings.query.first()
+    except Exception as e:
+        print(f"Error fetching website settings: {e}")
+
+    return render_template(
+        'sitemap_pages.html',
+        website_settings=website_settings,
+        base_url=base_url,
+        current_date=current_date
+    )
+
+
+@app.route('/post-sitemap')
+def sitemap_blogs():
+    """Display all blog articles"""
+    import re
+    blogs = []
+    website_settings = None
+    base_url = request.url_root.rstrip('/')
+    current_date = datetime.now().strftime('%b %d, %Y')
+
+    try:
+        blogs = Blog.query.filter_by(status=True).order_by(Blog.updated_at.desc()).all()
+        # Calculate image count for each blog
+        for blog in blogs:
+            image_count = 0
+            # Count cover image
+            if blog.image:
+                image_count += 1
+            # Count images in description HTML
+            if blog.description:
+                img_tags = re.findall(r'<img[^>]+>', blog.description, re.IGNORECASE)
+                image_count += len(img_tags)
+            blog.image_count = image_count
+    except Exception as e:
+        print(f"Error fetching blogs: {e}")
+
+    try:
+        website_settings = WebsiteSettings.query.first()
+    except Exception as e:
+        print(f"Error fetching website settings: {e}")
+
+    return render_template(
+        'sitemap_blogs.html',
+        blogs=blogs,
+        website_settings=website_settings,
+        base_url=base_url,
+        current_date=current_date
+    )
+
+
+@app.route('/web-story-sitemap')
+def sitemap_webstories():
+    """Display all web stories"""
+    webstories = []
+    website_settings = None
+    base_url = request.url_root.rstrip('/')
+    current_date = datetime.now().strftime('%b %d, %Y')
+
+    try:
+        webstories = WebStory.query.filter_by(status=True).order_by(WebStory.updated_at.desc()).all()
+        # Calculate image count for each webstory
+        for story in webstories:
+            image_count = 0
+            # Count cover image
+            if story.cover_image:
+                image_count += 1
+            # Count images in slides
+            if story.slides:
+                for slide in story.slides:
+                    if slide.get('image'):
+                        image_count += 1
+            story.image_count = image_count
+    except Exception as e:
+        print(f"Error fetching webstories: {e}")
+
+    try:
+        website_settings = WebsiteSettings.query.first()
+    except Exception as e:
+        print(f"Error fetching website settings: {e}")
+
+    return render_template(
+        'sitemap_webstories.html',
+        webstories=webstories,
+        website_settings=website_settings,
+        base_url=base_url,
+        current_date=current_date
+    )
+
+
+@app.route('/sitemap.xml')
+@app.route('/sitemap_index.xml')
+def sitemap_xml():
+    """Generate sitemap XML for search engines"""
+    from flask import make_response, request
+
+    # Get the base URL from the request
+    base_url = request.url_root.rstrip('/')
+
+    # Fetch dynamic content
+    blogs = []
+    webstories = []
+
+    try:
+        blogs = Blog.query.filter_by(status=True).order_by(Blog.updated_at.desc()).all()
+    except Exception as e:
+        print(f"Error fetching blogs for sitemap: {e}")
+
+    try:
+        webstories = WebStory.query.filter_by(status=True).order_by(WebStory.updated_at.desc()).all()
+    except Exception as e:
+        print(f"Error fetching webstories for sitemap: {e}")
+
+    # Render the sitemap template
+    xml_content = render_template(
+        'sitemap.xml',
+        base_url=base_url,
+        blogs=blogs,
+        webstories=webstories
+    )
+
+    # Create response with proper content type
+    response = make_response(xml_content)
+    response.headers['Content-Type'] = 'application/xml'
+    response.headers['Cache-Control'] = 'public, max-age=3600'  # Cache for 1 hour
+
+    return response
+
+
+@app.route('/robots.txt')
+def robots():
+    """Generate robots.txt dynamically using template"""
+    from flask import make_response, request
+
+    base_url = request.url_root.rstrip('/')
+
+    # Render the robots template
+    robots_content = render_template('robots.txt', base_url=base_url)
+
+    response = make_response(robots_content)
+    response.headers['Content-Type'] = 'text/plain'
+
+    return response
+
 
 # Execute application
 if __name__ == '__main__':

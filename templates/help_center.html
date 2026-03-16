@@ -1,7 +1,29 @@
 {% extends "base2.html" %}
-
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/help-center.css") }}">
+{% endblock %}
 {% block title %}Help Center - QR Dada{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://qrdada.com/help#webpage",
+  "url": "https://qrdada.com/help",
+  "name": "QRDada Help & Support",
+  "description": "Find help, guides, and support resources for using QRDada to create and manage static and dynamic QR codes for URLs, WhatsApp, SMS, email, vCards, events, and WiFi.",
+  "about": {
+    "@type": "Organization",
+    "@id": "https://qrdada.com/#organization"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://qrdada.com/#website"
+  }
+}
+</script>
 
+{% endblock %}
 {% block content %}
 <div class="bg-gray-50 min-h-[80vh] font-['Inter','Roboto',sans-serif] text-gray-800">
 
@@ -21,81 +43,7 @@
         </div> -->
     </div>
 
-    <style>
-        /* Scroll offset for sections on mobile */
-        section[id] {
-            scroll-margin-top: 100px;
-        }
-
-        @media (max-width: 640px) {
-            section[id] {
-                scroll-margin-top: 90px;
-            }
-        }
-
-        /* Consistent heading styles */
-        #help-content h2 {
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            color: #111827 !important;
-            margin-bottom: 1.5rem !important;
-        }
-
-        #help-content h3 {
-            font-size: 1.25rem !important;
-            font-weight: 600 !important;
-            color: #111827 !important;
-            margin-bottom: 1rem !important;
-            margin-top: 1.5rem !important;
-        }
-
-        #help-content h4 {
-            font-size: 1.125rem !important;
-            font-weight: 600 !important;
-            color: #111827 !important;
-            margin-bottom: 0.75rem !important;
-            margin-top: 1rem !important;
-        }
-
-        #help-content h5 {
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            color: #111827 !important;
-            margin-bottom: 0.5rem !important;
-        }
-
-        /* Consistent paragraph and text styles */
-        #help-content p {
-            font-size: 1rem !important;
-            line-height: 1.75 !important;
-            color: #374151 !important;
-            margin-bottom: 1rem !important;
-        }
-
-        /* Consistent list styles */
-        #help-content ul, #help-content ol {
-            margin-bottom: 1rem !important;
-        }
-
-        #help-content li {
-            font-size: 1rem !important;
-            line-height: 1.75 !important;
-            color: #374151 !important;
-            margin-bottom: 0.5rem !important;
-        }
-
-        /* Consistent article spacing */
-        #help-content article {
-            margin-bottom: 2rem !important;
-        }
-
-        /* Table text consistency */
-        #help-content table td, #help-content table th {
-            font-size: 1rem !important;
-            line-height: 1.5 !important;
-            color: #111827 !important;
-        }
-    </style>
+    
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" id="help-content">
@@ -900,27 +848,7 @@
     <i class="fas fa-arrow-up text-lg"></i>
 </button>
 
-<style>
-    /* Scroll to top button styles */
-    #scroll-to-top.visible {
-        opacity: 1;
-        visibility: visible;
-    }
 
-    /* Active sidebar link styles */
-    .sidebar-link.active {
-        background-color: rgb(237 233 254) !important;
-        color: rgb(109 40 217) !important;
-    }
-
-    .sidebar-link.active i {
-        color: rgb(139 92 246) !important;
-    }
-
-    .sidebar-link {
-        transition: all 0.2s ease;
-    }
-</style>
 
 <!-- Search Functionality, Smooth Scroll, and Scroll Spy -->
 <script>

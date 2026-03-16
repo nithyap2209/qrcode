@@ -1,0 +1,515 @@
+
+/* Desktop-specific layout styles */
+@media (min-width: 992px) {
+    /* Hide mobile layout on desktop */
+    .mobile-layout {
+        display: none !important;
+    }
+    
+    /* Show desktop rows */
+    .desktop-row-2,
+    .desktop-row-3 {
+        display: flex !important;
+    }
+    
+    /* Ensure equal height for filter and revenue trends */
+    .desktop-row-2 .card {
+        min-height: 400px;
+    }
+    
+    /* Chart container for revenue trends in desktop */
+    .chart-container-revenue {
+        position: relative;
+        height: 280px;
+    }
+    
+    /* Chart container for payment distribution in desktop */
+    .chart-container-distribution {
+        position: relative;
+        height: 250px;
+    }
+}
+
+/* Mobile-specific layout styles */
+@media (max-width: 991.98px) {
+    /* Hide desktop-specific rows on mobile */
+    .desktop-row-2,
+    .desktop-row-3 {
+        display: none !important;
+    }
+    
+    /* Show mobile layout */
+    .mobile-layout {
+        display: flex !important;
+    }
+}
+
+/* Updated Chart Container Classes for New Layout */
+.chart-container-medium {
+    position: relative;
+    height: 180px;
+}
+
+.chart-container-mini {
+    position: relative;
+    height: 120px;
+}
+
+/* Chart Container Improvements */
+.chart-container {
+    position: relative;
+    height: 280px;
+}
+
+.chart-container-small {
+    position: relative;
+    height: 200px;
+}
+
+/* Ensure proper height distribution for charts section */
+.charts-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.charts-container .revenue-chart-card {
+    flex: 1;
+    min-height: 220px;
+    margin-bottom: 0.75rem !important;
+}
+
+.charts-container .distribution-chart-card {
+    flex: 1;
+    min-height: 180px;
+}
+
+/* Compact layout adjustments */
+.charts-container .card-body.p-2 {
+    padding: 0.5rem !important;
+}
+
+.charts-container .card-header.py-2 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* Icon Wrapper Responsive */
+.icon-wrapper {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* Card Hover Effects */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Avatar Circle */
+.avatar-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+}
+
+/* Button Icon */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Scrollable table container styles */
+.table-scrollable-container {
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.table-scrollable-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-scrollable-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-scrollable-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.table-scrollable-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Ensure sticky header works properly */
+.table thead th {
+    background-color: var(--bs-gray-100) !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 2px solid var(--bs-border-color);
+}
+
+/* Add some padding to prevent content from being cut off */
+.table-scrollable-container .table {
+    margin-bottom: 0;
+}
+
+/* Smooth scrolling */
+.table-scrollable-container {
+    scroll-behavior: smooth;
+}
+
+/* Mobile Payment Cards */
+.mobile-payment-card {
+    background: white;
+    transition: background-color 0.2s ease;
+}
+
+.mobile-payment-card:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.mobile-payment-card:last-child {
+    border-bottom: none !important;
+}
+
+/* Fixed Mobile Dropdown Positioning */
+.mobile-payment-dropdown {
+    min-width: 200px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background-color: white;
+    z-index: 1050;
+    margin-top: 0.25rem;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    position: absolute !important;
+}
+
+.mobile-payment-dropdown .dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    color: #495057;
+    text-decoration: none;
+    transition: background-color 0.15s ease-in-out;
+    white-space: nowrap;
+}
+
+.mobile-payment-dropdown .dropdown-item:hover,
+.mobile-payment-dropdown .dropdown-item:focus {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.mobile-payment-dropdown .dropdown-item i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Chart Period Selector */
+#chart-period-selector .btn,
+#chart-period-selector-mobile .btn {
+    border-radius: 0;
+}
+
+#chart-period-selector .btn:first-child,
+#chart-period-selector-mobile .btn:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+#chart-period-selector .btn:last-child,
+#chart-period-selector-mobile .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+/* Responsive Utility Classes */
+.min-width-0 {
+    min-width: 0;
+}
+
+/* Mobile Specific Styles */
+@media (max-width: 991.98px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .chart-container-medium {
+        height: 200px;
+    }
+    
+    .chart-container-mini {
+        height: 140px;
+    }
+    
+    .btn-group-sm .btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* Reset charts container height on mobile */
+    .charts-container .revenue-chart-card,
+    .charts-container .distribution-chart-card {
+        height: auto;
+        min-height: auto;
+        flex: none;
+    }
+    
+    .charts-container .revenue-chart-card {
+        min-height: 250px;
+        margin-bottom: 1rem !important;
+    }
+    
+    .charts-container .distribution-chart-card {
+        min-height: 200px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .icon-wrapper {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .avatar-circle {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .chart-container-medium {
+        height: 180px;
+    }
+    
+    .chart-container-mini {
+        height: 120px;
+    }
+    
+    .card-header h6 {
+        font-size: 0.9rem;
+    }
+    
+    .mobile-payment-card {
+        padding: 0.75rem !important;
+    }
+    
+    .dropdown-menu {
+        font-size: 0.875rem;
+        z-index: 1055 !important;
+        position: absolute !important;
+    }
+    
+    /* Fix table dropdown positioning */
+    .table-dropdown-wrapper {
+        position: relative;
+    }
+
+    .table-dropdown-wrapper .dropdown-menu {
+        position: absolute !important;
+        top: 100% !important;
+        right: 0 !important;
+        left: auto !important;
+        transform: none !important;
+        z-index: 1055 !important;
+    }
+
+    /* Ensure parent containers don't clip dropdowns */
+    .card-body,
+    .mobile-payment-card {
+        overflow: visible !important;
+    }
+
+    /* Enhanced mobile dropdown positioning */
+    .mobile-payment-dropdown {
+        position: fixed !important;
+        z-index: 1055 !important;
+        min-width: 200px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Compact filter layout on mobile */
+    .btn-group .btn {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .form-select-sm,
+    .input-group-sm .form-control {
+        font-size: 0.875rem;
+    }
+    
+    /* Fix mobile dropdown positioning */
+    .mobile-payment-dropdown {
+        width: 180px;
+        min-width: 180px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .row.g-3 {
+        --bs-gutter-x: 0.75rem;
+        --bs-gutter-y: 0.75rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.2rem 0.3rem;
+        font-size: 0.7rem;
+    }
+    
+    .form-text {
+        font-size: 0.7rem;
+    }
+    
+    /* Mobile dropdown improvements for small screens */
+    .mobile-payment-dropdown {
+        width: 160px;
+        min-width: 160px;
+        font-size: 0.8rem;
+    }
+    
+    .mobile-payment-dropdown .dropdown-item {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+    
+    .btn,
+    .dropdown,
+    .chart-container,
+    .chart-container-small,
+    .chart-container-medium,
+    .chart-container-mini,
+    .chart-container-revenue,
+    .chart-container-distribution {
+        display: none !important;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+}
+
+/* Loading States */
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.65;
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+    
+    .badge {
+        border: 1px solid #000;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .btn,
+    .mobile-payment-card {
+        transition: none;
+    }
+    
+    .fade-in {
+        animation: none;
+    }
+}

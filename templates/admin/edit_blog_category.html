@@ -1,5 +1,7 @@
 {% extends 'admin/base.html' %}
-
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/admin/edit-blog-category.css") }}">
+{% endblock %}
 {% block title %}Edit Blog Category - Admin Dashboard{% endblock %}
 
 {% block content %}
@@ -60,14 +62,5 @@
     </div>
 </div>
 
-<style>
-    .card {
-        border-radius: 12px;
-    }
 
-    .form-control:focus {
-        border-color: #4895ef;
-        box-shadow: 0 0 0 0.2rem rgba(72, 149, 239, 0.25);
-    }
-</style>
 {% endblock %}

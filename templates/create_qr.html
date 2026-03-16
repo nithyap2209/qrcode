@@ -4,1086 +4,7 @@
 {% block title %}Create QR Code - QR Dada{% endblock %}
 
 {% block head %}
-<style>
-/* Glassmorphic UI styles matching dashboard aesthetic */
-    body {
-        background-color: #f8fafc;
-    }
-    
-    .formal-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 1rem;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        transition: all 0.3s ease;
-    }
-    
-    .formal-card:hover {
-        box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.06);
-        transform: translateY(-2px);
-    }
-    
-    /* Glass morphism for all cards */
-    .glass {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
-    
-    .formal-button {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        color: white;
-        border: none;
-        transition: all 0.3s ease;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    .formal-button:hover {
-        background: linear-gradient(45deg, #6d28d9, #4338ca);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.05);
-    }
-    
-    .section-header {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #1f2937;
-        border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 0.75rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #4b5563;
-        margin-bottom: 0.5rem;
-    }
-    
-    .form-input {
-        border: 1px solid #d1d5db;
-        background-color: #ffffff;
-        font-size: 0.875rem;
-        padding: 0.625rem 0.875rem;
-        transition: all 0.2s ease;
-        border-radius: 0.5rem;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-    
-    .form-input:focus {
-        border-color: #8b5cf6;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-        background-color: #fafafa;
-    }
-    
-    .qr-type-option {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 2px solid #e5e7eb;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    }
-    
-    .qr-type-option:hover {
-        border-color: #8b5cf6;
-        box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1), 0 4px 6px -2px rgba(139, 92, 246, 0.05);
-        transform: translateY(-3px);
-        background: rgba(237, 233, 254, 0.3);
-    }
-    
-    .qr-type-option.active {
-        border-color: #7c3aed;
-        background: linear-gradient(to bottom right, rgba(139, 92, 246, 0.1), rgba(79, 70, 229, 0.05));
-        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.15), 0 4px 6px -2px rgba(124, 58, 237, 0.08);
-    }
-    
-    .tab-button {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #6b7280;
-        padding: 0.75rem 1rem;
-        border-bottom: 3px solid transparent;
-        transition: all 0.2s ease;
-    }
-    
-    .tab-button:hover {
-        color: #8b5cf6;
-        background-color: rgba(237, 233, 254, 0.1);
-    }
-    
-    .tab-button.active {
-        color: #7c3aed;
-        border-bottom-color: #7c3aed;
-        background-color: rgba(237, 233, 254, 0.05);
-    }
-    
-    .template-card {
-        border: 2px solid #e5e7eb;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    .template-card:hover {
-        border-color: #8b5cf6;
-        box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.15), 0 10px 10px -5px rgba(139, 92, 246, 0.04);
-        transform: translateY(-5px);
-        background: linear-gradient(to bottom right, rgba(237, 233, 254, 0.5), rgba(255, 255, 255, 0.95));
-    }
-    
-    .template-card.selected {
-        border-color: #7c3aed;
-        background: linear-gradient(to bottom right, rgba(139, 92, 246, 0.15), rgba(79, 70, 229, 0.05));
-        box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.15), 0 10px 10px -5px rgba(124, 58, 237, 0.04);
-    }
-    
-    /* Enhanced template preview backgrounds */
-    .template-preview {
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-    }
-    
-    .template-card:hover .template-preview {
-        transform: scale(1.05);
-    }
-    
-    /* Color preview with modern styling */
-    .color-preview {
-        width: 32px;
-        height: 32px;
-        border: 2px solid #e5e7eb;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border-radius: 0.5rem;
-        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-    }
-    
-    .color-preview:hover {
-        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1), inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-        transform: scale(1.1);
-        border-color: #8b5cf6;
-    }
-    
-    /* Modern accordion styling */
-    .accordion-header {
-        background: linear-gradient(to right, rgba(249, 250, 251, 0.95), rgba(243, 244, 246, 0.95));
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid #e5e7eb;
-        font-weight: 500;
-        color: #374151;
-        transition: all 0.3s ease;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    }
-    
-    .accordion-header:hover {
-        background: linear-gradient(to right, rgba(237, 233, 254, 0.95), rgba(233, 229, 254, 0.95));
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    /* Modern shape options */
-    .shape-option label {
-        border: 2px solid #e5e7eb;
-        background: rgba(255, 255, 255, 0.95);
-        transition: all 0.3s ease;
-        padding: 0.625rem 1rem;
-        font-size: 0.875rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    }
-    
-    .shape-option input:checked + label {
-        border-color: #7c3aed;
-        background: linear-gradient(to right, rgba(237, 233, 254, 0.95), rgba(233, 229, 254, 0.95));
-        box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.1), 0 2px 4px -1px rgba(124, 58, 237, 0.06);
-        transform: translateY(-2px);
-    }
-    
-    .shape-option label:hover {
-        border-color: #a78bfa;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        background: rgba(249, 250, 251, 0.95);
-    }
-    
-    /* Modern range slider */
-    input[type="range"] {
-        -webkit-appearance: none;
-        appearance: none;
-        height: 6px;
-        background: linear-gradient(to right, #e5e7eb, #d1d5db);
-        border-radius: 9999px;
-        outline: none;
-        transition: all 0.3s ease;
-    }
-    
-    input[type="range"]:hover {
-        background: linear-gradient(to right, #ddd6fe, #c4b5fd);
-    }
-    
-    input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: linear-gradient(45deg, #8b5cf6, #7c3aed);
-        cursor: pointer;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        transition: all 0.2s ease;
-        border: 2px solid white;
-    }
-    
-    input[type="range"]::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.05);
-    }
-    
-    /* Modern color picker popup */
-    .color-picker-popup {
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 1rem;
-        animation: slideIn 0.2s ease forwards;
-    }
-    
-    .color-preset {
-        border: 2px solid #e5e7eb;
-        transition: all 0.2s ease;
-        border-radius: 0.375rem;
-    }
-    
-    .color-preset:hover {
-        transform: scale(1.15);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        border-color: #8b5cf6;
-    }
-    
-    /* Preview section styling matching dashboard cards */
-    .qr-preview {
-        background: rgba(255, 255, 255, 0.5);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 2rem;
-        border-radius: 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-    
-    .qr-preview:hover {
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        transform: translateY(-2px);
-    }
-    
-    /* Modern toggle switch */
-    .toggle-checkbox:checked {
-        right: 0;
-        border-color: #7c3aed;
-    }
-    
-    .toggle-checkbox:checked + .toggle-label {
-        background-color: #7c3aed;
-    }
-    
-    /* Help text styling */
-    .help-text {
-        font-size: 0.8125rem;
-        color: #6b7280;
-        line-height: 1.4;
-    }
-    
-    /* Error message styling */
-    .error-text {
-        font-size: 0.8125rem;
-        color: #ef4444;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
-    
-    /* Badge styling matching dashboard */
-    .badge {
-        background-color: #f3f4f6;
-        color: #4b5563;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
-    
-    .badge.primary {
-        background-color: #ede9fe;
-        color: #7c3aed;
-    }
-
-    /* Add this CSS to improve the modal without blocking scroll */
-
-    .validation-modal {
-        position: fixed; 
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh; /* Changed from 100% to 100vh */
-        /* background-color: rgba(0, 0, 0, 0.6); Slightly darker backdrop */
-        display: flex; 
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-        padding: 1rem;
-        overflow-y: auto; /* Allow modal itself to scroll if needed */
-        /* backdrop-filter: blur(2px); Add subtle blur effect */
-        /* -webkit-backdrop-filter: blur(2px); */
-    }
-
-    .validation-modal.show {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .validation-modal-content {
-        background: rgba(255, 255, 255, 0.98); 
-        /* backdrop-filter: blur(10px); */
-        /* -webkit-backdrop-filter: blur(10px); */
-        border-radius: 1.5rem;
-        padding: 1.5rem;
-        max-width: 500px;
-        width: 90%;
-        max-height: 90vh; /* Prevent modal from being too tall */
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* Enhanced shadow */
-        transform: scale(0.9) translateY(-20px);
-        transition: all 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        overflow-y: auto;
-        margin: auto;
-        position: relative; /* Ensure proper positioning */
-    }
-
-    .validation-modal.show .validation-modal-content {
-        transform: scale(1) translateY(0);
-    }
-
-    /* Ensure modal content is always visible and accessible */
-    .validation-modal-content:focus-within {
-        outline: none;
-    }
-
-    /* Add smooth transitions for better UX */
-    .validation-modal-btn {
-        transition: all 0.2s ease;
-    }
-
-    .validation-modal-btn:hover {
-        transform: translateY(-1px);
-    }
-
-    .validation-modal-btn:active {
-        transform: translateY(0);
-    }
-    .validation-modal-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
-    .validation-modal-icon {
-        width: 3rem;
-        height: 3rem;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        font-size: 1.5rem;
-    }
-
-    .validation-modal-icon.error {
-        background-color: #fee2e2;
-        color: #dc2626;
-    }
-
-    .validation-modal-icon.warning {
-        background-color: #fef3c7;
-        color: #d97706;
-    }
-
-    .validation-modal-icon.subscription {
-        background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-        color: #7c3aed;
-    }
-
-    .validation-modal-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin: 0;
-    }
-
-    .validation-modal-body {
-        color: #6b7280;
-        margin-bottom: 1.5rem;
-        line-height: 1.6;
-    }
-
-    .validation-modal-actions {
-        display: flex;
-        gap: 0.75rem;
-        justify-content: flex-end;
-    }
-
-    .validation-modal-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: none;
-        font-size: 0.875rem;
-    }
-
-    .validation-modal-btn.primary {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        color: white;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    .validation-modal-btn.primary:hover {
-        background: linear-gradient(45deg, #6d28d9, #4338ca);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.05);
-    }
-
-    .validation-modal-btn.secondary {
-        background-color: #f3f4f6;
-        color: #374151;
-        border: 1px solid #e5e7eb;
-    }
-
-    .validation-modal-btn.secondary:hover {
-        background-color: #e5e7eb;
-        transform: translateY(-1px);
-    }
-
-    /* Form validation styles */
-    .form-field-error {
-        border-color: #ef4444 !important;
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
-        background-color: #fef2f2 !important;
-    }
-
-    .field-error-message {
-        color: #dc2626;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .field-error-message i {
-        margin-right: 0.25rem;
-    }
-
-    /* Upgrade prompt styling */
-    .upgrade-prompt {
-        background: linear-gradient(135deg, #7c3aed, #4f46e5);
-        color: white;
-        padding: 1rem;
-        border-radius: 0.75rem;
-        margin-top: 0.75rem;
-        animation: slideIn 0.3s ease forwards;
-    }
-
-    .upgrade-btn {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        text-decoration: none;
-        display: inline-block;
-        margin-top: 0.5rem;
-        transition: all 0.2s ease;
-        font-size: 0.875rem;
-    }
-
-    .upgrade-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        color: white;
-        text-decoration: none;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    /* Dynamic QR disabled state */
-    .dynamic-qr-disabled {
-        opacity: 0.7;
-        position: relative;
-    }
-
-    .dynamic-qr-disabled::after {
-        content: '🔒';
-        position: absolute;
-        right: -25px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 14px;
-    }
-    
-    /* Animation keyframes */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Add animation classes */
-    .animate-fade-in {
-        animation: fadeIn 0.5s ease forwards;
-    }
-    
-    /* Floating animation for certain elements */
-    @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-    
-    .animate-float {
-        animation: float 6s ease-in-out infinite;
-    }
-    
-    /* Pulse animation */
-    @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: .5;
-        }
-    }
-    
-    .animate-pulse {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    
-    /* Loading overlay for preview */
-    .preview-loading {
-        position: absolute;
-        inset: 0;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(2px);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border-radius: 1rem;
-    }
-    
-    /* Enhanced focus states */
-    .form-input:focus,
-    .shape-option input:focus + label,
-    button:focus,
-    a:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-    }
-    
-    /* Smooth transitions for all interactive elements */
-    .form-input,
-    .shape-option label,
-    .template-card,
-    .qr-type-option,
-    .tab-button,
-    .accordion-header,
-    button,
-    a {
-        transition: all 0.3s ease;
-    }
-    
-    /* QR History Panel styling */
-    .qr-history-panel {
-        border-radius: 0.5rem;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #e5e7eb transparent;
-    }
-    
-    .qr-history-panel::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .qr-history-panel::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    
-    .qr-history-panel::-webkit-scrollbar-thumb {
-        background-color: #e5e7eb;
-        border-radius: 3px;
-    }
-    
-    .qr-history-panel::-webkit-scrollbar-thumb:hover {
-        background-color: #d1d5db;
-    }
-    
-    /* Gradient background preview */
-    .gradient-preview {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .gradient-preview::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
-        animation: shimmer 2s infinite;
-    }
-    
-    @keyframes shimmer {
-        0% {
-            transform: translateX(-100%);
-        }
-        100% {
-            transform: translateX(100%);
-        }
-    }
-    
-    /* Feature box enhancement */
-    .feature-box {
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-        border: 1px solid #e5e7eb;
-        background: rgba(255, 255, 255, 0.8);
-    }
-    
-    .feature-box:hover {
-        border-color: #ddd6fe;
-        box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.1), 0 10px 10px -5px rgba(139, 92, 246, 0.04);
-        transform: translateY(-2px);
-        background: rgba(237, 233, 254, 0.1);
-    }
-    
-    /* Icon containers matching dashboard style */
-    .feature-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 3rem;
-        height: 3rem;
-        border-radius: 9999px;
-        font-size: 1.25rem;
-        background: linear-gradient(45deg, #8b5cf6, #7c3aed);
-        color: white;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    /* Progress bar matching dashboard */
-    .progress {
-        height: 0.5rem;
-        width: 100%;
-        background-color: #e5e7eb;
-        border-radius: 9999px;
-        overflow: hidden;
-    }
-    
-    .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #8b5cf6, #7c3aed);
-        border-radius: 9999px;
-        transition: width 0.5s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .progress-bar::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-        animation: shimmer 2s infinite;
-    }
-
-    /* ========== MOBILE RESPONSIVE STYLES ========== */
-
-    /* Small devices (phones, 576px and below) */
-    @media (max-width: 576px) {
-        /* Page header adjustments */
-        .max-w-7xl {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        .mb-8.border-b h1 {
-            font-size: 1.5rem;
-        }
-
-        .mb-8.border-b p {
-            font-size: 0.875rem;
-        }
-
-        /* Card padding reduction */
-        .formal-card {
-            padding: 1rem;
-            border-radius: 0.75rem;
-        }
-
-        .formal-card.p-6 {
-            padding: 1rem !important;
-        }
-
-        /* Section headers */
-        .section-header {
-            font-size: 1rem;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        /* QR Type Grid - 3 columns on mobile */
-        .grid.grid-cols-3.md\\:grid-cols-4.lg\\:grid-cols-5 {
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 0.5rem !important;
-        }
-
-        .qr-type-option {
-            padding: 0.75rem 0.5rem !important;
-        }
-
-        .qr-type-option i {
-            font-size: 1.25rem !important;
-            margin-bottom: 0.25rem !important;
-        }
-
-        .qr-type-option .text-sm {
-            font-size: 0.7rem !important;
-        }
-
-        /* Form inputs */
-        .form-input {
-            font-size: 16px !important; /* Prevents zoom on iOS */
-            padding: 0.75rem !important;
-        }
-
-        .form-label {
-            font-size: 0.8rem;
-        }
-
-        .help-text {
-            font-size: 0.75rem;
-        }
-
-        /* Tab buttons */
-        .tab-button {
-            font-size: 0.75rem;
-            padding: 0.5rem 0.75rem;
-        }
-
-        /* Template cards grid */
-        .grid.grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4 {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 0.5rem !important;
-        }
-
-        .template-card {
-            padding: 0.5rem;
-        }
-
-        .template-card .text-xs {
-            font-size: 0.65rem !important;
-        }
-
-        /* Shape options */
-        .shape-option label {
-            padding: 0.5rem 0.75rem !important;
-            font-size: 0.75rem !important;
-        }
-
-        /* Color pickers */
-        .color-preview {
-            width: 28px;
-            height: 28px;
-        }
-
-        /* Buttons */
-        .formal-button {
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-            width: 100%;
-        }
-
-        /* Preview section */
-        .qr-preview {
-            padding: 1rem;
-        }
-
-        /* Accordion */
-        .accordion-header {
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-        }
-
-        /* Modal adjustments */
-        .validation-modal-content {
-            padding: 1rem;
-            width: 95%;
-            max-height: 85vh;
-        }
-
-        .validation-modal-title {
-            font-size: 1rem;
-        }
-
-        .validation-modal-body {
-            font-size: 0.875rem;
-        }
-
-        .validation-modal-btn {
-            padding: 0.625rem 1rem;
-            font-size: 0.8rem;
-        }
-
-        .validation-modal-actions {
-            flex-direction: column;
-        }
-
-        .validation-modal-actions button {
-            width: 100%;
-        }
-
-        /* Badge */
-        .badge {
-            font-size: 0.65rem;
-            padding: 0.2rem 0.5rem;
-        }
-
-        /* Range slider thumb */
-        input[type="range"]::-webkit-slider-thumb {
-            width: 24px;
-            height: 24px;
-        }
-
-        /* Grid layout override for main container */
-        .grid.grid-cols-1.lg\\:grid-cols-3 {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .lg\\:col-span-2 {
-            order: 1;
-        }
-
-        /* Sticky preview on mobile - moves to bottom */
-        .lg\\:sticky {
-            position: relative !important;
-            top: auto !important;
-            order: 2;
-            margin-top: 1.5rem;
-        }
-
-        /* Feature boxes */
-        .feature-box {
-            padding: 1rem;
-        }
-
-        .feature-icon {
-            width: 2.5rem;
-            height: 2.5rem;
-            font-size: 1rem;
-        }
-
-        /* Input groups with icons */
-        .flex > span.inline-flex {
-            padding-left: 0.75rem;
-            padding-right: 0.75rem;
-        }
-
-        /* Color picker popup */
-        .color-picker-popup {
-            width: calc(100vw - 2rem) !important;
-            max-width: 320px;
-            left: 50% !important;
-            transform: translateX(-50%);
-        }
-
-        .color-preset {
-            width: 28px;
-            height: 28px;
-        }
-    }
-
-    /* Medium devices (tablets, 577px to 768px) */
-    @media (min-width: 577px) and (max-width: 768px) {
-        .formal-card.p-6 {
-            padding: 1.25rem !important;
-        }
-
-        .section-header {
-            font-size: 1.05rem;
-        }
-
-        /* QR Type Grid */
-        .grid.grid-cols-3.md\\:grid-cols-4.lg\\:grid-cols-5 {
-            grid-template-columns: repeat(4, 1fr) !important;
-        }
-
-        .qr-type-option {
-            padding: 0.875rem !important;
-        }
-
-        /* Template cards */
-        .grid.grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4 {
-            grid-template-columns: repeat(3, 1fr) !important;
-        }
-
-        /* Main grid layout */
-        .grid.grid-cols-1.lg\\:grid-cols-3 {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .lg\\:sticky {
-            position: relative !important;
-            top: auto !important;
-        }
-    }
-
-    /* Landscape mode on phones */
-    @media (max-width: 896px) and (orientation: landscape) {
-        .validation-modal-content {
-            max-height: 95vh;
-            padding: 1rem;
-        }
-
-        .lg\\:sticky {
-            position: relative !important;
-        }
-    }
-
-    /* Touch-friendly improvements */
-    @media (hover: none) and (pointer: coarse) {
-        .qr-type-option:hover,
-        .template-card:hover,
-        .formal-card:hover {
-            transform: none;
-        }
-
-        .qr-type-option:active,
-        .template-card:active {
-            transform: scale(0.98);
-        }
-
-        .formal-button:active {
-            transform: translateY(1px);
-        }
-
-        /* Larger touch targets */
-        .qr-type-option {
-            min-height: 70px;
-        }
-
-        input[type="checkbox"],
-        input[type="radio"] {
-            min-width: 20px;
-            min-height: 20px;
-        }
-    }
-
-    /* Safe area insets for notched devices */
-    @supports (padding: max(0px)) {
-        .max-w-7xl {
-            padding-left: max(1rem, env(safe-area-inset-left));
-            padding-right: max(1rem, env(safe-area-inset-right));
-        }
-
-        .validation-modal {
-            padding-bottom: max(1rem, env(safe-area-inset-bottom));
-        }
-    }
-
-    /* High DPI screens */
-    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-        .formal-card,
-        .template-card,
-        .qr-type-option {
-            border-width: 0.5px;
-        }
-    }
-
-    /* Reduce motion for accessibility */
-    @media (prefers-reduced-motion: reduce) {
-        .formal-card,
-        .template-card,
-        .qr-type-option,
-        .formal-button,
-        .animate-float,
-        .animate-pulse,
-        .animate-fade-in {
-            animation: none !important;
-            transition: none !important;
-        }
-
-        .progress-bar::after {
-            animation: none;
-        }
-    }
-
-    /* Dark mode support (optional, follows system preference) */
-    @media (prefers-color-scheme: dark) {
-        /* Uncomment below if dark mode is desired */
-        /*
-        body {
-            background-color: #1a1a2e;
-        }
-
-        .formal-card {
-            background: rgba(30, 30, 50, 0.9);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-        */
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for("static", filename="css/create-qr.css") }}">
 {% endblock %}
 
 {% block content %}
@@ -1205,6 +126,12 @@
                             <i class="fas fa-calendar-alt text-gray-600 text-xl mb-2"></i>
                             <div class="text-sm font-medium text-gray-700">Event</div>
                             <input type="radio" name="qr_type" value="event" class="hidden">
+                        </div>
+
+                        <div class="qr-type-option p-4 text-center" data-type="image" tabindex="0" role="radio" aria-checked="false">
+                            <i class="fas fa-image text-gray-600 text-xl mb-2"></i>
+                            <div class="text-sm font-medium text-gray-700">Image</div>
+                            <input type="radio" name="qr_type" value="image" class="hidden">
                         </div>
                     </div>
                 </div>
@@ -1621,10 +548,82 @@
                                 <label for="organizer" class="form-label block">Organizer</label>
                                 <input type="text" class="form-input w-full" id="organizer" name="organizer" placeholder="Event organizer">
                             </div>
-                        </div>  
+                        </div>
+
+                        <!-- Image Content Fields (hidden by default) -->
+                        <div class="qr-type-content hidden" id="image-content">
+                            <div class="mb-6">
+                                <label for="qr-image-file" class="form-label block">Upload Image <span class="text-red-500">*</span></label>
+                                <input type="file" class="form-input w-full" id="qr-image-file" name="qr_image_file" accept="image/*" required>
+                                <p class="help-text mt-1">Supported formats: JPG, PNG, GIF, WebP (Max 5MB)</p>
+                            </div>
+                            <div class="mb-6" id="image-preview-container" style="display: none;">
+                                <label class="form-label block">Preview</label>
+                                <div class="rounded-lg p-4" id="image-preview-bg" style="background: linear-gradient(to bottom, #0a0a0a, #1a1a2e);">
+                                    <img id="image-preview" src="" alt="Image preview" class="max-w-full max-h-64 mx-auto rounded" style="box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label for="image-caption" class="form-label block">Caption</label>
+                                <input type="text" class="form-input w-full" id="image-caption" name="image_caption" placeholder="Optional caption for your image">
+                                <p class="help-text mt-1">A short description that will be shown with the image</p>
+                            </div>
+
+                            <!-- Background Gradient for Image Display -->
+                            <div class="mb-6">
+                                <label class="form-label block mb-3">Display Background Gradient</label>
+                                <p class="help-text mb-3">Choose the background gradient that will show when someone scans this QR code</p>
+
+                                <!-- Preset gradient options -->
+                                <div class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-4" id="gradient-presets">
+                                    <div class="gradient-preset active" data-c1="#0a0a0a" data-c2="#1a1a2e" data-dir="to bottom" title="Dark Blue" style="background: linear-gradient(to bottom, #0a0a0a, #1a1a2e);"></div>
+                                    <div class="gradient-preset" data-c1="#1a1a2e" data-c2="#16213e" data-dir="to bottom" title="Deep Navy" style="background: linear-gradient(to bottom, #1a1a2e, #16213e);"></div>
+                                    <div class="gradient-preset" data-c1="#0f0c29" data-c2="#302b63" data-dir="to bottom" title="Purple Night" style="background: linear-gradient(to bottom, #0f0c29, #302b63);"></div>
+                                    <div class="gradient-preset" data-c1="#232526" data-c2="#414345" data-dir="to bottom" title="Charcoal" style="background: linear-gradient(to bottom, #232526, #414345);"></div>
+                                    <div class="gradient-preset" data-c1="#0f2027" data-c2="#2c5364" data-dir="to bottom" title="Dark Teal" style="background: linear-gradient(to bottom, #0f2027, #2c5364);"></div>
+                                    <div class="gradient-preset" data-c1="#200122" data-c2="#6f0000" data-dir="to bottom" title="Dark Red" style="background: linear-gradient(to bottom, #200122, #6f0000);"></div>
+                                    <div class="gradient-preset" data-c1="#f5f7fa" data-c2="#c3cfe2" data-dir="to bottom" title="Light Cloud" style="background: linear-gradient(to bottom, #f5f7fa, #c3cfe2);"></div>
+                                    <div class="gradient-preset" data-c1="#fdfcfb" data-c2="#e2d1c3" data-dir="to bottom" title="Warm Light" style="background: linear-gradient(to bottom, #fdfcfb, #e2d1c3);"></div>
+                                    <div class="gradient-preset" data-c1="#667eea" data-c2="#764ba2" data-dir="135deg" title="Violet" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                                    <div class="gradient-preset" data-c1="#fc466b" data-c2="#3f5efb" data-dir="135deg" title="Sunset" style="background: linear-gradient(135deg, #fc466b, #3f5efb);"></div>
+                                    <div class="gradient-preset" data-c1="#11998e" data-c2="#38ef7d" data-dir="135deg" title="Green" style="background: linear-gradient(135deg, #11998e, #38ef7d);"></div>
+                                    <div class="gradient-preset" data-c1="#ee9ca7" data-c2="#ffdde1" data-dir="135deg" title="Pink" style="background: linear-gradient(135deg, #ee9ca7, #ffdde1);"></div>
+                                </div>
+
+                                <!-- Custom color pickers -->
+                                <div class="grid grid-cols-2 gap-4 mb-3">
+                                    <div>
+                                        <label class="text-xs text-gray-500 mb-1 block">Color 1</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="img-bg-color1" name="img_bg_color_1" value="#0a0a0a" class="w-10 h-10 border border-gray-300 rounded cursor-pointer p-0">
+                                            <input type="text" id="img-bg-color1-text" value="#0a0a0a" class="form-input flex-1 text-xs" maxlength="7">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 mb-1 block">Color 2</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="img-bg-color2" name="img_bg_color_2" value="#1a1a2e" class="w-10 h-10 border border-gray-300 rounded cursor-pointer p-0">
+                                            <input type="text" id="img-bg-color2-text" value="#1a1a2e" class="form-input flex-1 text-xs" maxlength="7">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Direction selector -->
+                                <div>
+                                    <label class="text-xs text-gray-500 mb-1 block">Direction</label>
+                                    <select id="img-bg-direction" name="img_bg_direction" class="form-input w-full text-sm">
+                                        <option value="to bottom">Top to Bottom</option>
+                                        <option value="to right">Left to Right</option>
+                                        <option value="to bottom right">Diagonal</option>
+                                        <option value="135deg">135 Degrees</option>
+                                        <option value="to top">Bottom to Top</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
+
                 <!-- Step 3: QR Code Styling -->
                 <div class="formal-card p-6 mb-6">
                     <h2 class="section-header">
@@ -4005,6 +3004,85 @@
         }
     }
 
+    // Setup image preview and gradient controls for Image QR type
+    function setupImagePreview() {
+        const imageInput = document.getElementById('qr-image-file');
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewImg = document.getElementById('image-preview');
+        const previewBg = document.getElementById('image-preview-bg');
+        const color1Input = document.getElementById('img-bg-color1');
+        const color1Text = document.getElementById('img-bg-color1-text');
+        const color2Input = document.getElementById('img-bg-color2');
+        const color2Text = document.getElementById('img-bg-color2-text');
+        const directionSelect = document.getElementById('img-bg-direction');
+
+        function updatePreviewBg() {
+            if (!previewBg) return;
+            var c1 = color1Input ? color1Input.value : '#0a0a0a';
+            var c2 = color2Input ? color2Input.value : '#1a1a2e';
+            var dir = directionSelect ? directionSelect.value : 'to bottom';
+            previewBg.style.background = 'linear-gradient(' + dir + ', ' + c1 + ', ' + c2 + ')';
+        }
+
+        if (imageInput && previewContainer && previewImg) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size must be less than 5MB');
+                        imageInput.value = '';
+                        previewContainer.style.display = 'none';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        previewImg.src = ev.target.result;
+                        previewContainer.style.display = 'block';
+                        updatePreviewBg();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.style.display = 'none';
+                }
+            });
+        }
+
+        // Gradient preset clicks
+        document.querySelectorAll('.gradient-preset').forEach(function(preset) {
+            preset.addEventListener('click', function() {
+                document.querySelectorAll('.gradient-preset').forEach(function(p) { p.classList.remove('active'); });
+                this.classList.add('active');
+                var c1 = this.getAttribute('data-c1');
+                var c2 = this.getAttribute('data-c2');
+                var dir = this.getAttribute('data-dir');
+                if (color1Input) { color1Input.value = c1; color1Text.value = c1; }
+                if (color2Input) { color2Input.value = c2; color2Text.value = c2; }
+                if (directionSelect) {
+                    for (var i = 0; i < directionSelect.options.length; i++) {
+                        if (directionSelect.options[i].value === dir) {
+                            directionSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                updatePreviewBg();
+            });
+        });
+
+        // Sync color pickers with text inputs
+        if (color1Input && color1Text) {
+            color1Input.addEventListener('input', function() { color1Text.value = this.value; updatePreviewBg(); });
+            color1Text.addEventListener('input', function() { if (/^#[0-9a-fA-F]{6}$/.test(this.value)) { color1Input.value = this.value; updatePreviewBg(); } });
+        }
+        if (color2Input && color2Text) {
+            color2Input.addEventListener('input', function() { color2Text.value = this.value; updatePreviewBg(); });
+            color2Text.addEventListener('input', function() { if (/^#[0-9a-fA-F]{6}$/.test(this.value)) { color2Input.value = this.value; updatePreviewBg(); } });
+        }
+        if (directionSelect) {
+            directionSelect.addEventListener('change', updatePreviewBg);
+        }
+    }
+
     // Enhanced template application function
     function enhancedApplyTemplateStyles(template) {
         if (!template) return;
@@ -4238,6 +3316,7 @@
         setupGradientOptions();
         setupFrameText();
         setupPasswordToggle();
+        setupImagePreview();
         setupFormValidation();
         setupFormChangeDetection();
         setupSliders();

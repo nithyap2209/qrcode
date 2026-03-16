@@ -1,0 +1,170 @@
+{% extends 'base2.html' %}
+{% block title %}QR Code for Image - Share Images via QR Code | QR Dada{% endblock %}
+{% block content %}
+<section class="bg-gradient-to-br from-primary-50 to-secondary-50 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-block p-4 bg-white rounded-full shadow-lg mb-6">
+            <i class="fas fa-image text-5xl text-secondary-600"></i>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">QR Code for Images</h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            With QR Dada, you can create a QR Code for an Image that displays your photo or graphic instantly when scanned. Upload any image and share it with anyone through a simple QR code scan. Perfect for portfolios, product images, menus, and more.
+        </p>
+        <a href="{{ url_for('create_qr') }}" class="bg-secondary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-secondary-700 transition-colors shadow-lg inline-block">
+            Create Image QR Code
+        </a>
+    </div>
+</section>
+
+<!-- What is Image QR Code Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">What is an Image QR Code?</h2>
+                <p class="text-lg text-gray-600 mb-4">
+                    An Image QR Code links directly to an uploaded image. When someone scans it, the image is displayed on their device instantly. No apps needed, no extra steps. Just scan and view.
+                </p>
+                <p class="text-lg text-gray-600 mb-4">
+                    This is ideal for sharing product photos, restaurant menus, event posters, artwork, or any visual content without printing or emailing large files.
+                </p>
+                <div class="bg-secondary-50 border-l-4 border-secondary-600 p-4 mt-6">
+                    <p class="text-sm text-gray-700">
+                        <i class="fas fa-lightbulb text-secondary-600 mr-2"></i>
+                        <strong>Pro Tip:</strong> Use high-quality images for the best viewing experience. Supported formats include JPG, PNG, GIF, and WebP.
+                    </p>
+                </div>
+            </div>
+            <div class="bg-gray-100 rounded-lg p-8 text-center">
+                <div class="mx-auto mb-4 w-64 h-64 bg-white rounded-lg shadow-inner flex items-center justify-center">
+                    <i class="fas fa-image text-8xl text-gray-300"></i>
+                </div>
+                <p class="text-sm text-gray-600">Example: Image QR Code</p>
+            </div>
+        </div>
+
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">Ideal For</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow">
+                <i class="fas fa-utensils text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Restaurants & Cafes</h3>
+                <p class="text-gray-600">Share your menu as an image QR code. Customers scan and instantly see your offerings without touching a physical menu.</p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow">
+                <i class="fas fa-palette text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Artists & Designers</h3>
+                <p class="text-gray-600">Showcase your portfolio or artwork. Attach a QR code to your business card and let people view your work instantly.</p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg hover:shadow-lg transition-shadow">
+                <i class="fas fa-store text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Product Showcases</h3>
+                <p class="text-gray-600">Display product images, size charts, or instruction diagrams through a simple QR code scan on your packaging.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How to Create Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">How to Create an Image QR Code</h2>
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-secondary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
+                <h3 class="font-semibold mb-2">Select Image Type</h3>
+                <p class="text-gray-600 text-sm">Choose "Image" from the QR code type options</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-secondary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
+                <h3 class="font-semibold mb-2">Upload Your Image</h3>
+                <p class="text-gray-600 text-sm">Upload a JPG, PNG, GIF, or WebP image (up to 5MB)</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-secondary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
+                <h3 class="font-semibold mb-2">Customize Design</h3>
+                <p class="text-gray-600 text-sm">Style your QR code with colors, shapes, and frames</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-secondary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">4</div>
+                <h3 class="font-semibold mb-2">Download & Share</h3>
+                <p class="text-gray-600 text-sm">Download your QR code and share it anywhere</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">Benefits of Image QR Codes</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center p-6">
+                <i class="fas fa-bolt text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">Instant Viewing</h3>
+                <p class="text-gray-600">Images load immediately when scanned. No downloads or app installations required.</p>
+            </div>
+            <div class="text-center p-6">
+                <i class="fas fa-sync-alt text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">Updatable Content</h3>
+                <p class="text-gray-600">With dynamic QR codes, update the image anytime without reprinting the QR code.</p>
+            </div>
+            <div class="text-center p-6">
+                <i class="fas fa-chart-bar text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">Scan Analytics</h3>
+                <p class="text-gray-600">Track how many times your image QR code has been scanned with detailed analytics.</p>
+            </div>
+            <div class="text-center p-6">
+                <i class="fas fa-download text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">Downloadable</h3>
+                <p class="text-gray-600">Viewers can easily download the shared image directly to their device.</p>
+            </div>
+            <div class="text-center p-6">
+                <i class="fas fa-mobile-alt text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">Mobile Friendly</h3>
+                <p class="text-gray-600">Images are displayed responsively, looking great on any device screen size.</p>
+            </div>
+            <div class="text-center p-6">
+                <i class="fas fa-share-alt text-3xl text-secondary-600 mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">Easy Sharing</h3>
+                <p class="text-gray-600">Viewers can share the image link with others using built-in share functionality.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">Frequently Asked Questions</h2>
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="font-semibold text-lg mb-2">What image formats are supported?</h3>
+                <p class="text-gray-600">We support JPG, PNG, GIF, and WebP formats with a maximum file size of 5MB.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="font-semibold text-lg mb-2">Can I update the image after creating the QR code?</h3>
+                <p class="text-gray-600">Yes! If you create a dynamic QR code, you can replace the image anytime without changing the QR code itself.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="font-semibold text-lg mb-2">Do viewers need an app to see the image?</h3>
+                <p class="text-gray-600">No. The image opens directly in the viewer's web browser. No special app is needed.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="font-semibold text-lg mb-2">Is a subscription required for Image QR codes?</h3>
+                <p class="text-gray-600">Yes, Image QR codes require an active subscription plan. Check our pricing page for available plans.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-16 bg-gradient-to-br from-secondary-600 to-primary-700">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-white mb-6">Ready to Share Images via QR Code?</h2>
+        <p class="text-xl text-white/80 mb-8">Create your Image QR code in seconds with QR Dada.</p>
+        <a href="{{ url_for('create_qr') }}" class="bg-white text-secondary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg inline-block">
+            Get Started Now
+        </a>
+    </div>
+</section>
+{% endblock %}

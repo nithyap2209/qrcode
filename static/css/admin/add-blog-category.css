@@ -1,0 +1,50 @@
+
+.card {
+    border-radius: 12px;
+}
+
+.form-control:focus {
+    border-color: #4895ef;
+    box-shadow: 0 0 0 0.2rem rgba(72, 149, 239, 0.25);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 767.98px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch !important;
+    }
+
+    .card-header .btn {
+        width: 100%;
+    }
+
+    .card-header h5 {
+        font-size: 1.1rem;
+    }
+
+    .card-body {
+        padding: 1rem !important;
+    }
+
+    .d-flex.gap-2 {
+        flex-direction: column;
+    }
+
+    .d-flex.gap-2 .btn,
+    .d-flex.gap-2 a.btn {
+        width: 100%;
+    }
+
+    .col-lg-8 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .container-fluid.py-4 {
+        padding: 0.75rem !important;
+    }
+}

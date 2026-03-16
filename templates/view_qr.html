@@ -3,235 +3,9 @@
 {% block title %}{{ qr_code.name }} - QR Code Details{% endblock %}
 
 {% block head %}
+<!-- QR Pages CSS -->
+<link rel="stylesheet" href="{{ url_for("static", filename="css/view-qr.css") }}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<style>
-    /* Enhanced animations and transitions */
-    .details-card {
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .details-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
-    
-    /* Improved color preview style */
-    .color-preview {
-        @apply inline-block w-5 h-5 rounded-md border border-gray-200 mr-2 align-middle;
-        transition: transform 0.2s ease;
-    }
-    .color-preview:hover {
-        transform: scale(1.2);
-    }
-    
-    /* Enhanced tab styling */
-    .tab-button {
-        @apply py-4 px-6 text-center font-medium text-sm text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-all duration-300;
-    }
-    .tab-button.active {
-        @apply bg-secondary-50 text-secondary-700 border-secondary-500 font-semibold;
-    }
-    .tab-button:hover:not(.active) {
-        @apply bg-gray-50 border-gray-200;
-    }
-    
-    /* Enhanced QR code container */
-    .qr-display {
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-    .qr-display:hover {
-        transform: scale(1.02);
-        box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
-    }
-    
-    /* Glass effect for cards */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    }
-    
-    /* Improved modal styling */
-    .modal-content {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-        transform: scale(0.95);
-        opacity: 0;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .modal.show .modal-content {
-        transform: scale(1);
-        opacity: 1;
-    }
-    
-    /* Gradient background for headers */
-    .gradient-bg-light {
-        background: linear-gradient(to right, rgba(14, 165, 233, 0.1), rgba(139, 92, 246, 0.15));
-    }
-    
-    /* Button hover effects */
-    .btn-primary {
-        @apply py-2 px-4 bg-secondary-600 hover:bg-secondary-700 text-white rounded-md text-sm font-medium transition-colors duration-200;
-        position: relative;
-        overflow: hidden;
-    }
-    .btn-primary:hover::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateX(-100%);
-        animation: btn-shine 0.75s;
-    }
-    @keyframes btn-shine {
-        100% {
-            transform: translateX(100%);
-        }
-    }
-    
-    /* Enhanced scrollbar for content sections */
-    .custom-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(139, 92, 246, 0.5) rgba(226, 232, 240, 0.5);
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: rgba(226, 232, 240, 0.5);
-        border-radius: 10px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(139, 92, 246, 0.5);
-        border-radius: 10px;
-    }
-    
-    /* QR pattern background */
-    .qr-pattern-bg {
-        background-color: #f8fafc;
-        background-image: 
-            radial-gradient(#e2e8f0 1.5px, transparent 1.5px),
-            radial-gradient(#e2e8f0 1.5px, transparent 1.5px);
-        background-size: 30px 30px;
-        background-position: 0 0, 15px 15px;
-        z-index: 10;
-    }
-    
-    /* Animations for modal */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes fadeOutDown {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-    }
-
-    /* Share modal pulse animation for the QR code */
-    @keyframes pulse-light {
-        0%, 100% {
-            box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
-        }
-        50% {
-            box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
-        }
-    }
-
-    .share-qr-preview {
-        animation: pulse-light 3s infinite;
-    }
-
-    /* Hover effects for share options */
-    .share-option:hover {
-        transform: translateY(-3px);
-    }
-    
-    /* Mobile optimizations */
-    @media (max-width: 640px) {
-        .details-card {
-            margin-bottom: 1rem;
-        }
-        
-        /* Hide scrollbars but allow scrolling */
-        .hide-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
-        }
-        
-        /* Larger touch targets for mobile */
-        .btn-primary, button, a.btn, .share-option {
-            min-height: 44px;
-        }
-        
-        /* Optimize modals for mobile */
-        .modal-content {
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        /* Better text truncation on mobile */
-        .truncate-mobile {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-        
-        /* Improved tap targets */
-        .copyable-text {
-            display: flex;
-            align-items: center;
-        }
-        
-        .copy-button {
-            min-width: 44px;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    }
-
-    /* Safe area insets for notched phones */
-    @supports (padding: max(0px)) {
-        .safe-area-inset {
-            padding-left: max(1rem, env(safe-area-inset-left));
-            padding-right: max(1rem, env(safe-area-inset-right));
-            padding-bottom: max(1rem, env(safe-area-inset-bottom));
-        }
-        
-        .modal {
-            padding-top: max(1rem, env(safe-area-inset-top));
-        }
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -631,6 +405,34 @@
                                     {% endif %}
                                 </div>
                             
+                            {% elif qr_code.qr_type == 'image' %}
+                                <div class="space-y-4">
+                                    {% if qr_code.image_detail %}
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Image</p>
+                                            <div class="rounded-lg p-4 flex items-center justify-center" style="background: linear-gradient({{ qr_code.image_detail.bg_direction or 'to bottom' }}, {{ qr_code.image_detail.bg_color_1 or '#0a0a0a' }}, {{ qr_code.image_detail.bg_color_2 or '#1a1a2e' }}); min-height: 200px;">
+                                                <img src="{{ url_for('static', filename='uploads/' + qr_code.image_detail.image_path) }}" alt="QR Image" class="max-w-full max-h-64 mx-auto rounded-lg" style="object-fit: contain;">
+                                            </div>
+                                        </div>
+                                        {% if qr_code.image_detail.caption %}
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Caption</p>
+                                            <p class="text-gray-900 flex items-center">
+                                                <i class="fas fa-caption mr-2 text-gray-400"></i>
+                                                {{ qr_code.image_detail.caption }}
+                                            </p>
+                                        </div>
+                                        {% endif %}
+                                    {% elif content %}
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Image</p>
+                                            <div class="rounded-lg p-4 flex items-center justify-center" style="background: linear-gradient({{ content.bg_direction or 'to bottom' }}, {{ content.bg_color_1 or '#0a0a0a' }}, {{ content.bg_color_2 or '#1a1a2e' }}); min-height: 200px;">
+                                                <img src="{{ url_for('static', filename='uploads/' + content.image_path) }}" alt="QR Image" class="max-w-full max-h-64 mx-auto rounded-lg" style="object-fit: contain;">
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
                             {% elif qr_code.qr_type == 'event' %}
                                 <div class="space-y-4">
                                     {% if qr_code.event_detail %}

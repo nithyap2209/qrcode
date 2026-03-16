@@ -3,687 +3,8 @@
 {% block title %}Edit QR Code - QR Dada{% endblock %}
 
 {% block head %}
-<style>
-/* Glass morphic UI styles matching dashboard design */
-    body {
-        background-color: #f8fafc;
-    }
-    
-    /* Main card styling to match dashboard glass effect */
-    .formal-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 1rem; /* Keeping 1rem for now, can change to 2xl if needed */
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        transition: all 0.3s ease;
-    }
-    
-    .formal-card:hover {
-        box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.06);
-    }
-    
-    /* Button styling matching dashboard gradient */
-    .formal-button {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        color: white;
-        border: none;
-        transition: all 0.3s ease;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    .formal-button:hover {
-        background: linear-gradient(45deg, #6d28d9, #4338ca);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(79, 70, 229, 0.2);
-    }
-    
-    /* Section headers with consistent styling */
-    .section-header {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #1f2937;
-        border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 0.75rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #4b5563;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Form inputs with cleaner styling */
-    .form-input {
-        border: 1px solid #d1d5db;
-        background-color: #ffffff;
-        font-size: 0.875rem;
-        padding: 0.625rem 0.875rem;
-        transition: all 0.2s ease;
-        border-radius: 0.5rem;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-    
-    .form-input:focus {
-        border-color: #7c3aed;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-    }
-    
-    /* QR type options with glass effect */
-    .qr-type-option {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 2px solid #e5e7eb;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    .qr-type-option:hover {
-        border-color: #7c3aed;
-        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.1), 0 4px 6px -2px rgba(124, 58, 237, 0.05);
-        transform: translateY(-3px);
-        background: rgba(255, 255, 255, 1);
-    }
-    
-    .qr-type-option.active {
-        border-color: #7c3aed;
-        background: linear-gradient(to bottom, rgba(124, 58, 237, 0.05), rgba(124, 58, 237, 0.1));
-        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.1), 0 4px 6px -2px rgba(124, 58, 237, 0.05);
-    }
-    
-    /* Tab styling */
-    .tab-button {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #6b7280;
-        padding: 0.75rem 1rem;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s ease;
-    }
-    
-    .tab-button.active {
-        color: #7c3aed;
-        border-bottom-color: #7c3aed;
-    }
-    
-    .tab-button:hover:not(.active) {
-        color: #9333ea;
-    }
-    
-    /* Template cards with glass effect */
-    .template-card {
-        border: 2px solid #e5e7eb;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    .template-card:hover {
-        border-color: #7c3aed;
-        box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.1), 0 10px 10px -5px rgba(124, 58, 237, 0.05);
-        transform: translateY(-4px);
-        background: rgba(255, 255, 255, 1);
-    }
-    
-    .template-card.selected {
-        border-color: #7c3aed;
-        background: linear-gradient(to bottom, rgba(124, 58, 237, 0.05), rgba(124, 58, 237, 0.1));
-        box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.1), 0 10px 10px -5px rgba(124, 58, 237, 0.05);
-    }
-    
-    /* Color preview with modern styling */
-    .color-preview {
-        width: 32px;
-        height: 32px;
-        border: 2px solid #e5e7eb;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border-radius: 0.5rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    }
-    
-    .color-preview:hover {
-        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
-        transform: scale(1.1);
-        border-color: #7c3aed;
-    }
-    
-    /* Modern accordion styling with glass effect */
-    .accordion-header {
-        background-color: rgba(249, 250, 251, 0.9);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid #e5e7eb;
-        font-weight: 500;
-        color: #374151;
-        transition: all 0.3s ease;
-        border-radius: 0.5rem;
-        cursor: pointer;
-    }
-    
-    .accordion-header:hover {
-        background-color: rgba(237, 233, 254, 0.5);
-        border-color: #c4b5fd;
-    }
-    
-    /* Modern shape options */
-    .shape-option label {
-        border: 2px solid #e5e7eb;
-        background: rgba(255, 255, 255, 0.95);
-        transition: all 0.3s ease;
-        padding: 0.625rem 1rem;
-        font-size: 0.875rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        cursor: pointer;
-    }
-    
-    .shape-option input:checked + label {
-        border-color: #7c3aed;
-        background: linear-gradient(to bottom, rgba(124, 58, 237, 0.05), rgba(124, 58, 237, 0.1));
-        box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.1), 0 2px 4px -1px rgba(124, 58, 237, 0.06);
-        transform: translateY(-2px);
-    }
-    
-    .shape-option label:hover {
-        border-color: #a78bfa;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    /* Modern range slider */
-    input[type="range"] {
-        -webkit-appearance: none;
-        appearance: none;
-        height: 6px;
-        background: #e5e7eb;
-        border-radius: 3px;
-        outline: none;
-        transition: background 0.3s ease;
-    }
-    
-    input[type="range"]:hover {
-        background: #d1d5db;
-    }
-    
-    input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        cursor: pointer;
-        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        transition: all 0.3s ease;
-    }
-    
-    input[type="range"]::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    /* Modern color picker popup */
-    .color-picker-popup {
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 0.75rem;
-        animation: fadeIn 0.3s ease forwards;
-    }
-    
-    .color-preset {
-        border: 2px solid #e5e7eb;
-        transition: all 0.3s ease;
-        border-radius: 0.375rem;
-    }
-    
-    .color-preset:hover {
-        transform: scale(1.15);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        border-color: #a78bfa;
-    }
-    
-    /* Preview section styling matching dashboard glass effect */
-    .qr-preview {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        transition: all 0.3s ease;
-    }
-    
-    .qr-preview:hover {
-        box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.06);
-        transform: translateY(-2px);
-    }
-    
-    /* Modern toggle switch */
-    .toggle-checkbox:checked {
-        right: 0;
-        border-color: #7c3aed;
-    }
-    
-    .toggle-checkbox:checked + .toggle-label {
-        background-color: #7c3aed;
-    }
-    
-    /* Help text styling */
-    .help-text {
-        font-size: 0.8125rem;
-        color: #6b7280;
-        margin-top: 0.375rem;
-    }
-    
-    /* Error message styling */
-    .error-text {
-        font-size: 0.8125rem;
-        color: #ef4444;
-    }
-    
-    /* Badge styling matching dashboard */
-    .badge {
-        background-color: #f3f4f6;
-        color: #4b5563;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        display: inline-flex;
-        align-items: center;
-    }
-    
-    .badge.primary {
-        background-color: #ede9fe;
-        color: #7c3aed;
-    }
-
-    /* ENHANCED VALIDATION MODAL STYLES - Matching dashboard glass effect */
-    .validation-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .validation-modal.show {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .validation-modal-content {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 1rem;
-        padding: 24px;
-        max-width: 450px;
-        width: 90%;
-        box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.2), 0 15px 15px -5px rgba(0, 0, 0, 0.1);
-        transform: scale(0.9);
-        transition: transform 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .validation-modal.show .validation-modal-content {
-        transform: scale(1);
-    }
-
-    .validation-modal-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 16px;
-    }
-
-    .validation-modal-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 16px;
-        font-size: 24px;
-    }
-
-    .validation-modal-icon.error {
-        background-color: #fee2e2;
-        color: #dc2626;
-    }
-
-    .validation-modal-icon.warning {
-        background-color: #fef3c7;
-        color: #d97706;
-    }
-
-    .validation-modal-icon.subscription {
-        background: linear-gradient(to bottom, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0.15));
-        color: #7c3aed;
-    }
-
-    .validation-modal-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #1f2937;
-        margin: 0;
-    }
-
-    .validation-modal-body {
-        color: #6b7280;
-        margin-bottom: 24px;
-        line-height: 1.6;
-    }
-
-    .validation-modal-actions {
-        display: flex;
-        gap: 12px;
-        justify-content: flex-end;
-    }
-
-    .validation-modal-btn {
-        padding: 8px 16px;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: none;
-    }
-
-    .validation-modal-btn.primary {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        color: white;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    .validation-modal-btn.primary:hover {
-        background: linear-gradient(45deg, #6d28d9, #4338ca);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(79, 70, 229, 0.2);
-    }
-
-    .validation-modal-btn.secondary {
-        background-color: #f3f4f6;
-        color: #374151;
-        border: 1px solid #d1d5db;
-    }
-
-    .validation-modal-btn.secondary:hover {
-        background-color: #e5e7eb;
-        transform: translateY(-2px);
-    }
-
-    /* Form validation styles */
-    .form-field-error {
-        border-color: #dc2626 !important;
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
-    }
-
-    .field-error-message {
-        color: #dc2626;
-        font-size: 0.875rem;
-        margin-top: 4px;
-        display: flex;
-        align-items: center;
-    }
-
-    .field-error-message i {
-        margin-right: 4px;
-    }
-
-    /* Upgrade prompt styling */
-    .upgrade-prompt {
-        background: linear-gradient(135deg, #7c3aed, #4f46e5);
-        color: white;
-        padding: 16px;
-        border-radius: 0.75rem;
-        margin-top: 12px;
-        animation: fadeIn 0.5s ease forwards;
-        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.15);
-    }
-
-    .upgrade-btn {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 8px 16px;
-        border-radius: 0.5rem;
-        text-decoration: none;
-        display: inline-block;
-        margin-top: 8px;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-    }
-
-    .upgrade-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        color: white;
-        text-decoration: none;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    /* Dynamic QR disabled state */
-    .dynamic-qr-disabled {
-        opacity: 0.6;
-        position: relative;
-    }
-
-    .dynamic-qr-disabled::after {
-        content: '🔒';
-        position: absolute;
-        right: -25px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 14px;
-    }
-    
-    /* Animation keyframes matching dashboard */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Add fade in animation class */
-    .animate-fade-in {
-        animation: fadeIn 0.5s ease forwards;
-    }
-    
-    /* Floating animation for certain elements */
-    @keyframes float {
-        0%, 100% { 
-            transform: translateY(0);
-        }
-        50% { 
-            transform: translateY(-10px);
-        }
-    }
-    
-    .animate-float {
-        animation: float 6s ease-in-out infinite;
-    }
-
-    /* Pulse animation for dynamic indicators */
-    @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: .5;
-        }
-    }
-
-    .animate-pulse {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    /* Loading overlay for preview */
-    .preview-loading {
-        position: absolute;
-        inset: 0;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border-radius: 1rem;
-    }
-
-    /* Enhanced button hover effects */
-    .btn-gradient {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        color: white;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    .btn-gradient:hover {
-        background: linear-gradient(45deg, #6d28d9, #4338ca);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(79, 70, 229, 0.2);
-    }
-
-    /* Feature box styling */
-    .feature-box {
-        border-radius: 1rem;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-        border: 2px solid #e5e7eb;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-    }
-
-    .feature-box:hover {
-        border-color: #c4b5fd;
-        box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.1), 0 10px 10px -5px rgba(124, 58, 237, 0.05);
-        transform: translateY(-3px);
-    }
-
-    .feature-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 3rem;
-        height: 3rem;
-        border-radius: 9999px;
-        font-size: 1.25rem;
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        color: white;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.2), 0 2px 4px -1px rgba(124, 58, 237, 0.1);
-    }
-
-    /* Progress bar */
-    .progress {
-        height: 0.5rem;
-        width: 100%;
-        background-color: #e5e7eb;
-        border-radius: 9999px;
-        overflow: hidden;
-    }
-
-    .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #7c3aed, #4f46e5);
-        border-radius: 9999px;
-        transition: width 0.5s ease;
-    }
-
-    /* Gradient preview enhancement */
-    .gradient-preview {
-        transition: all 0.3s ease;
-        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-    }
-
-    /* Template preview styling */
-    .template-preview {
-        transition: all 0.3s ease;
-        border-radius: 0.5rem;
-        overflow: hidden;
-    }
-
-    .template-card:hover .template-preview {
-        transform: scale(1.05);
-    }
-
-    /* Consistent spacing and padding */
-    .section-spacing {
-        padding: 2rem;
-    }
-
-    /* Smooth transitions for all interactive elements */
-    * {
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1.5rem;
-    }
-
-    .stat-card {
-        background: rgba(243, 244, 246, 0.8); /* light gray with slight transparency */
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-        padding: 1rem;
-        border-radius: 0.75rem;
-        text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 16px rgba(124, 58, 237, 0.1);
-    }
-
-    .stat-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #4f46e5; /* Indigo */
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: #6b7280; /* Cool Gray */
-        margin-top: 0.25rem;
-    }
-
-</style>
+<!-- QR Pages CSS -->
+<link rel="stylesheet" href="{{ url_for("static", filename="css/edit-qr.css") }}">
 {% endblock %}
 
 {% block content %}
@@ -1129,6 +450,52 @@
                             {% endif %}
                             
                             <!-- Event Content Fields -->
+                            {% if qr_code.qr_type == 'image' %}
+                            <div class="qr-type-content" id="image-content">
+                                <div class="mb-6">
+                                    <label class="form-label block">Current Image</label>
+                                    <div id="image-preview-wrapper" class="rounded-lg p-4 mb-3" style="background: linear-gradient({{ qr_code.image_detail.bg_direction or 'to bottom' if qr_code.image_detail else 'to bottom' }}, {{ qr_code.image_detail.bg_color_1 or '#0a0a0a' if qr_code.image_detail else '#0a0a0a' }}, {{ qr_code.image_detail.bg_color_2 or '#1a1a2e' if qr_code.image_detail else '#1a1a2e' }}); min-height: 200px; display: flex; align-items: center; justify-content: center;{% if not qr_code.image_detail or not qr_code.image_detail.image_path %} display: none;{% endif %}">
+                                        <img id="image-preview-img" src="{% if qr_code.image_detail and qr_code.image_detail.image_path %}{{ url_for('static', filename='uploads/' + qr_code.image_detail.image_path) }}{% endif %}" alt="Current QR Image" class="max-w-full max-h-64 mx-auto rounded" style="box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+                                    </div>
+                                </div>
+                                <div class="mb-6">
+                                    <label for="qr-image-file" class="form-label block">Replace Image</label>
+                                    <input type="file" class="form-input w-full" id="qr-image-file" name="qr_image_file" accept="image/*">
+                                    <p class="help-text mt-1">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</p>
+                                </div>
+                                <div class="mb-6">
+                                    <label for="image-caption" class="form-label block">Caption</label>
+                                    <input type="text" class="form-input w-full" id="image-caption" name="image_caption" value="{{ qr_code.image_detail.caption if qr_code.image_detail else content.caption|default('') }}" placeholder="Optional caption for your image">
+                                </div>
+
+                                <!-- Background Gradient -->
+                                <div class="mb-6">
+                                    <label class="form-label block mb-3">Display Background Gradient</label>
+                                    <div class="grid grid-cols-2 gap-4 mb-3">
+                                        <div>
+                                            <label class="text-xs text-gray-500 mb-1 block">Color 1</label>
+                                            <input type="color" name="img_bg_color_1" value="{{ qr_code.image_detail.bg_color_1 if qr_code.image_detail else '#0a0a0a' }}" class="w-10 h-10 border border-gray-300 rounded cursor-pointer p-0">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500 mb-1 block">Color 2</label>
+                                            <input type="color" name="img_bg_color_2" value="{{ qr_code.image_detail.bg_color_2 if qr_code.image_detail else '#1a1a2e' }}" class="w-10 h-10 border border-gray-300 rounded cursor-pointer p-0">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 mb-1 block">Direction</label>
+                                        <select name="img_bg_direction" class="form-input w-full text-sm">
+                                            {% set current_dir = qr_code.image_detail.bg_direction if qr_code.image_detail else 'to bottom' %}
+                                            <option value="to bottom" {{ 'selected' if current_dir == 'to bottom' }}>Top to Bottom</option>
+                                            <option value="to right" {{ 'selected' if current_dir == 'to right' }}>Left to Right</option>
+                                            <option value="to bottom right" {{ 'selected' if current_dir == 'to bottom right' }}>Diagonal</option>
+                                            <option value="135deg" {{ 'selected' if current_dir == '135deg' }}>135 Degrees</option>
+                                            <option value="to top" {{ 'selected' if current_dir == 'to top' }}>Bottom to Top</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
                             {% if qr_code.qr_type == 'event' %}
                             <div class="qr-type-content" id="event-content">
                                 <div class="mb-6">
@@ -3003,6 +2370,42 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// Image QR: instant file preview + live gradient update
+(function() {
+    const fileInput = document.getElementById('qr-image-file');
+    const previewWrapper = document.getElementById('image-preview-wrapper');
+    const previewImg = document.getElementById('image-preview-img');
+    if (!fileInput || !previewWrapper || !previewImg) return;
+
+    // Instant preview when user selects a new image file
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            previewWrapper.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Live gradient preview when colors or direction change
+    const bgColor1 = document.querySelector('input[name="img_bg_color_1"]');
+    const bgColor2 = document.querySelector('input[name="img_bg_color_2"]');
+    const bgDirection = document.querySelector('select[name="img_bg_direction"]');
+
+    function updateGradientPreview() {
+        if (!previewWrapper) return;
+        const c1 = bgColor1 ? bgColor1.value : '#0a0a0a';
+        const c2 = bgColor2 ? bgColor2.value : '#1a1a2e';
+        const dir = bgDirection ? bgDirection.value : 'to bottom';
+        previewWrapper.style.background = 'linear-gradient(' + dir + ', ' + c1 + ', ' + c2 + ')';
+    }
+
+    if (bgColor1) bgColor1.addEventListener('input', updateGradientPreview);
+    if (bgColor2) bgColor2.addEventListener('input', updateGradientPreview);
+    if (bgDirection) bgDirection.addEventListener('change', updateGradientPreview);
+})();
 
 </script>
 {% endblock %}

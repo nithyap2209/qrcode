@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Allow: /blogs
+Allow: /blog/
+Allow: /webstories
+Allow: /webstory/
+Allow: /about
+Allow: /contact
+Allow: /pricing
+Allow: /services/
+
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /dashboard
+Disallow: /api/
+
+Sitemap: {{ base_url }}/sitemap.xml

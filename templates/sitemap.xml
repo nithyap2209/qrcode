@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <!-- Static Pages -->
+    <url>
+        <loc>{{ base_url }}/</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/sitemap</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/about</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/contact</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/pricing</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/blogs</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/webstories</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Service Pages -->
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-url</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-email</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-wifi</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-sms</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-event</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-call</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-whatsapp</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-vcard</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>{{ base_url }}/services/qr-code-for-text</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Dynamic Blog Pages -->
+    {% for blog in blogs %}
+    <url>
+        <loc>{{ base_url }}/blog/{{ blog.slug }}</loc>
+        {% if blog.updated_at %}
+        <lastmod>{{ blog.updated_at.strftime('%Y-%m-%d') }}</lastmod>
+        {% endif %}
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    {% endfor %}
+
+    <!-- Dynamic Web Story Pages -->
+    {% for story in webstories %}
+    <url>
+        <loc>{{ base_url }}/webstory/{{ story.slug }}</loc>
+        {% if story.updated_at %}
+        <lastmod>{{ story.updated_at.strftime('%Y-%m-%d') }}</lastmod>
+        {% endif %}
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    {% endfor %}
+</urlset>

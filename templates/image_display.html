@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if detail.caption %}{{ detail.caption }}{% else %}Image{% endif %} - QR Dada</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient({{ detail.bg_direction or 'to bottom' }}, {{ detail.bg_color_1 or '#0a0a0a' }}, {{ detail.bg_color_2 or '#1a1a2e' }});
+            padding: 20px;
+        }
+        @keyframes kenburns {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.06) translate(-1%, -0.5%); }
+            100% { transform: scale(1) translate(0, 0); }
+        }
+        .image-wrapper {
+            max-width: 90vw;
+            max-height: 75vh;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        .image-wrapper img {
+            max-width: 100%;
+            max-height: 75vh;
+            display: block;
+            object-fit: contain;
+            animation: kenburns 12s ease-in-out infinite;
+        }
+        .caption {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 16px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-download {
+            background: rgba(255,255,255,0.95);
+            color: #1a1a2e;
+        }
+        .btn-download:hover { background: #fff; transform: translateY(-1px); }
+        .btn-share {
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.9);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-share:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .image-wrapper img { border-radius: 8px; max-height: 70vh; }
+            .btn { padding: 10px 18px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="image-wrapper">
+        <img src="{{ url_for('static', filename='uploads/' + detail.image_path) }}" alt="{{ detail.caption or 'Image' }}">
+    </div>
+    {% if detail.caption %}
+    <p class="caption">{{ detail.caption }}</p>
+    {% endif %}
+    <div class="actions">
+        <a href="{{ url_for('static', filename='uploads/' + detail.image_path) }}" download class="btn btn-download">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+        </a>
+        <button type="button" class="btn btn-share" onclick="shareImg()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+        </button>
+    </div>
+    <script>
+    function shareImg(){
+        if(navigator.share){
+            navigator.share({title:'{{ detail.caption or "Image" }}',url:location.href}).catch(function(){});
+        } else {
+            navigator.clipboard.writeText(location.href).then(function(){
+                var b=document.querySelector('.btn-share');
+                b.textContent='Copied!';
+                setTimeout(function(){b.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share';},2000);
+            });
+        }
+    }
+    </script>
+</body>
+</html>

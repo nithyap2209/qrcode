@@ -3,64 +3,35 @@
 {% block title %}Contact Us | QR Dada{% endblock %}
 
 {% block extra_head %}
+<!-- Pages CSS -->
+<link rel="stylesheet" href="{{ url_for("static", filename="css/contact.css") }}">
 <meta name="description" content="Contact QR Dada for support, questions, or feedback. Get in touch with our team for any assistance you need.">
-<style>
-    .contact-card { transition: all 0.3s ease; }
-    .contact-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "@id": "https://qrdada.com/contact#contactpage",
+  "url": "https://qrdada.com/contact",
+  "name": "Contact QRDada",
+  "description": "Get in touch with the QRDada team for support, queries, feedback, or business inquiries related to QR code generation and management.",
+  "about": {
+    "@type": "Organization",
+    "@id": "https://qrdada.com/#organization",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@qrdada.com",
+      "availableLanguage": "English"
     }
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://qrdada.com/#website"
+  }
+}
+</script>
 
-    .form-input { transition: all 0.2s ease; }
-    .form-input:focus {
-        border-color: #7c3aed;
-        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-        transform: translateY(-1px);
-    }
-
-    .alert { border-radius: 0.75rem; border-left: 4px solid; animation: slideIn 0.3s ease; }
-    .alert-success { background-color: rgba(16, 185, 129, 0.1); border-color: #10b981; color: #047857; }
-    .alert-danger { background-color: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #dc2626; }
-
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .contact-icon {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-    }
-
-    .social-link {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        transition: all 0.3s ease;
-    }
-
-    .social-link:hover {
-        transform: translateY(-3px) scale(1.1);
-        box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
-    }
-
-    .btn-gradient {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        color: white;
-        transition: all 0.3s ease;
-    }
-
-    .btn-gradient:hover {
-        background: linear-gradient(45deg, #6d28d9, #4338ca);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-        color: white;
-    }
-
-    @media (max-width: 640px) {
-        h1 { font-size: 2rem !important; }
-        h2 { font-size: 1.5rem !important; }
-        .contact-card { padding: 1.5rem; }
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -203,6 +174,11 @@
                         <div class="text-right text-sm text-gray-500 mt-1">
                             <span id="charCount">0</span>/5000 characters
                         </div>
+                    </div>
+
+                    <!-- Google reCAPTCHA -->
+                    <div class="mb-6">
+                        <div class="g-recaptcha" data-sitekey="6LcjljssAAAAABE6AovzONs44J0GEYig35ZTEsY_"></div>
                     </div>
 
                     <button type="submit" class="btn-gradient w-full py-3 px-6 rounded-xl font-semibold text-white flex items-center justify-center space-x-2">

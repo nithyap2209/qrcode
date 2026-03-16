@@ -1,4 +1,10 @@
+
 {% extends "admin/base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/admin/subscription-analytics.css") }}">
+{% endblock %}
+
 
 {% block title %}Subscription Analytics{% endblock %}
 
@@ -343,124 +349,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
-.stat-title {
-    font-size: 0.875rem;
-    font-weight: 500;
-    opacity: 0.9;
-}
-
-.stat-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-top: 0.25rem;
-}
-
-.stat-icon {
-    opacity: 0.7;
-}
-
-.analytics-table-container {
-    max-height: 600px;
-    overflow-y: auto;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.375rem;
-}
-
-.analytics-table-container .table {
-    margin-bottom: 0;
-    min-width: 1000px;
-}
-
-.analytics-table-container .table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.usage-cell {
-    min-width: 120px;
-}
-
-.legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-}
-
-/* Custom scrollbar */
-.analytics-table-container::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.analytics-table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.analytics-table-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-}
-
-.analytics-table-container::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .analytics-table-container {
-        max-height: 400px;
-    }
-    
-    .stat-value {
-        font-size: 1.25rem;
-    }
-    
-    .btn-group .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .usage-cell {
-        min-width: 100px;
-    }
-    
-    .small {
-        font-size: 0.75rem;
-    }
-    
-    .btn-group {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .btn-group .btn {
-        margin-bottom: 0.25rem;
-        border-radius: 0.25rem !important;
-    }
-}
-
-/* Animation for progress bars */
-@keyframes fillProgress {
-    from { width: 0%; }
-}
-
-.progress-bar {
-    animation: fillProgress 1s ease-out;
-}
-
-/* Hover effects */
-.table tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05) !important;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-    transition: all 0.2s ease;
-}
-</style>
 {% endblock %}

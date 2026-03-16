@@ -1,5 +1,7 @@
 {% extends 'admin/base.html' %}
-
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/admin/edit-blog.css") }}">
+{% endblock %}
 {% block title %}Edit Blog - Admin Dashboard{% endblock %}
 
 {% block content %}
@@ -18,7 +20,7 @@
                     </div>
                 </div>
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ url_for('admin.admin_edit_blog', id=blog.id) }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ url_for('admin.admin_edit_blog', id=blog.id) }}" enctype="multipart/form-data" id="blogForm">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
                         <!-- General Tab -->
@@ -73,6 +75,17 @@
                         </div>
 
                         <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="publish_date" class="form-label fw-semibold">
+                                    Publish Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="publish_date" name="publish_date"
+                                       value="{{ blog.publish_date.strftime('%Y-%m-%d') if blog.publish_date else '' }}" required>
+                                <small class="form-text text-muted">The date when the blog will be published</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <div class="col-md-12">
                                 <label for="image" class="form-label fw-semibold">Blog Image</label>
                                 <input type="file" class="form-control" id="image" name="image" accept="image/*">
@@ -105,12 +118,38 @@
 
                                 <!-- SEO Image Alt Text Reminder -->
                                 <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
-                                    <i class="fas fa-lightbulb me-2"></i><strong>SEO Tip:</strong> When adding images to your blog content, always click the image and add descriptive alt text using the toolbar button. Alt text improves SEO and accessibility!
+                                    <i class="fas fa-lightbulb me-2"></i><strong>SEO Tip:</strong> When adding images, click the image icon in toolbar. You can set alt text, width, height, alignment and preview the image in the Image Properties dialog!
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
 
                                 <textarea class="form-control" id="description" name="description"
-                                          rows="8" placeholder="Enter blog content">{{ blog.description or '' }}</textarea>
+                                          rows="10" placeholder="Enter blog content">{{ blog.description or '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- TOC Preview -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="toc-preview-card" id="toc-preview-card" style="display: none;">
+                                    <div class="toc-preview-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-list-ul me-2 text-primary"></i>Table of Contents Preview
+                                        </h6>
+                                        <span class="badge bg-primary" id="toc-heading-count">0 headings</span>
+                                    </div>
+                                    <div class="toc-preview-body">
+                                        <p class="text-muted small mb-2">
+                                            <i class="fas fa-info-circle me-1"></i>This TOC is auto-generated from H2 headings in your content. It will appear on the blog detail page.
+                                        </p>
+                                        <ol class="toc-preview-list" id="toc-preview-list">
+                                        </ol>
+                                    </div>
+                                </div>
+                                <div class="toc-preview-empty" id="toc-preview-empty">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>Add H2 headings in the editor (Format &rarr; Heading 2) to auto-generate a Table of Contents on the blog page.
+                                    </small>
+                                </div>
                             </div>
                         </div>
 
@@ -222,224 +261,184 @@
     </div>
 </div>
 
-<style>
-    .form-label {
-        color: #495057;
-        margin-bottom: 0.5rem;
-    }
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #4895ef;
-        box-shadow: 0 0 0 0.2rem rgba(72, 149, 239, 0.25);
-    }
 
-    .card {
-        border-radius: 12px;
-    }
-
-    .card-header {
-        border-top-left-radius: 12px !important;
-        border-top-right-radius: 12px !important;
-    }
-</style>
-
-<!-- CKEditor 5 Classic Build -->
-<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
+<!-- CKEditor 4 CDN with all plugins -->
+<script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
 
 <script>
-    // Auto-generate slug from title
+    // Wait for DOM and CKEditor to be ready
     document.addEventListener('DOMContentLoaded', function() {
+        // Auto-generate slug from title
         const titleInput = document.getElementById('title');
         const slugInput = document.getElementById('slug');
-        let manuallyEdited = false;
+        let manuallyEdited = true; // For edit page, assume slug was manually set
 
-        // Function to generate slug from string
         function generateSlug(text) {
             return text
                 .toLowerCase()
                 .trim()
-                .replace(/[^\w\s-]/g, '') // Remove special characters
-                .replace(/\s+/g, '-')      // Replace spaces with hyphens
-                .replace(/-+/g, '-');      // Replace multiple hyphens with single hyphen
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-');
         }
 
-        // Auto-generate slug when title changes
         titleInput.addEventListener('input', function() {
             if (!manuallyEdited) {
                 slugInput.value = generateSlug(this.value);
             }
         });
 
-        // Track manual edits to slug
         slugInput.addEventListener('input', function() {
             manuallyEdited = true;
         });
 
-        // Reset manual edit flag if slug is cleared
         slugInput.addEventListener('blur', function() {
-            if (this.value === '') {
+            if (!this.value.trim()) {
                 manuallyEdited = false;
+                this.value = generateSlug(titleInput.value);
             }
         });
+
+        // Initialize CKEditor 4
+        initCKEditor();
     });
 
-    // Custom upload adapter for CKEditor
-    class MyUploadAdapter {
-        constructor(loader) {
-            this.loader = loader;
+    function initCKEditor() {
+        // Check if CKEditor is loaded
+        if (typeof CKEDITOR === 'undefined') {
+            // Wait and retry
+            setTimeout(initCKEditor, 100);
+            return;
         }
 
-        upload() {
-            return this.loader.file.then(file => new Promise((resolve, reject) => {
-                const data = new FormData();
-                data.append('upload', file);
+        CKEDITOR.replace('description', {
+            height: 400,
 
-                fetch('{{ url_for("admin.admin_blog_upload_image") }}', {
-                    method: 'POST',
-                    body: data,
-                    credentials: 'include'
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(result => {
-                    if (result.uploaded) {
-                        console.log('Image uploaded successfully:', result.url);
-                        resolve({
-                            default: result.url
-                        });
-                    } else {
-                        const errorMsg = result.error ? result.error.message : 'Upload failed';
-                        console.error('Upload error:', errorMsg);
-                        reject(errorMsg);
-                    }
-                })
-                .catch(error => {
-                    console.error('Upload failed:', error);
-                    reject('Upload failed: ' + error.message);
-                });
-            }));
-        }
+            // Disable version check to suppress security warning popup
+            versionCheck: false,
 
-        abort() {
-            // Handle abort
-        }
-    }
+            // File browser URLs for image upload
+            filebrowserUploadUrl: '{{ url_for("admin.admin_blog_upload_image_ckeditor4") }}',
+            filebrowserImageUploadUrl: '{{ url_for("admin.admin_blog_upload_image_ckeditor4") }}',
 
-    function MyCustomUploadAdapterPlugin(editor) {
-        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-            return new MyUploadAdapter(loader);
-        };
-    }
+            // Upload method
+            filebrowserUploadMethod: 'form',
 
-    // Initialize CKEditor
-    ClassicEditor
-        .create(document.querySelector('#description'), {
-            extraPlugins: [MyCustomUploadAdapterPlugin],
-            toolbar: {
-                items: [
-                    'heading', '|',
-                    'bold', 'italic', 'underline', 'strikethrough', '|',
-                    'bulletedList', 'numberedList', '|',
-                    'outdent', 'indent', '|',
-                    'link', 'imageUpload', 'mediaEmbed', 'insertTable', '|',
-                    'blockQuote', 'horizontalLine', '|',
-                    'undo', 'redo'
-                ],
-                shouldNotGroupWhenFull: true
-            },
-            heading: {
-                options: [
-                    { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-                    { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
-                    { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-                    { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
-                    { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' }
-                ]
-            },
-            link: {
-                decorators: {
-                    openInNewTab: {
-                        mode: 'manual',
-                        label: 'Open in a new tab',
-                        attributes: {
-                            target: '_blank',
-                            rel: 'noopener noreferrer'
+            // Extra plugins
+            extraPlugins: 'justify,colorbutton,font',
+
+            // Toolbar configuration
+            toolbar: [
+                { name: 'document', items: ['Source'] },
+                { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+                { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
+                '/',
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+                { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar'] },
+                '/',
+                { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+                { name: 'colors', items: ['TextColor', 'BGColor'] },
+                { name: 'tools', items: ['Maximize', 'ShowBlocks'] }
+            ],
+
+            // Allow all HTML content
+            allowedContent: true,
+
+            // Format tags
+            format_tags: 'p;h1;h2;h3;h4;h5;h6;pre;address',
+
+            // Remove empty paragraphs
+            ignoreEmptyParagraph: true,
+
+            // Image dialog configuration
+            image_previewText: ' ',
+
+            // Remove format configuration - includes font-weight styles
+            removeFormatTags: 'b,big,cite,code,del,dfn,em,font,i,ins,kbd,q,s,samp,small,span,strike,strong,sub,sup,tt,u,var',
+            removeFormatAttributes: 'class,style,lang,width,height,align,hspace,valign',
+
+            // Paste from Word settings - clean up styles
+            pasteFromWordRemoveFontStyles: true,
+            pasteFromWordRemoveStyles: true,
+
+            // Content CSS for styling inside editor
+            contentsCss: [
+                'body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333; padding: 10px; }',
+                'a { color: #4895ef !important; text-decoration: underline; }',
+                'a:hover { color: #3a7bd5 !important; }',
+                'a span, a * { color: inherit !important; }',
+                'strong a, a strong, b a, a b { color: #4895ef !important; font-weight: bold; }'
+            ].join(' '),
+
+            // On instance ready
+            on: {
+                instanceReady: function(evt) {
+                    console.log('CKEditor 4 initialized successfully');
+                    var editor = evt.editor;
+
+                    // Apply link styles to editor content
+                    var style = document.createElement('style');
+                    style.textContent = 'a { color: #4895ef !important; } a span, a * { color: inherit !important; } strong a, a strong, b a, a b { color: #4895ef !important; }';
+                    editor.document.getHead().$.appendChild(style);
+
+                    // Clean up existing content - convert inline bold styles to <strong> tags
+                    setTimeout(function() {
+                        var editorContent = editor.getData();
+                        if (editorContent) {
+                            var cleanedContent = cleanBoldStyles(editorContent);
+                            if (cleanedContent !== editorContent) {
+                                editor.setData(cleanedContent);
+                                console.log('Existing bold styles cleaned up');
+                            }
                         }
+                        // Initial TOC preview on load
+                        updateTocPreview(editor);
+                    }, 100);
+
+                    // Update TOC preview on content change
+                    editor.on('change', function() { updateTocPreview(editor); });
+                    editor.on('afterCommandExec', function() { updateTocPreview(editor); });
+                    editor.on('afterSetData', function() { updateTocPreview(editor); });
+                },
+                // Clean up pasted content - convert inline bold styles to <strong> tags
+                paste: function(evt) {
+                    var html = evt.data.dataValue;
+                    if (html) {
+                        evt.data.dataValue = cleanBoldStyles(html);
                     }
+                    // Update TOC after paste with a delay
+                    setTimeout(function() {
+                        var ed = CKEDITOR.instances.description;
+                        if (ed) updateTocPreview(ed);
+                    }, 300);
                 }
-            },
-            image: {
-                toolbar: [
-                    'imageTextAlternative', '|',
-                    'imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|',
-                    'linkImage'
-                ],
-                styles: [
-                    'full',
-                    'side',
-                    'alignLeft',
-                    'alignCenter',
-                    'alignRight'
-                ],
-                resizeUnit: 'px',
-                resizeOptions: [
-                    {
-                        name: 'resizeImage:original',
-                        value: null,
-                        label: 'Original'
-                    },
-                    {
-                        name: 'resizeImage:50',
-                        value: '50',
-                        label: '50%'
-                    },
-                    {
-                        name: 'resizeImage:75',
-                        value: '75',
-                        label: '75%'
-                    }
-                ]
-            },
-            table: {
-                contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
             }
-        })
-        .then(editor => {
-            window.blogEditor = editor;
-            console.log('CKEditor initialized successfully', editor);
-            console.log('Image upload is configured and ready!');
-
-            // Add event listener to warn if images don't have alt text
-            editor.model.document.on('change:data', () => {
-                const imageElements = editor.model.document.getRoot().getChildren();
-                let imagesWithoutAlt = 0;
-
-                for (const item of imageElements) {
-                    if (item.name === 'imageBlock' || item.name === 'imageInline') {
-                        const alt = item.getAttribute('alt');
-                        if (!alt || alt.trim() === '') {
-                            imagesWithoutAlt++;
-                        }
-                    }
-                }
-
-                // You can add a visual indicator here if needed
-                if (imagesWithoutAlt > 0) {
-                    console.warn(`⚠️ SEO Warning: ${imagesWithoutAlt} image(s) missing alt text for accessibility and SEO`);
-                }
-            });
-        })
-        .catch(error => {
-            console.error('CKEditor initialization error:', error);
         });
 
+        // Function to clean bold styles - used for both existing and pasted content
+        function cleanBoldStyles(html) {
+            // Convert span with font-weight bold/700/800/900 to <strong>
+            html = html.replace(/<span([^>]*?)style\s*=\s*["']([^"']*?)font-weight\s*:\s*(bold|[7-9]00)([^"']*?)["']([^>]*)>([\s\S]*?)<\/span>/gi, function(match, before, styleBefore, weight, styleAfter, after, content) {
+                var remainingStyle = (styleBefore + styleAfter).replace(/font-weight\s*:\s*\w+;?\s*/gi, '').replace(/;\s*$/, '').trim();
+                if (remainingStyle) {
+                    return '<strong><span' + before + 'style="' + remainingStyle + '"' + after + '>' + content + '</span></strong>';
+                }
+                return '<strong>' + content + '</strong>';
+            });
+            // Convert <b> tags with inline styles to clean <strong>
+            html = html.replace(/<b\s+style\s*=\s*["'][^"']*["']\s*>([\s\S]*?)<\/b>/gi, '<strong>$1</strong>');
+            // Convert remaining <b> to <strong>
+            html = html.replace(/<b(\s|>)/gi, '<strong$1');
+            html = html.replace(/<\/b>/gi, '</strong>');
+            return html;
+        }
+    }
+
     // FAQ Management Functions
-    let faqCounter = document.querySelectorAll('.faq-item').length;
+    let faqCounter = {{ (blog.schema_data|from_json|length) if blog.schema_data else 0 }};
 
     function addFaq() {
         faqCounter++;
@@ -485,6 +484,37 @@
             }
         });
         faqCounter = faqItems.length;
+    }
+
+    // TOC Preview - extract H2 headings from CKEditor content
+    function updateTocPreview(editor) {
+        var content = editor.getData();
+        var tocCard = document.getElementById('toc-preview-card');
+        var tocEmpty = document.getElementById('toc-preview-empty');
+        var tocList = document.getElementById('toc-preview-list');
+        var tocCount = document.getElementById('toc-heading-count');
+
+        // Parse HTML and extract H2 headings
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        var h2Elements = tempDiv.querySelectorAll('h2');
+
+        if (h2Elements.length > 0) {
+            tocCard.style.display = 'block';
+            tocEmpty.style.display = 'none';
+            tocList.innerHTML = '';
+            tocCount.textContent = h2Elements.length + ' heading' + (h2Elements.length > 1 ? 's' : '');
+
+            h2Elements.forEach(function(h2, index) {
+                var li = document.createElement('li');
+                li.className = 'toc-preview-item';
+                li.textContent = h2.textContent.trim();
+                tocList.appendChild(li);
+            });
+        } else {
+            tocCard.style.display = 'none';
+            tocEmpty.style.display = 'block';
+        }
     }
 </script>
 {% endblock %}

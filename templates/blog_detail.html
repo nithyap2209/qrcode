@@ -11,6 +11,9 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ request.url }}">
 
+    <!-- Blog Page CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/blog-detail.css') }}">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="{{ request.url }}">
@@ -121,657 +124,6 @@
     </script>
     {% endif %}
     {% endif %}
-
-    <style>
-        :root {
-            --primary: #7c3aed;
-            --primary-dark: #6d28d9;
-            --primary-light: #8b5cf6;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border-radius: 0.75rem;
-            --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 0.25rem 0.375rem -0.0625rem rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 0.625rem 0.9375rem -0.1875rem rgba(124, 58, 237, 0.15);
-        }
-
-        /* Main content */
-        .main-container {
-            padding: 2rem;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: white;
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 2rem;
-        }
-
-        .back-button:hover {
-            background: linear-gradient(-45deg, #0ea5e9, #8b5cf6);
-            color: white;
-            border-color: transparent;
-            transform: translateX(-5px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .back-button i {
-            transition: transform 0.3s ease;
-        }
-
-        .back-button:hover i {
-            transform: translateX(-3px);
-        }
-
-        .blog-header-card {
-            color: white;
-            padding: 3rem 2.5rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .blog-header-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-        }
-
-        .blog-header-card::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -10%;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 50%;
-        }
-
-        .blog-header-card > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .blog-category-badge {
-            display: inline-block;
-            padding: 0.5rem 1.25rem;
-            background: rgba(255,255,255,0.25);
-            border-radius: 25px;
-            font-size: 0.875rem;
-            margin-bottom: 1.25rem;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-        }
-
-        .blog-header-card h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-            letter-spacing: -0.5px;
-        }
-
-        .blog-header-meta {
-            font-size: 1rem;
-            opacity: 0.95;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-        }
-
-        .blog-header-meta i {
-            margin-right: 0.5rem;
-        }
-
-        .blog-header-meta span {
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .blog-content-card {
-            background: white;
-            padding: 3rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            margin-bottom: 2rem;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .blog-featured-image {
-            width: 100%;
-            object-fit: cover;
-            border-radius: var(--border-radius);
-            margin-bottom: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .blog-featured-image:hover {
-            transform: scale(1.02);
-        }
-
-        .blog-body h1 {
-            color: var(--text);
-            font-weight: 700;
-            margin-top: 2.5rem;
-            margin-bottom: 1.25rem;
-            font-size: 1.75rem;
-            line-height: 1.3;
-        }
-
-        .blog-body h2 {
-            color: var(--text);
-            font-weight: 700;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-
-        .blog-body h3 {
-            color: var(--text);
-            font-weight: 600;
-            margin-top: 1.75rem;
-            margin-bottom: 0.875rem;
-            font-size: 1.25rem;
-        }
-
-        .blog-body p {
-            margin-bottom: 1.25rem;
-            font-size: 1.05rem;
-            line-height: 1.8;
-            color: #495057;
-        }
-
-        .blog-body strong {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .blog-body a {
-            color: var(--primary) !important;
-            text-decoration: underline !important;
-            text-underline-offset: 2px;
-            transition: all 0.2s ease;
-            cursor: pointer !important;
-            pointer-events: auto !important;
-            position: relative;
-            z-index: 10;
-            display: inline;
-        }
-
-        .blog-body a:hover {
-            color: var(--primary-dark) !important;
-            text-decoration-thickness: 2px;
-        }
-
-        .blog-body a:visited {
-            color: #5b21b6 !important;
-        }
-
-        .blog-body {
-            position: relative;
-            z-index: 1;
-        }
-
-        .blog-body * {
-            pointer-events: auto;
-        }
-
-        .blog-body ul {
-            margin-bottom: 1.25rem;
-            padding-left: 2rem;
-            list-style-type: disc !important;
-            list-style-position: outside;
-        }
-
-        .blog-body ol {
-            margin-bottom: 1.25rem;
-            padding-left: 2rem;
-            list-style-type: decimal !important;
-            list-style-position: outside;
-        }
-
-        .blog-body ul ul {
-            list-style-type: circle !important;
-        }
-
-        .blog-body ul ul ul {
-            list-style-type: square !important;
-        }
-
-        .blog-body li {
-            margin-bottom: 0.625rem;
-            line-height: 1.7;
-            display: list-item !important;
-        }
-
-        .blog-body .ql-indent-1 {
-            padding-left: 3rem;
-        }
-
-        .blog-body .ql-indent-2 {
-            padding-left: 6rem;
-        }
-
-        .blog-body blockquote {
-            border-left: 4px solid var(--primary);
-            padding-left: 1.25rem;
-            margin: 2rem 0;
-            font-style: italic;
-            color: var(--text-light);
-        }
-
-        .blog-body table {
-            width: 100%;
-            margin: 2rem 0;
-            border-collapse: collapse;
-        }
-
-        .blog-body table th,
-        .blog-body table td {
-            padding: 0.75rem;
-            border: 1px solid #dee2e6;
-        }
-
-        .blog-body table th {
-            background: #f8f9fa;
-            font-weight: 600;
-        }
-
-        .blog-body figure.image {
-            margin: 2rem 0;
-            text-align: center;
-        }
-
-        .blog-body figure.image img {
-            max-width: 100%;
-            height: auto;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .blog-body img {
-            max-width: 100%;
-            height: auto;
-            border-radius: var(--border-radius);
-        }
-
-        .blog-body .image-style-side {
-            float: right;
-            margin-left: 1.25rem;
-            max-width: 50%;
-        }
-
-        .blog-body .image-style-align-left {
-            float: left;
-            margin-right: 1.25rem;
-        }
-
-        .blog-body .image-style-align-right {
-            float: right;
-            margin-left: 1.25rem;
-        }
-
-        .blog-body .image-style-align-center {
-            text-align: center;
-            margin: 2rem auto;
-            display: block;
-        }
-
-        /* Share Section */
-        .share-card {
-            background: linear-gradient(135deg, rgba(39, 56, 121, 0.05) 0%, rgba(15, 116, 178, 0.05) 100%);
-            padding: 2.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 2.5rem;
-            text-align: center;
-            border: 1px solid rgba(39, 56, 121, 0.1);
-        }
-
-        .share-card h5 {
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            font-size: 1.25rem;
-        }
-
-        .share-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            margin: 0 0.5rem;
-            color: white;
-            text-decoration: none;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 1.3rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .share-btn:hover {
-            transform: translateY(-8px) scale(1.1);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .share-facebook { background: #1877f2; }
-        .share-twitter { background: #1da1f2; }
-        .share-linkedin { background: #0a66c2; }
-        .share-whatsapp { background: #25d366; }
-
-        /* FAQ Section */
-        .faq-section {
-            background: white;
-            padding: 2.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            margin-bottom: 2rem;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .faq-section h3 {
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: var(--text);
-            font-size: 1.75rem;
-            position: relative;
-            padding-bottom: 1rem;
-        }
-
-        .faq-section h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(-45deg, #0ea5e9, #8b5cf6);
-            border-radius: 2px;
-        }
-
-        .faq-item {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .faq-item:hover {
-            border-color: var(--primary-light);
-            box-shadow: 0 4px 12px rgba(39, 56, 121, 0.1);
-        }
-
-        .faq-question {
-            background: linear-gradient(135deg, rgba(39, 56, 121, 0.05) 0%, rgba(15, 116, 178, 0.05) 100%);
-            padding: 1.25rem 1.5rem;
-            font-weight: 600;
-            color: var(--text);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .faq-question:hover {
-            background: linear-gradient(135deg, rgba(39, 56, 121, 0.1) 0%, rgba(15, 116, 178, 0.1) 100%);
-        }
-
-        .faq-question i {
-            color: var(--primary);
-            transition: transform 0.3s ease;
-            font-size: 0.875rem;
-        }
-
-        .faq-item.active .faq-question i {
-            transform: rotate(180deg);
-        }
-
-        .faq-answer {
-            padding: 0 1.5rem;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .faq-item.active .faq-answer {
-            padding: 1.25rem 1.5rem;
-            max-height: 500px;
-        }
-
-        .faq-answer p {
-            margin: 0;
-            color: var(--text-light);
-            line-height: 1.7;
-        }
-
-        /* Related Posts */
-        .related-posts {
-            margin-top: 4rem;
-        }
-
-        .related-posts h3 {
-            font-weight: 700;
-            margin-bottom: 2rem;
-            text-align: center;
-            color: var(--text);
-            font-size: 2rem;
-            position: relative;
-            padding-bottom: 1rem;
-        }
-
-        .related-posts h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: linear-gradient(-45deg, #0ea5e9, #8b5cf6);
-            border-radius: 2px;
-        }
-
-        .related-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .related-card {
-            background: white;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            height: 100%;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-
-        .related-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(-45deg, #0ea5e9, #8b5cf6);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.4s ease;
-        }
-
-        .related-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(39, 56, 121, 0.15);
-        }
-
-        .related-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .related-image {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: linear-gradient(-45deg, #0ea5e9, #8b5cf6);
-        }
-
-        .related-card-body {
-            padding: 1.25rem;
-        }
-
-        .related-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.625rem;
-            line-height: 1.4;
-        }
-
-        .related-title a {
-            color: inherit;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .related-title a:hover {
-            color: var(--primary);
-        }
-
-        .related-date {
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        .blog-header-card {
-            animation: fadeIn 0.8s ease;
-        }
-
-        .blog-content-card {
-            animation: fadeInUp 0.8s ease 0.2s backwards;
-        }
-
-        .share-card {
-            animation: fadeInUp 0.8s ease 0.3s backwards;
-        }
-
-        .faq-section {
-            animation: fadeInUp 0.8s ease 0.25s backwards;
-        }
-
-        .related-card {
-            animation: fadeInUp 0.6s ease backwards;
-        }
-
-        .related-card:nth-child(1) { animation-delay: 0.1s; }
-        .related-card:nth-child(2) { animation-delay: 0.2s; }
-        .related-card:nth-child(3) { animation-delay: 0.3s; }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 1rem;
-            }
-
-            .blog-header-card {
-                padding: 2rem 1.5rem;
-            }
-
-            .blog-header-card h1 {
-                font-size: 1.75rem;
-            }
-
-            .blog-header-meta {
-                font-size: 0.875rem;
-                gap: 1rem;
-            }
-
-            .blog-content-card {
-                padding: 1.5rem;
-            }
-
-            .blog-body h1 {
-                font-size: 1.5rem;
-            }
-
-            .blog-body h2 {
-                font-size: 1.3rem;
-            }
-
-            .blog-body h3 {
-                font-size: 1.15rem;
-            }
-
-            .blog-body figure.image img {
-                margin: 1.25rem 0;
-            }
-
-            .image-style-side,
-            .image-style-align-left,
-            .image-style-align-right {
-                float: none !important;
-                max-width: 100% !important;
-                margin: 1.25rem 0 !important;
-            }
-
-            .share-btn {
-                width: 48px;
-                height: 48px;
-                font-size: 1.1rem;
-                margin: 0 0.25rem;
-            }
-
-            .related-posts h3 {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
 {% endblock %}
 
 {% block content %}
@@ -792,7 +144,7 @@
             <div class="blog-header-meta">
                 <span>
                     <i class="far fa-calendar"></i>
-                    {{ blog.created_at.strftime('%B %d, %Y') }}
+                    {{ blog.publish_date.strftime('%B %d, %Y') if blog.publish_date else blog.created_at.strftime('%B %d, %Y') }}
                 </span>
                 {% if blog.author_name or blog.created_by %}
                 <span>
@@ -801,6 +153,19 @@
                 </span>
                 {% endif %}
             </div>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="toc-section" id="toc-section" style="display: none;">
+            <div class="toc-header" onclick="toggleToc()">
+                <h2><i class="fas fa-list-ul me-2"></i>Table of Contents</h2>
+                <i class="fas fa-chevron-up toc-toggle-icon" id="toc-toggle-icon"></i>
+            </div>
+            <nav class="toc-nav" id="toc-nav">
+                <ul class="toc-list" id="toc-list">
+                    <!-- TOC items will be generated by JavaScript -->
+                </ul>
+            </nav>
         </div>
 
         <!-- Blog Content -->
@@ -906,6 +271,101 @@
 
 {% block extra_js %}
     <script>
+        // Table of Contents Toggle
+        function toggleToc() {
+            const tocNav = document.getElementById('toc-nav');
+            const toggleIcon = document.getElementById('toc-toggle-icon');
+            tocNav.classList.toggle('collapsed');
+            toggleIcon.classList.toggle('fa-chevron-up');
+            toggleIcon.classList.toggle('fa-chevron-down');
+        }
+
+        // Generate Table of Contents from H2 headings
+        document.addEventListener('DOMContentLoaded', function() {
+            const blogBody = document.querySelector('.blog-body');
+            const tocSection = document.getElementById('toc-section');
+            const tocList = document.getElementById('toc-list');
+
+            if (blogBody && tocList) {
+                const h2Elements = blogBody.querySelectorAll('h2');
+
+                if (h2Elements.length > 0) {
+                    // Show TOC section only if there are H2 headings
+                    tocSection.style.display = 'block';
+
+                    h2Elements.forEach(function(h2, index) {
+                        // Create a unique ID for each H2
+                        var headingText = h2.textContent.trim();
+                        var headingId = 'toc-heading-' + index + '-' + headingText.toLowerCase()
+                            .replace(/[^a-z0-9\s-]/g, '')
+                            .replace(/\s+/g, '-')
+                            .substring(0, 50);
+
+                        // Set the ID on the H2 element
+                        h2.setAttribute('id', headingId);
+
+                        // Create TOC list item
+                        var li = document.createElement('li');
+                        li.className = 'toc-item';
+
+                        var a = document.createElement('a');
+                        a.href = '#' + headingId;
+                        a.className = 'toc-link';
+                        a.textContent = headingText;
+
+                        // Smooth scroll on click
+                        a.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            var target = document.getElementById(headingId);
+                            if (target) {
+                                var offset = 80; // Account for fixed headers
+                                var targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                                window.scrollTo({
+                                    top: targetPosition,
+                                    behavior: 'smooth'
+                                });
+                                // Update URL hash without jumping
+                                history.pushState(null, null, '#' + headingId);
+                            }
+                        });
+
+                        li.appendChild(a);
+                        tocList.appendChild(li);
+                    });
+
+                    // Highlight active TOC item on scroll
+                    // Only highlight once user has scrolled past the first heading
+                    var tocLinks = tocList.querySelectorAll('.toc-link');
+                    window.addEventListener('scroll', function() {
+                        var scrollPosition = window.scrollY + 120;
+                        var firstHeadingTop = h2Elements[0].getBoundingClientRect().top + window.pageYOffset;
+
+                        // Don't highlight anything if user hasn't scrolled to the first heading yet
+                        if (scrollPosition < firstHeadingTop) {
+                            tocLinks.forEach(function(link) { link.classList.remove('active'); });
+                            return;
+                        }
+
+                        var activeFound = false;
+                        // Loop in reverse to find the last heading that's above the scroll position
+                        for (var i = h2Elements.length - 1; i >= 0; i--) {
+                            var headingTop = h2Elements[i].getBoundingClientRect().top + window.pageYOffset;
+                            if (scrollPosition >= headingTop) {
+                                tocLinks.forEach(function(link) { link.classList.remove('active'); });
+                                tocLinks[i].classList.add('active');
+                                activeFound = true;
+                                break;
+                            }
+                        }
+
+                        if (!activeFound) {
+                            tocLinks.forEach(function(link) { link.classList.remove('active'); });
+                        }
+                    });
+                }
+            }
+        });
+
         // FAQ Toggle Function
         function toggleFaq(element) {
             const faqItem = element.parentElement;
@@ -921,5 +381,133 @@
                 faqItem.classList.add('active');
             }
         }
+
+        // Function to clean bold styles - convert inline styles to proper tags
+        function cleanBoldStyles(html) {
+            // Convert span with font-weight bold/700/800/900 to <strong>
+            html = html.replace(/<span([^>]*?)style\s*=\s*["']([^"']*?)font-weight\s*:\s*(bold|[7-9]00)([^"']*?)["']([^>]*)>([\s\S]*?)<\/span>/gi, function(match, before, styleBefore, weight, styleAfter, after, content) {
+                var remainingStyle = (styleBefore + styleAfter).replace(/font-weight\s*:\s*\w+;?\s*/gi, '').replace(/;\s*$/, '').trim();
+                if (remainingStyle) {
+                    return '<strong><span' + before + 'style="' + remainingStyle + '"' + after + '>' + content + '</span></strong>';
+                }
+                return '<strong>' + content + '</strong>';
+            });
+            // Convert <b> tags with inline styles to clean <strong>
+            html = html.replace(/<b\s+style\s*=\s*["'][^"']*["']\s*>([\s\S]*?)<\/b>/gi, '<strong>$1</strong>');
+            // Convert remaining <b> to <strong>
+            html = html.replace(/<b(\s|>)/gi, '<strong$1');
+            html = html.replace(/<\/b>/gi, '</strong>');
+            return html;
+        }
+
+        // Normalize bold text formatting from pasted content
+        document.addEventListener('DOMContentLoaded', function() {
+            const blogBody = document.querySelector('.blog-body');
+            if (blogBody) {
+                // Clean up the HTML content to normalize bold styles
+                const originalHTML = blogBody.innerHTML;
+                const cleanedHTML = cleanBoldStyles(originalHTML);
+                if (cleanedHTML !== originalHTML) {
+                    blogBody.innerHTML = cleanedHTML;
+                    console.log('Bold styles normalized for display');
+                }
+
+                // Also ensure all bold elements have proper font-weight
+                const boldElements = blogBody.querySelectorAll('strong, b');
+                boldElements.forEach(function(el) {
+                    el.style.fontWeight = '700';
+                });
+
+                // Handle any remaining spans with font-weight styles
+                const boldSpans = blogBody.querySelectorAll('span[style*="font-weight"]');
+                boldSpans.forEach(function(span) {
+                    const style = span.getAttribute('style') || '';
+                    if (style.match(/font-weight\s*:\s*(bold|[7-9]00)/i)) {
+                        span.style.fontWeight = '700';
+                    }
+                });
+            }
+        });
+
+        // Handle CKEditor 4 deprecated image attributes (border, hspace, vspace)
+        document.addEventListener('DOMContentLoaded', function() {
+            const blogBody = document.querySelector('.blog-body');
+            if (blogBody) {
+                const images = blogBody.querySelectorAll('img');
+                images.forEach(function(img) {
+                    // Handle border attribute
+                    const border = img.getAttribute('border');
+                    let borderWidth = 0;
+                    if (border && border !== '0') {
+                        borderWidth = parseInt(border) || 1;
+                        img.style.border = borderWidth + 'px solid #333';
+                        img.style.borderRadius = '0'; // Remove default border-radius when border is set
+                        img.style.boxSizing = 'border-box'; // Include border in width calculation
+                    }
+
+                    // Handle hspace attribute (horizontal space - left and right margin)
+                    const hspace = img.getAttribute('hspace');
+                    if (hspace) {
+                        const hspaceValue = parseInt(hspace) || 0;
+                        img.style.marginLeft = hspaceValue + 'px';
+                        img.style.marginRight = hspaceValue + 'px';
+                    }
+
+                    // Handle vspace attribute (vertical space - top and bottom margin)
+                    const vspace = img.getAttribute('vspace');
+                    if (vspace) {
+                        const vspaceValue = parseInt(vspace) || 0;
+                        img.style.marginTop = vspaceValue + 'px';
+                        img.style.marginBottom = vspaceValue + 'px';
+                    }
+
+                    // Handle width attribute - ALWAYS apply if attribute exists
+                    const width = img.getAttribute('width');
+                    if (width) {
+                        const widthValue = width.toString();
+                        if (widthValue.includes('%')) {
+                            img.style.width = widthValue;
+                        } else {
+                            img.style.width = parseInt(widthValue) + 'px';
+                        }
+                        img.style.maxWidth = '100%';
+                        img.style.boxSizing = 'border-box';
+                    }
+
+                    // Handle height attribute - ALWAYS apply if attribute exists
+                    const height = img.getAttribute('height');
+                    if (height) {
+                        const heightValue = height.toString();
+                        if (heightValue.includes('%')) {
+                            img.style.height = heightValue;
+                        } else {
+                            img.style.height = parseInt(heightValue) + 'px';
+                        }
+                    }
+
+                    // If no width/height attributes, check for inline style dimensions
+                    // CKEditor sometimes only saves inline styles
+                    if (!width && !height) {
+                        const inlineStyle = img.getAttribute('style');
+                        if (inlineStyle) {
+                            // Parse width from inline style
+                            const widthMatch = inlineStyle.match(/width:\s*(\d+)(px|%)?/i);
+                            if (widthMatch) {
+                                img.style.width = widthMatch[1] + (widthMatch[2] || 'px');
+                                img.style.maxWidth = '100%';
+                            }
+                            // Parse height from inline style
+                            const heightMatch = inlineStyle.match(/height:\s*(\d+)(px|%)?/i);
+                            if (heightMatch) {
+                                img.style.height = heightMatch[1] + (heightMatch[2] || 'px');
+                            }
+                        }
+                    }
+
+                    // Always ensure box-sizing for images
+                    img.style.boxSizing = 'border-box';
+                });
+            }
+        });
     </script>
 {% endblock %}

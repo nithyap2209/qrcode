@@ -3,54 +3,28 @@
 {% block title %}About Us | QR Dada{% endblock %}
 
 {% block extra_head %}
+<!-- Pages CSS -->
+<link rel="stylesheet" href="{{ url_for("static", filename="css/about.css") }}">
 <meta name="description" content="Learn about QR DADA - A QR generation tool built for brands that care about design. Discover our story, vision, and what makes us different.">
-<style>
-    .about-card { transition: all 0.3s ease; }
-    .about-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "@id": "https://qrdada.com/about#aboutpage",
+  "url": "https://qrdada.com/about",
+  "name": "About QRDada",
+  "description": "Learn about QRDada, a QR code generator platform that helps individuals and businesses create static and dynamic QR codes for URLs, WhatsApp, SMS, text, email, phone calls, vCards, events, and WiFi through a simple and efficient interface.",
+  "about": {
+    "@type": "Organization",
+    "@id": "https://qrdada.com/#organization"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://qrdada.com/#website"
+  }
+}
+</script>
 
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .animate-slide-in { animation: slideIn 0.6s ease-out forwards; }
-
-    .feature-icon { transition: all 0.3s ease; }
-    .feature-card:hover .feature-icon {
-        transform: scale(1.1);
-        color: #7c3aed;
-    }
-
-    .btn-gradient {
-        background: linear-gradient(45deg, #7c3aed, #4f46e5);
-        color: white;
-        transition: all 0.3s ease;
-    }
-
-    .btn-gradient:hover {
-        background: linear-gradient(45deg, #6d28d9, #4338ca);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-        color: white;
-    }
-
-    @media (max-width: 640px) {
-        h1 { font-size: 2rem !important; }
-        h2 { font-size: 1.75rem !important; }
-        .feature-card { padding: 1.5rem; }
-        .feature-icon { width: 3rem; height: 3rem; }
-        .about-card { padding: 1.5rem; }
-    }
-
-    @media (max-width: 480px) {
-        .grid-cols-1 { gap: 1rem; }
-        .py-16 { padding-top: 3rem; padding-bottom: 3rem; }
-        .px-4 { padding-left: 1rem; padding-right: 1rem; }
-    }
-</style>
 {% endblock %}
 
 {% block content %}

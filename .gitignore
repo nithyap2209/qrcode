@@ -1,0 +1,40 @@
+# Environment & Secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Logs
+*.log
+flask_app.log
+
+# Uploads (user content)
+static/uploads/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+nul
+
+# Claude Code
+.claude/
+
+# Temp / misc
+app_ec2.py
+app1.py
+*.zip
+image.jpeg

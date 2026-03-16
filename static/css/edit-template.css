@@ -1,0 +1,14 @@
+
+    .CodeMirror {
+        height: 400px;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        font-family: 'Fira Code', monospace;
+        font-size: 14px;
+    }
+    #preview-frame {
+        width: 100%;
+        min-height: 400px;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+    }

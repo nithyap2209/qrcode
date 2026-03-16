@@ -1,4 +1,7 @@
 {% extends 'admin/base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/admin/blog-categories.css") }}">
+{% endblock %}
 
 {% block title %}Blog Categories - Admin Dashboard{% endblock %}
 
@@ -18,7 +21,8 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
+                    <!-- Desktop Table View -->
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
@@ -77,6 +81,50 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Mobile Card View -->
+                    <div class="d-md-none">
+                        {% if categories %}
+                            {% for category in categories %}
+                            <div class="mobile-data-card mb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1 fw-semibold">{{ category.name }}</h6>
+                                        <small class="text-muted">{{ category.blogs.count() }} blogs</small>
+                                    </div>
+                                    {% if category.status %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                                    <span><i class="fas fa-sort-numeric-down me-1"></i>Sort: {{ category.sort_order }}</span>
+                                    <span><i class="fas fa-hashtag me-1"></i>ID: {{ category.id }}</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('admin.admin_edit_blog_category', id=category.id) }}"
+                                       class="btn btn-outline-primary btn-sm flex-fill">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm flex-fill"
+                                            onclick="deleteCategory({{ category.id }}, '{{ category.name }}', {{ category.blogs.count() }})">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No categories found</p>
+                                <a href="{{ url_for('admin.admin_add_blog_category') }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i>Add Your First Category
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -106,18 +154,7 @@
     </div>
 </div>
 
-<style>
-    .card {
-        border-radius: 12px;
-    }
 
-    .table thead th {
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        color: #495057;
-    }
-</style>
 
 <script>
     function deleteCategory(categoryId, categoryName, blogCount) {

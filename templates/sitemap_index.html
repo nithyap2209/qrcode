@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitemap - QR Dada</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+   <!-- ✅ YOUR EXTERNAL CSS (ADD HERE) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sitemap-index.css') }}">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <a href="{{ url_for('index') }}" class="flex items-center space-x-3">
+                    <div class="bg-white p-2 rounded-lg shadow-sm">
+                        {% if website_settings and website_settings.website_logo_file %}
+                            <img src="{{ url_for('static', filename='uploads/' + website_settings.website_logo_file) }}"
+                                alt="QR Dada Logo" class="h-10 w-auto">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/qr.png') }}"
+                                alt="QR Dada Logo" class="h-10 w-auto">
+                        {% endif %}
+                    </div>
+                    
+                </a>
+                <a href="{{ url_for('index') }}" class="text-primary-600 hover:text-primary-700 font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Sitemap</h1>
+            <p class="text-xl text-primary-100 max-w-2xl mx-auto">
+                Explore all pages and resources available on QR Dada
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+        <!-- Category Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Pages Category -->
+            <a href="/page-sitemap" class="category-card bg-white rounded-2xl shadow-lg p-8 text-center cursor-pointer">
+                <div class="category-icon bg-primary-100 text-primary-600">
+                    <i class="fas fa-file-alt text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Pages</h2>
+                <p class="text-gray-500 mb-4">Main website pages, services, and legal pages</p>
+                <div class="flex items-center justify-center text-primary-600 font-medium">
+                    <span>View All Pages</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <span class="text-sm text-gray-400">{{ pages_count }} pages</span>
+                </div>
+            </a>
+
+            <!-- Posts Category -->
+            <a href="/post-sitemap" class="category-card bg-white rounded-2xl shadow-lg p-8 text-center cursor-pointer">
+                <div class="category-icon bg-orange-100 text-orange-600">
+                    <i class="fas fa-blog text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Posts</h2>
+                <p class="text-gray-500 mb-4">Articles, tutorials, and latest updates</p>
+                <div class="flex items-center justify-center text-orange-600 font-medium">
+                    <span>View All Posts</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <span class="text-sm text-gray-400">{{ blogs_count }} articles</span>
+                </div>
+            </a>
+
+            <!-- Web Stories Category -->
+            <a href="/web-story-sitemap" class="category-card bg-white rounded-2xl shadow-lg p-8 text-center cursor-pointer">
+                <div class="category-icon bg-purple-100 text-purple-600">
+                    <i class="fas fa-images text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Web Stories</h2>
+                <p class="text-gray-500 mb-4">Visual stories and interactive content</p>
+                <div class="flex items-center justify-center text-purple-600 font-medium">
+                    <span>View All Stories</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <span class="text-sm text-gray-400">{{ webstories_count }} stories</span>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- XML Sitemap Link -->
+        <div class="mt-16 bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-4">
+                <i class="fas fa-code text-2xl text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">XML Sitemap for Search Engines</h3>
+            <p class="text-gray-300 mb-4">For search engine crawlers and SEO tools</p>
+            <a href="{{ url_for('sitemap_xml') }}" target="_blank" class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition">
+                <i class="fas fa-external-link-alt mr-2"></i>View XML Sitemap
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <p class="text-gray-400 text-sm">&copy; {{ current_year }} QR Dada. All rights reserved.</p>
+                <div class="flex space-x-6 text-sm">
+                    <a href="{{ url_for('privacy') }}" class="text-gray-400 hover:text-white transition">Privacy</a>
+                    <a href="{{ url_for('terms') }}" class="text-gray-400 hover:text-white transition">Terms</a>
+                    <a href="{{ url_for('contact') }}" class="text-gray-400 hover:text-white transition">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

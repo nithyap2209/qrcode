@@ -1,4 +1,8 @@
 {% extends "admin/base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for("static", filename="css/admin/website-settings.css") }}">
+{% endblock %}
+
 
 {% block title %}Website Settings - Admin{% endblock %}
 
@@ -382,46 +386,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
-.timeline {
-    position: relative;
-    padding-left: 30px;
-}
 
-.timeline-item {
-    position: relative;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -35px;
-    top: 5px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-
-.timeline-content {
-    padding-left: 5px;
-}
-
-.border-left-primary {
-    border-left: 4px solid #273879 !important;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #273879;
-    box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
-}
-
-.btn-primary {
-    background-color: #273879;
-    border-color: #273879;
-}
-
-.btn-primary:hover {
-    background-color: #273879;
-    border-color: #273879;
-}
-</style>
 {% endblock %}

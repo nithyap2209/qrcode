@@ -1,0 +1,41 @@
+
+.card {
+    border-radius: 12px;
+}
+
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+/* Mobile Card Styles */
+.mobile-data-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.mobile-data-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Mobile header adjustments */
+@media (max-width: 767.98px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch !important;
+    }
+
+    .card-header .btn {
+        width: 100%;
+    }
+
+    .card-header h5 {
+        font-size: 1.1rem;
+    }
+}

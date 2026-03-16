@@ -1,0 +1,160 @@
+/**
+ * Admin New Subscribed User Page CSS
+ * Styles for templates/admin/new_subscribed_user.html
+ */
+
+.user-search-container {
+    position: relative;
+}
+
+.user-search-container input.user-selected {
+    background-color: #e7f3ff;
+    border-color: #007bff;
+    color: #0056b3;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.user-search-container input.user-selected::placeholder {
+    color: #0056b3;
+    opacity: 0.8;
+}
+
+.search-icon {
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 0.375rem 0.375rem;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-result-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.search-result-item:hover,
+.search-result-item.active {
+    background-color: #f8f9fa;
+}
+
+.search-result-item.no-results {
+    color: #6c757d;
+    cursor: default;
+    font-style: italic;
+    justify-content: center;
+}
+
+.search-result-item.no-results:hover {
+    background-color: transparent;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 2px;
+}
+
+.user-email {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.select-icon {
+    color: #007bff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.search-result-item:hover .select-icon {
+    opacity: 1;
+}
+
+mark {
+    background-color: #fff3cd;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.selected-user-display .alert {
+    margin-bottom: 0;
+    padding: 8px 12px;
+}
+
+.feature-item {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+}
+
+.feature-item:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.text-muted {
+    opacity: 0.6;
+}
+
+/* Animation for the form submission */
+.btn-primary:active {
+    animation: btn-pulse 0.3s ease-out;
+}
+
+@keyframes btn-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* Visual indicator for readonly state */
+.user-search-container input[readonly] {
+    cursor: pointer;
+}
+
+.user-search-container input[readonly]:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .search-results {
+        max-height: 200px;
+    }
+
+    .search-result-item {
+        padding: 10px 12px;
+    }
+
+    .user-name {
+        font-size: 0.9rem;
+    }
+
+    .user-email {
+        font-size: 0.8rem;
+    }
+}
