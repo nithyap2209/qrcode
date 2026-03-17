@@ -3935,6 +3935,89 @@ def qr_scanner():
     """Free QR Code Scanner tool"""
     return render_template('qr_scanner.html')
 
+@app.route('/api/scan-qr', methods=['POST'])
+def api_scan_qr():
+    """Server-side QR code scanning using pyzbar + OpenCV for styled/colored QR codes"""
+    if 'image' not in request.files:
+        return jsonify({'success': False, 'error': 'No image provided'}), 400
+
+    file = request.files['image']
+    if not file.filename:
+        return jsonify({'success': False, 'error': 'No file selected'}), 400
+
+    try:
+        import cv2
+        import numpy as np
+        from pyzbar.pyzbar import decode as pyzbar_decode
+
+        # Read image bytes
+        img_bytes = file.read()
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if img is None:
+            return jsonify({'success': False, 'error': 'Invalid image'}), 400
+
+        decoded_data = None
+
+        # Attempt 1: pyzbar on original image
+        results = pyzbar_decode(img)
+        if results:
+            decoded_data = results[0].data.decode('utf-8', errors='replace')
+
+        # Attempt 2: Convert to grayscale
+        if not decoded_data:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            results = pyzbar_decode(gray)
+            if results:
+                decoded_data = results[0].data.decode('utf-8', errors='replace')
+
+        # Attempt 3: Threshold (binarize)
+        if not decoded_data:
+            _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            results = pyzbar_decode(binary)
+            if results:
+                decoded_data = results[0].data.decode('utf-8', errors='replace')
+
+        # Attempt 4: Adaptive threshold
+        if not decoded_data:
+            adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 10)
+            results = pyzbar_decode(adaptive)
+            if results:
+                decoded_data = results[0].data.decode('utf-8', errors='replace')
+
+        # Attempt 5: Resize + sharpen for small images
+        if not decoded_data:
+            h, w = img.shape[:2]
+            if max(h, w) < 600:
+                scale = 1200 / max(h, w)
+                resized = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+                results = pyzbar_decode(resized)
+                if results:
+                    decoded_data = results[0].data.decode('utf-8', errors='replace')
+
+        # Attempt 6: OpenCV QR detector
+        if not decoded_data:
+            qr_detector = cv2.QRCodeDetector()
+            val, _, _ = qr_detector.detectAndDecode(img)
+            if val:
+                decoded_data = val
+
+        # Attempt 7: OpenCV QR detector on grayscale
+        if not decoded_data:
+            val, _, _ = qr_detector.detectAndDecode(gray)
+            if val:
+                decoded_data = val
+
+        if decoded_data:
+            return jsonify({'success': True, 'data': decoded_data})
+        else:
+            return jsonify({'success': False, 'error': 'No QR code found'})
+
+    except Exception as e:
+        logging.error(f"QR scan error: {str(e)}")
+        return jsonify({'success': False, 'error': 'Scan failed'}), 500
+
 def apply_watermark(qr_img, text):
     """Apply text watermark to QR code"""
     # Create a transparent layer for watermark
