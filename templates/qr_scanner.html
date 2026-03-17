@@ -599,53 +599,23 @@
         document.getElementById('cameraPlaceholder').classList.remove('hidden');
     }
 
-    // Image upload scanner using html5-qrcode
-    // Server-side scan fallback using pyzbar + OpenCV
-    function serverSideScan(file) {
-        var formData = new FormData();
-        formData.append('image', file);
-
-        // Get CSRF token if exists
-        var csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        var csrfInput = document.querySelector('input[name="csrf_token"]');
-        var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : (csrfInput ? csrfInput.value : '');
-
-        var headers = {};
-        if (csrfToken) headers['X-CSRFToken'] = csrfToken;
-
-        return fetch('/api/scan-qr', {
-            method: 'POST',
-            body: formData,
-            headers: headers
-        })
-        .then(function(response) {
-            if (!response.ok) throw new Error('Server error: ' + response.status);
-            return response.json();
-        })
-        .then(function(data) {
-            if (data.success && data.data) {
-                return data.data;
-            }
-            return null;
-        })
-        .catch(function(err) {
-            console.error('Server scan failed:', err);
-            return null;
-        });
-    }
+    // Store uploaded file globally so it persists
+    var currentUploadedFile = null;
 
     function scanUploadedImage(event) {
         var file = event.target.files[0];
         if (!file) return;
+        currentUploadedFile = file;
 
         // Clear previous result, preview and error
         document.getElementById('resultSection').classList.add('hidden');
         document.getElementById('resultText').textContent = '';
+        document.getElementById('rawDataSection').classList.add('hidden');
         document.getElementById('uploadError').classList.add('hidden');
         document.getElementById('uploadPreview').classList.add('hidden');
         document.getElementById('previewImage').src = '';
 
-        // Show preview immediately
+        // Show preview
         var previewReader = new FileReader();
         previewReader.onload = function(e) {
             document.getElementById('previewImage').src = e.target.result;
@@ -653,16 +623,42 @@
         };
         previewReader.readAsDataURL(file);
 
-        // Send directly to server-side scanner (handles all QR types including styled/colored)
+        // Send to server for scanning
         showToast('Scanning QR code...', 'info');
-        serverSideScan(file).then(function(result) {
-            if (result) {
-                showResult(result);
-                showToast('QR code scanned successfully!', 'success');
+
+        var formData = new FormData();
+        formData.append('image', file);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/scan-qr', true);
+        xhr.setRequestHeader('Accept', 'application/json');
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.success && data.data) {
+                        showResult(data.data);
+                        showToast('QR code scanned successfully!', 'success');
+                    } else {
+                        document.getElementById('uploadError').classList.remove('hidden');
+                    }
+                } catch (e) {
+                    console.error('Parse error:', e);
+                    document.getElementById('uploadError').classList.remove('hidden');
+                }
             } else {
+                console.error('Server responded with:', xhr.status, xhr.responseText);
                 document.getElementById('uploadError').classList.remove('hidden');
             }
-        });
+        };
+
+        xhr.onerror = function() {
+            console.error('Network error during scan');
+            document.getElementById('uploadError').classList.remove('hidden');
+        };
+
+        xhr.send(formData);
     }
 
     // Reset upload area
