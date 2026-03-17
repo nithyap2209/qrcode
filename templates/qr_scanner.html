@@ -371,8 +371,12 @@
         const file = event.target.files[0];
         if (!file) return;
 
-        // Hide previous error
+        // Clear previous result, preview and error immediately
+        document.getElementById('resultSection').classList.add('hidden');
+        document.getElementById('resultText').textContent = '';
         document.getElementById('uploadError').classList.add('hidden');
+        document.getElementById('uploadPreview').classList.add('hidden');
+        document.getElementById('previewImage').src = '';
 
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -386,6 +390,7 @@
                     inversionAttempts: 'attemptBoth'
                 });
 
+                // Show new image preview
                 document.getElementById('previewImage').src = e.target.result;
                 document.getElementById('uploadPreview').classList.remove('hidden');
 
@@ -466,7 +471,13 @@
         document.getElementById('resultText').textContent = '';
         document.getElementById('uploadPreview').classList.add('hidden');
         document.getElementById('uploadError').classList.add('hidden');
+        document.getElementById('previewImage').src = '';
         document.getElementById('fileInput').value = '';
+
+        // If on upload tab, open file picker right away for next scan
+        if (!document.getElementById('uploadPanel').classList.contains('hidden')) {
+            document.getElementById('fileInput').click();
+        }
     }
 
     // FAQ toggle
