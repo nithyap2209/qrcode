@@ -107,7 +107,14 @@
                 </div>
                 <!-- Formatted result content -->
                 <div id="resultFormatted" class="result-formatted"></div>
-                <!-- Raw data (hidden, used for copy) -->
+                <!-- Raw data toggle -->
+                <div id="rawDataSection" class="hidden mt-3">
+                    <div class="raw-data-box">
+                        <p class="text-xs font-semibold text-gray-400 mb-1 uppercase">Raw Data</p>
+                        <pre id="rawDataText" class="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-all"></pre>
+                    </div>
+                </div>
+                <!-- Hidden copy source -->
                 <p id="resultText" class="hidden"></p>
                 <!-- Action buttons -->
                 <div class="flex flex-wrap gap-2 sm:gap-3 mt-4">
@@ -117,9 +124,12 @@
                     <a id="openLinkBtn" href="#" target="_blank" rel="noopener noreferrer" class="scanner-btn scanner-btn-outline text-xs sm:text-sm hidden">
                         <i class="fas fa-external-link-alt"></i> Open Link
                     </a>
-                    <a id="actionBtn" href="#" class="scanner-btn scanner-btn-outline text-xs sm:text-sm hidden">
+                    <a id="actionBtn" href="#" title="Action" class="scanner-btn scanner-btn-outline text-xs sm:text-sm hidden">
                         <i id="actionBtnIcon" class="fas fa-external-link-alt"></i> <span id="actionBtnText"></span>
                     </a>
+                    <button type="button" class="scanner-btn scanner-btn-outline text-xs sm:text-sm" onclick="toggleRawData()">
+                        <i class="fas fa-code"></i> Raw Data
+                    </button>
                     <button type="button" class="scanner-btn scanner-btn-outline text-xs sm:text-sm" onclick="resetScanner()">
                         <i class="fas fa-redo"></i> Scan Again
                     </button>
@@ -652,6 +662,9 @@
         }
 
         formatted.innerHTML = html;
+        // Populate raw data and hide it by default
+        document.getElementById('rawDataText').textContent = data;
+        document.getElementById('rawDataSection').classList.add('hidden');
         document.getElementById('resultSection').classList.remove('hidden');
 
         setTimeout(function() {
@@ -686,6 +699,12 @@
     }
 
     // FAQ toggle
+    // Toggle raw data view
+    function toggleRawData() {
+        var section = document.getElementById('rawDataSection');
+        section.classList.toggle('hidden');
+    }
+
     function toggleFaq(btn) {
         var content = btn.nextElementSibling;
         var icon = btn.querySelector('i');

@@ -3959,55 +3959,102 @@ def api_scan_qr():
             return jsonify({'success': False, 'error': 'Invalid image'}), 400
 
         decoded_data = None
+        h, w = img.shape[:2]
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # Attempt 1: pyzbar on original image
-        results = pyzbar_decode(img)
-        if results:
-            decoded_data = results[0].data.decode('utf-8', errors='replace')
-
-        # Attempt 2: Convert to grayscale
-        if not decoded_data:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            results = pyzbar_decode(gray)
+        # Helper to try pyzbar decode
+        def try_decode(image):
+            results = pyzbar_decode(image)
             if results:
-                decoded_data = results[0].data.decode('utf-8', errors='replace')
+                return results[0].data.decode('utf-8', errors='replace')
+            return None
 
-        # Attempt 3: Threshold (binarize)
+        # Attempt 1: pyzbar on original
+        decoded_data = try_decode(img)
+
+        # Attempt 2: Grayscale
+        if not decoded_data:
+            decoded_data = try_decode(gray)
+
+        # Attempt 3: Otsu threshold
         if not decoded_data:
             _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-            results = pyzbar_decode(binary)
-            if results:
-                decoded_data = results[0].data.decode('utf-8', errors='replace')
+            decoded_data = try_decode(binary)
 
         # Attempt 4: Adaptive threshold
         if not decoded_data:
-            adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 10)
-            results = pyzbar_decode(adaptive)
-            if results:
-                decoded_data = results[0].data.decode('utf-8', errors='replace')
+            block_size = max(51, (min(h, w) // 10) | 1)
+            adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, block_size, 10)
+            decoded_data = try_decode(adaptive)
 
-        # Attempt 5: Resize + sharpen for small images
+        # Attempt 5: Color-to-black conversion (for colored QR codes)
+        # Convert any non-white pixel to black
         if not decoded_data:
-            h, w = img.shape[:2]
-            if max(h, w) < 600:
-                scale = 1200 / max(h, w)
-                resized = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
-                results = pyzbar_decode(resized)
-                if results:
-                    decoded_data = results[0].data.decode('utf-8', errors='replace')
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            # White: low saturation + high value
+            white_mask = cv2.inRange(hsv, np.array([0, 0, 180]), np.array([180, 60, 255]))
+            color_bw = np.full_like(gray, 0)  # Start all black
+            color_bw[white_mask > 0] = 255     # Set white areas
+            decoded_data = try_decode(color_bw)
 
-        # Attempt 6: OpenCV QR detector
+        # Attempt 6: Morphological close to fill circular dots into squares
+        if not decoded_data:
+            _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+            kernel_size = max(3, min(h, w) // 80)
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
+            closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+            # Dilate slightly to merge nearby dots
+            dilated = cv2.dilate(closed, kernel, iterations=1)
+            inverted = cv2.bitwise_not(dilated)
+            decoded_data = try_decode(inverted)
+
+        # Attempt 7: Scale up small images
+        if not decoded_data and max(h, w) < 800:
+            scale = 1200 / max(h, w)
+            resized = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+            decoded_data = try_decode(resized)
+            if not decoded_data:
+                resized_gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+                _, resized_bin = cv2.threshold(resized_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                decoded_data = try_decode(resized_bin)
+
+        # Attempt 8: Heavy blur + threshold (smooths dots into solid areas)
+        if not decoded_data:
+            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+            _, blur_bin = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            decoded_data = try_decode(blur_bin)
+
+        # Attempt 9: Median blur (good for salt-and-pepper noise / dot patterns)
+        if not decoded_data:
+            median = cv2.medianBlur(gray, 5)
+            _, median_bin = cv2.threshold(median, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            decoded_data = try_decode(median_bin)
+
+        # Attempt 10: OpenCV QR detector (different algorithm)
         if not decoded_data:
             qr_detector = cv2.QRCodeDetector()
             val, _, _ = qr_detector.detectAndDecode(img)
             if val:
                 decoded_data = val
 
-        # Attempt 7: OpenCV QR detector on grayscale
+        # Attempt 11: OpenCV QR detector on processed images
         if not decoded_data:
-            val, _, _ = qr_detector.detectAndDecode(gray)
-            if val:
-                decoded_data = val
+            for proc_img in [gray, binary, color_bw]:
+                val, _, _ = qr_detector.detectAndDecode(proc_img)
+                if val:
+                    decoded_data = val
+                    break
+
+        # Attempt 12: Scale up + morphological close (for small styled QR)
+        if not decoded_data:
+            scale = max(2.0, 1500 / max(h, w))
+            big = cv2.resize(gray, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+            _, big_bin = cv2.threshold(big, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            k = max(3, int(scale * 2) | 1)
+            kern = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
+            big_closed = cv2.morphologyEx(big_bin, cv2.MORPH_CLOSE, kern)
+            big_inv = cv2.bitwise_not(big_closed)
+            decoded_data = try_decode(big_inv)
 
         if decoded_data:
             return jsonify({'success': True, 'data': decoded_data})
