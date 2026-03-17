@@ -3952,13 +3952,27 @@ def api_scan_qr():
         # Read image bytes
         img_bytes = file.read()
         nparr = np.frombuffer(img_bytes, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        if img is None:
+        # Read with alpha channel support (IMREAD_UNCHANGED)
+        img_raw = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+
+        if img_raw is None:
             return jsonify({'success': False, 'error': 'Invalid image'}), 400
+
+        # Handle transparent PNG: replace alpha with white background
+        if len(img_raw.shape) == 3 and img_raw.shape[2] == 4:
+            # Image has alpha channel (RGBA)
+            alpha = img_raw[:, :, 3] / 255.0
+            white_bg = np.ones_like(img_raw[:, :, :3], dtype=np.uint8) * 255
+            for c in range(3):
+                white_bg[:, :, c] = (img_raw[:, :, c] * alpha + 255 * (1 - alpha)).astype(np.uint8)
+            img = white_bg
+        else:
+            img = img_raw if len(img_raw.shape) == 3 else cv2.cvtColor(img_raw, cv2.COLOR_GRAY2BGR)
 
         decoded_data = None
         h, w = img.shape[:2]
+        logging.info(f"QR scan: image size={w}x{h}, original_channels={img_raw.shape[2] if len(img_raw.shape)==3 else 1}, file={file.filename}")
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         detector = cv2.QRCodeDetector()
 
