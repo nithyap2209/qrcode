@@ -380,24 +380,33 @@
         var formData = new FormData();
         formData.append('image', file);
 
-        // Get CSRF token
+        // Get CSRF token if exists
         var csrfMeta = document.querySelector('meta[name="csrf-token"]');
         var csrfInput = document.querySelector('input[name="csrf_token"]');
         var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : (csrfInput ? csrfInput.value : '');
 
+        var headers = {};
+        if (csrfToken) headers['X-CSRFToken'] = csrfToken;
+
         return fetch('/api/scan-qr', {
             method: 'POST',
             body: formData,
-            headers: csrfToken ? { 'X-CSRFToken': csrfToken } : {}
+            headers: headers
         })
-        .then(function(response) { return response.json(); })
+        .then(function(response) {
+            if (!response.ok) throw new Error('Server error: ' + response.status);
+            return response.json();
+        })
         .then(function(data) {
             if (data.success && data.data) {
                 return data.data;
             }
             return null;
         })
-        .catch(function() { return null; });
+        .catch(function(err) {
+            console.error('Server scan failed:', err);
+            return null;
+        });
     }
 
     function scanUploadedImage(event) {
@@ -419,25 +428,42 @@
         };
         previewReader.readAsDataURL(file);
 
-        // Step 1: Try client-side scan (html5-qrcode / ZXing)
+        // Try client-side first, then server-side fallback
+        var clientDone = false;
+
+        // Client-side scan (html5-qrcode / ZXing)
         var tempScanner = new Html5Qrcode('uploadScanTemp');
         tempScanner.scanFile(file, true)
             .then(function(decodedText) {
+                clientDone = true;
                 showResult(decodedText);
                 showToast('QR code scanned successfully!', 'success');
             })
             .catch(function() {
-                // Step 2: Client-side failed → try server-side (pyzbar + OpenCV)
-                showToast('Analyzing with advanced scanner...', 'info');
-                serverSideScan(file).then(function(result) {
-                    if (result) {
-                        showResult(result);
-                        showToast('QR code scanned successfully!', 'success');
-                    } else {
-                        document.getElementById('uploadError').classList.remove('hidden');
-                    }
-                });
+                clientDone = true;
+                // Client failed → try server-side
+                tryServerScan(file);
             });
+
+        // If client-side takes too long (>3s), go to server directly
+        setTimeout(function() {
+            if (!clientDone) {
+                clientDone = true;
+                tryServerScan(file);
+            }
+        }, 3000);
+    }
+
+    function tryServerScan(file) {
+        showToast('Scanning with advanced engine...', 'info');
+        serverSideScan(file).then(function(result) {
+            if (result) {
+                showResult(result);
+                showToast('QR code scanned successfully!', 'success');
+            } else {
+                document.getElementById('uploadError').classList.remove('hidden');
+            }
+        });
     }
 
     // Reset upload area
