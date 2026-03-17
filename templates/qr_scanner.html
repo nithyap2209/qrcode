@@ -634,31 +634,36 @@
         xhr.setRequestHeader('Accept', 'application/json');
 
         xhr.onload = function() {
-            if (xhr.status === 200) {
-                try {
-                    var data = JSON.parse(xhr.responseText);
-                    if (data.success && data.data) {
-                        showResult(data.data);
-                        showToast('QR code scanned successfully!', 'success');
-                    } else {
-                        document.getElementById('uploadError').classList.remove('hidden');
-                    }
-                } catch (e) {
-                    console.error('Parse error:', e);
-                    document.getElementById('uploadError').classList.remove('hidden');
+            try {
+                var data = JSON.parse(xhr.responseText);
+                if (data.success && data.data) {
+                    showResult(data.data);
+                    showToast('QR code scanned successfully!', 'success');
+                    return;
                 }
-            } else {
-                console.error('Server responded with:', xhr.status, xhr.responseText);
-                document.getElementById('uploadError').classList.remove('hidden');
+            } catch (e) {
+                // parse failed
             }
+            // If we get here, scan failed — show error with details for debugging
+            document.getElementById('uploadError').classList.remove('hidden');
+            showToast('Scan failed (HTTP ' + xhr.status + '). Check browser console.', 'error');
+            console.error('QR Scan Response:', xhr.status, xhr.responseText);
         };
 
         xhr.onerror = function() {
-            console.error('Network error during scan');
             document.getElementById('uploadError').classList.remove('hidden');
+            showToast('Network error — is the server running?', 'error');
+            console.error('XHR network error');
+        };
+
+        xhr.timeout = 15000;
+        xhr.ontimeout = function() {
+            document.getElementById('uploadError').classList.remove('hidden');
+            showToast('Scan timed out. Please try again.', 'error');
         };
 
         xhr.send(formData);
+        console.log('Scan request sent for file:', file.name, file.size, 'bytes');
     }
 
     // Reset upload area
