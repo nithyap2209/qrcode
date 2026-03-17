@@ -100,21 +100,25 @@
         <!-- Result Section -->
         <div id="resultSection" class="hidden mb-6">
             <div class="scanner-result has-result">
-                <div class="flex items-start gap-3">
-                    <div class="flex-shrink-0 mt-1">
-                        <i class="fas fa-check-circle text-green-500 text-lg sm:text-xl"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Scanned Result</p>
-                        <p id="resultText" class="text-sm sm:text-lg text-gray-800 break-all"></p>
-                    </div>
+                <!-- Result type badge -->
+                <div class="flex items-center gap-2 mb-3">
+                    <i id="resultTypeIcon" class="fas fa-check-circle text-green-500 text-lg"></i>
+                    <span id="resultTypeBadge" class="result-type-badge">Scanned Result</span>
                 </div>
+                <!-- Formatted result content -->
+                <div id="resultFormatted" class="result-formatted"></div>
+                <!-- Raw data (hidden, used for copy) -->
+                <p id="resultText" class="hidden"></p>
+                <!-- Action buttons -->
                 <div class="flex flex-wrap gap-2 sm:gap-3 mt-4">
                     <button type="button" class="scanner-btn scanner-btn-primary text-xs sm:text-sm" onclick="copyResult(event)">
                         <i class="fas fa-copy"></i> Copy
                     </button>
                     <a id="openLinkBtn" href="#" target="_blank" rel="noopener noreferrer" class="scanner-btn scanner-btn-outline text-xs sm:text-sm hidden">
                         <i class="fas fa-external-link-alt"></i> Open Link
+                    </a>
+                    <a id="actionBtn" href="#" class="scanner-btn scanner-btn-outline text-xs sm:text-sm hidden">
+                        <i id="actionBtnIcon" class="fas fa-external-link-alt"></i> <span id="actionBtnText"></span>
                     </a>
                     <button type="button" class="scanner-btn scanner-btn-outline text-xs sm:text-sm" onclick="resetScanner()">
                         <i class="fas fa-redo"></i> Scan Again
@@ -419,23 +423,206 @@
         }
     });
 
-    // Show result
+    // Detect QR content type
+    function detectType(data) {
+        var d = data.trim();
+        if (d.toUpperCase().startsWith('BEGIN:VCALENDAR') || d.toUpperCase().startsWith('BEGIN:VEVENT')) return 'event';
+        if (d.toUpperCase().startsWith('BEGIN:VCARD')) return 'vcard';
+        if (d.toUpperCase().startsWith('WIFI:')) return 'wifi';
+        if (d.toUpperCase().startsWith('MAILTO:')) return 'email';
+        if (d.toUpperCase().startsWith('TEL:')) return 'phone';
+        if (d.toUpperCase().startsWith('SMSTO:') || d.toUpperCase().startsWith('SMS:')) return 'sms';
+        if (d.toLowerCase().startsWith('https://wa.me/') || d.toLowerCase().startsWith('https://api.whatsapp.com/')) return 'whatsapp';
+        try { var u = new URL(d); if (u.protocol === 'http:' || u.protocol === 'https:') return 'url'; } catch(e) {}
+        return 'text';
+    }
+
+    // Extract value from vCard/vCal field
+    function extractField(data, fieldName) {
+        var lines = data.split(/\r?\n/);
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            // Handle fields like "FN:", "TEL;TYPE=CELL:", "DTSTART:" etc
+            if (line.toUpperCase().startsWith(fieldName.toUpperCase() + ':') || line.toUpperCase().startsWith(fieldName.toUpperCase() + ';')) {
+                return line.substring(line.indexOf(':') + 1).trim();
+            }
+        }
+        return '';
+    }
+
+    // Format date string like 20251114T235100 to readable format
+    function formatDateTime(dtStr) {
+        if (!dtStr || dtStr.length < 8) return dtStr;
+        var clean = dtStr.replace(/[^0-9T]/g, '');
+        var year = clean.substring(0, 4);
+        var month = clean.substring(4, 6);
+        var day = clean.substring(6, 8);
+        var result = day + '/' + month + '/' + year;
+        if (clean.length >= 13 && clean.indexOf('T') !== -1) {
+            var timePart = clean.split('T')[1];
+            var hour = timePart.substring(0, 2);
+            var min = timePart.substring(2, 4);
+            result += ' at ' + hour + ':' + min;
+        }
+        return result;
+    }
+
+    // Build a formatted row
+    function resultRow(icon, label, value) {
+        if (!value) return '';
+        // Escape HTML
+        var safe = value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return '<div class="result-row"><i class="fas fa-' + icon + ' result-row-icon"></i><div><span class="result-row-label">' + label + '</span><span class="result-row-value">' + safe + '</span></div></div>';
+    }
+
+    // Show result with smart formatting
     function showResult(data) {
         document.getElementById('resultText').textContent = data;
+        var type = detectType(data);
+        var formatted = document.getElementById('resultFormatted');
+        var badge = document.getElementById('resultTypeBadge');
+        var typeIcon = document.getElementById('resultTypeIcon');
+        var openLinkBtn = document.getElementById('openLinkBtn');
+        var actionBtn = document.getElementById('actionBtn');
+        var actionBtnIcon = document.getElementById('actionBtnIcon');
+        var actionBtnText = document.getElementById('actionBtnText');
+        var html = '';
+
+        // Reset action buttons
+        openLinkBtn.classList.add('hidden');
+        actionBtn.classList.add('hidden');
+
+        if (type === 'event') {
+            badge.textContent = 'Calendar Event';
+            typeIcon.className = 'fas fa-calendar-alt text-secondary-600 text-lg';
+            var summary = extractField(data, 'SUMMARY');
+            var location = extractField(data, 'LOCATION');
+            var dtstart = extractField(data, 'DTSTART');
+            var dtend = extractField(data, 'DTEND');
+            var description = extractField(data, 'DESCRIPTION');
+            var organizer = extractField(data, 'ORGANIZER');
+            html += resultRow('calendar-check', 'Event', summary);
+            html += resultRow('map-marker-alt', 'Location', location);
+            html += resultRow('clock', 'Starts', formatDateTime(dtstart));
+            if (dtend) html += resultRow('clock', 'Ends', formatDateTime(dtend));
+            if (description) html += resultRow('align-left', 'Details', description);
+            if (organizer) html += resultRow('user', 'Organizer', organizer);
+
+        } else if (type === 'vcard') {
+            badge.textContent = 'Contact Card';
+            typeIcon.className = 'fas fa-address-card text-secondary-600 text-lg';
+            var fn = extractField(data, 'FN');
+            var tel = extractField(data, 'TEL');
+            var email = extractField(data, 'EMAIL');
+            var org = extractField(data, 'ORG');
+            var title = extractField(data, 'TITLE');
+            var url = extractField(data, 'URL');
+            var adr = extractField(data, 'ADR');
+            var note = extractField(data, 'NOTE');
+            html += resultRow('user', 'Name', fn);
+            if (org) html += resultRow('building', 'Organization', org);
+            if (title) html += resultRow('briefcase', 'Title', title);
+            if (tel) html += resultRow('phone', 'Phone', tel);
+            if (email) html += resultRow('envelope', 'Email', email);
+            if (url) html += resultRow('globe', 'Website', url);
+            if (adr) html += resultRow('map-marker-alt', 'Address', adr.replace(/;/g, ', '));
+            if (note) html += resultRow('sticky-note', 'Note', note);
+            // Action: Call
+            if (tel) {
+                actionBtn.href = 'tel:' + tel;
+                actionBtnIcon.className = 'fas fa-phone';
+                actionBtnText.textContent = 'Call';
+                actionBtn.classList.remove('hidden');
+            }
+
+        } else if (type === 'wifi') {
+            badge.textContent = 'WiFi Network';
+            typeIcon.className = 'fas fa-wifi text-secondary-600 text-lg';
+            var wifiData = data.substring(5); // Remove 'WIFI:'
+            var ssid = '', password = '', encryption = '', hidden = '';
+            wifiData.split(';').forEach(function(part) {
+                if (part.startsWith('S:')) ssid = part.substring(2);
+                else if (part.startsWith('P:')) password = part.substring(2);
+                else if (part.startsWith('T:')) encryption = part.substring(2);
+                else if (part.startsWith('H:')) hidden = part.substring(2);
+            });
+            html += resultRow('wifi', 'Network Name', ssid);
+            if (password) html += resultRow('key', 'Password', password);
+            if (encryption) html += resultRow('lock', 'Security', encryption);
+            if (hidden === 'true') html += resultRow('eye-slash', 'Hidden', 'Yes');
+
+        } else if (type === 'email') {
+            badge.textContent = 'Email';
+            typeIcon.className = 'fas fa-envelope text-secondary-600 text-lg';
+            var emailAddr = data.replace(/^mailto:/i, '').split('?')[0];
+            var subject = '', body = '';
+            if (data.indexOf('?') !== -1) {
+                var params = data.substring(data.indexOf('?') + 1).split('&');
+                params.forEach(function(p) {
+                    if (p.toLowerCase().startsWith('subject=')) subject = decodeURIComponent(p.substring(8));
+                    if (p.toLowerCase().startsWith('body=')) body = decodeURIComponent(p.substring(5));
+                });
+            }
+            html += resultRow('envelope', 'Email', emailAddr);
+            if (subject) html += resultRow('heading', 'Subject', subject);
+            if (body) html += resultRow('align-left', 'Message', body);
+            actionBtn.href = data;
+            actionBtnIcon.className = 'fas fa-paper-plane';
+            actionBtnText.textContent = 'Send Email';
+            actionBtn.classList.remove('hidden');
+
+        } else if (type === 'phone') {
+            badge.textContent = 'Phone Number';
+            typeIcon.className = 'fas fa-phone text-secondary-600 text-lg';
+            var phoneNum = data.replace(/^tel:/i, '');
+            html += resultRow('phone', 'Number', phoneNum);
+            actionBtn.href = 'tel:' + phoneNum;
+            actionBtnIcon.className = 'fas fa-phone';
+            actionBtnText.textContent = 'Call';
+            actionBtn.classList.remove('hidden');
+
+        } else if (type === 'sms') {
+            badge.textContent = 'SMS Message';
+            typeIcon.className = 'fas fa-sms text-secondary-600 text-lg';
+            var smsClean = data.replace(/^smsto:|^sms:/i, '');
+            var smsParts = smsClean.split(':');
+            var smsNum = smsParts[0] || '';
+            var smsMsg = smsParts.slice(1).join(':') || '';
+            html += resultRow('phone', 'Number', smsNum);
+            if (smsMsg) html += resultRow('comment', 'Message', smsMsg);
+            actionBtn.href = 'sms:' + smsNum + (smsMsg ? '?body=' + encodeURIComponent(smsMsg) : '');
+            actionBtnIcon.className = 'fas fa-sms';
+            actionBtnText.textContent = 'Send SMS';
+            actionBtn.classList.remove('hidden');
+
+        } else if (type === 'whatsapp') {
+            badge.textContent = 'WhatsApp';
+            typeIcon.className = 'fab fa-whatsapp text-green-600 text-lg';
+            html += resultRow('comment-dots', 'WhatsApp Link', data);
+            openLinkBtn.href = data;
+            openLinkBtn.classList.remove('hidden');
+
+        } else if (type === 'url') {
+            badge.textContent = 'Website Link';
+            typeIcon.className = 'fas fa-globe text-secondary-600 text-lg';
+            var safeUrl = data.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            html += '<div class="result-row"><i class="fas fa-link result-row-icon"></i><div><span class="result-row-label">URL</span><span class="result-row-value break-all">' + safeUrl + '</span></div></div>';
+            openLinkBtn.href = data;
+            openLinkBtn.classList.remove('hidden');
+
+        } else {
+            badge.textContent = 'Text Content';
+            typeIcon.className = 'fas fa-font text-secondary-600 text-lg';
+            var safeText = data.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>');
+            html += '<div class="result-row"><i class="fas fa-align-left result-row-icon"></i><div><span class="result-row-label">Text</span><span class="result-row-value">' + safeText + '</span></div></div>';
+        }
+
+        formatted.innerHTML = html;
         document.getElementById('resultSection').classList.remove('hidden');
 
         setTimeout(function() {
             document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 100);
-
-        var openLinkBtn = document.getElementById('openLinkBtn');
-        try {
-            new URL(data);
-            openLinkBtn.href = data;
-            openLinkBtn.classList.remove('hidden');
-        } catch (e) {
-            openLinkBtn.classList.add('hidden');
-        }
     }
 
     // Copy result
