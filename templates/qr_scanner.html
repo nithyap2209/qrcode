@@ -43,18 +43,13 @@
             </button>
         </div>
 
+        <!-- Hidden temp element for upload scanning -->
+        <div id="uploadScanTemp" class="upload-scan-temp"></div>
+
         <!-- Camera Scanner -->
         <div id="cameraPanel" class="scanner-container mb-6">
             <div class="scanner-video-wrapper">
-                <video id="scannerVideo" autoplay playsinline muted></video>
-                <div class="scanner-overlay">
-                    <div class="scanner-frame">
-                        <span class="corner top-left"></span>
-                        <span class="corner top-right"></span>
-                        <span class="corner bottom-left"></span>
-                        <span class="corner bottom-right"></span>
-                    </div>
-                </div>
+                <div id="scannerVideo" class="scanner-video-inner"></div>
                 <!-- Camera placeholder when not active -->
                 <div id="cameraPlaceholder" class="camera-placeholder">
                     <i class="fas fa-camera text-4xl sm:text-5xl text-gray-400 mb-3"></i>
@@ -270,17 +265,14 @@
     </div>
 </section>
 
-<!-- jsQR Library -->
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<!-- html5-qrcode Library (ZXing-based, supports colored & styled QR codes) -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <script>
-    let videoStream = null;
-    let scanInterval = null;
-    const video = document.getElementById('scannerVideo');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let html5QrScanner = null;
+    let cameraRunning = false;
 
-    // Toast notification (replaces browser alert)
+    // Toast notification
     function showToast(message, type) {
         const toast = document.getElementById('toastNotification');
         const toastMsg = document.getElementById('toastMessage');
@@ -297,11 +289,9 @@
             toastIcon.className = 'fas fa-info-circle';
         }
 
-        // Show toast
         toast.classList.remove('hidden');
         toast.classList.add('toast-show');
 
-        // Auto-hide after 4 seconds
         setTimeout(function() {
             toast.classList.remove('toast-show');
             setTimeout(function() { toast.classList.add('hidden'); }, 300);
@@ -315,170 +305,91 @@
         document.getElementById('cameraPanel').classList.toggle('hidden', tab !== 'camera');
         document.getElementById('uploadPanel').classList.toggle('hidden', tab !== 'upload');
         if (tab === 'upload') stopCamera();
-        // Hide results when switching tabs
         document.getElementById('resultSection').classList.add('hidden');
     }
 
-    // Camera scanner
+    // Camera scanner using html5-qrcode
     async function startCamera() {
         try {
-            videoStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
-            });
-            video.srcObject = videoStream;
+            var videoWrapper = document.getElementById('scannerVideo');
+            document.getElementById('cameraPlaceholder').classList.add('hidden');
+
+            // Clear any previous scanner content
+            videoWrapper.innerHTML = '';
+
+            html5QrScanner = new Html5Qrcode('scannerVideo');
+            await html5QrScanner.start(
+                { facingMode: 'environment' },
+                {
+                    fps: 10,
+                    qrbox: function(viewfinderWidth, viewfinderHeight) {
+                        var size = Math.min(viewfinderWidth, viewfinderHeight) * 0.65;
+                        return { width: size, height: size };
+                    }
+                },
+                function(decodedText) {
+                    showResult(decodedText);
+                    stopCamera();
+                    showToast('QR code scanned successfully!', 'success');
+                },
+                function() {
+                    // Scan failure — ignore, keep scanning
+                }
+            );
+
+            cameraRunning = true;
             document.getElementById('startCameraBtn').classList.add('hidden');
             document.getElementById('stopCameraBtn').classList.remove('hidden');
-            document.getElementById('cameraPlaceholder').classList.add('hidden');
-            scanInterval = setInterval(scanFrame, 200);
         } catch (err) {
+            document.getElementById('cameraPlaceholder').classList.remove('hidden');
             showToast('Unable to access camera. Please allow camera permission in your browser settings.', 'error');
         }
     }
 
-    function stopCamera() {
-        if (videoStream) {
-            videoStream.getTracks().forEach(track => track.stop());
-            videoStream = null;
+    async function stopCamera() {
+        if (html5QrScanner && cameraRunning) {
+            try {
+                await html5QrScanner.stop();
+            } catch (e) {
+                // Already stopped
+            }
+            cameraRunning = false;
         }
-        if (scanInterval) {
-            clearInterval(scanInterval);
-            scanInterval = null;
-        }
-        video.srcObject = null;
         document.getElementById('startCameraBtn').classList.remove('hidden');
         document.getElementById('stopCameraBtn').classList.add('hidden');
         document.getElementById('cameraPlaceholder').classList.remove('hidden');
     }
 
-    function scanFrame() {
-        if (!video.videoWidth) return;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: 'dontInvert'
-        });
-        if (code) {
-            showResult(code.data);
-            stopCamera();
-            showToast('QR code scanned successfully!', 'success');
-        }
-    }
-
-    // Convert image data to high-contrast grayscale for better QR detection
-    function preprocessImage(imageData) {
-        const data = imageData.data;
-        for (let i = 0; i < data.length; i += 4) {
-            // Convert to grayscale using luminance formula
-            const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-            // Apply threshold for high contrast black/white
-            const bw = gray < 160 ? 0 : 255;
-            data[i] = bw;
-            data[i + 1] = bw;
-            data[i + 2] = bw;
-        }
-        return imageData;
-    }
-
-    // Try scanning with multiple preprocessing strategies
-    function tryScanImage(img) {
-        canvas.width = img.width;
-        canvas.height = img.height;
-
-        // Attempt 1: Scan original image directly
-        ctx.drawImage(img, 0, 0);
-        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        var code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: 'attemptBoth'
-        });
-        if (code) return code;
-
-        // Attempt 2: Grayscale with threshold
-        ctx.drawImage(img, 0, 0);
-        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        preprocessImage(imageData);
-        code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: 'attemptBoth'
-        });
-        if (code) return code;
-
-        // Attempt 3: Scale up small images (helps with low-res QR codes)
-        if (img.width < 500 || img.height < 500) {
-            var scale = Math.max(2, Math.min(4, 1000 / Math.max(img.width, img.height)));
-            canvas.width = Math.round(img.width * scale);
-            canvas.height = Math.round(img.height * scale);
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            code = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: 'attemptBoth'
-            });
-            if (code) return code;
-
-            // Attempt 4: Scaled up + grayscale threshold
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            preprocessImage(imageData);
-            code = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: 'attemptBoth'
-            });
-            if (code) return code;
-        }
-
-        // Attempt 5: High contrast with different threshold
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        var data = imageData.data;
-        for (var i = 0; i < data.length; i += 4) {
-            var gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-            var bw = gray < 128 ? 0 : 255;
-            data[i] = bw;
-            data[i + 1] = bw;
-            data[i + 2] = bw;
-        }
-        code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: 'attemptBoth'
-        });
-        if (code) return code;
-
-        return null;
-    }
-
-    // Image upload scanner
+    // Image upload scanner using html5-qrcode
     function scanUploadedImage(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Clear previous result, preview and error immediately
+        // Clear previous result, preview and error
         document.getElementById('resultSection').classList.add('hidden');
         document.getElementById('resultText').textContent = '';
         document.getElementById('uploadError').classList.add('hidden');
         document.getElementById('uploadPreview').classList.add('hidden');
         document.getElementById('previewImage').src = '';
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                var code = tryScanImage(img);
-
-                // Show new image preview
-                document.getElementById('previewImage').src = e.target.result;
-                document.getElementById('uploadPreview').classList.remove('hidden');
-
-                if (code) {
-                    showResult(code.data);
-                    showToast('QR code scanned successfully!', 'success');
-                } else {
-                    document.getElementById('uploadError').classList.remove('hidden');
-                }
-            };
-            img.src = e.target.result;
+        // Show preview immediately
+        const previewReader = new FileReader();
+        previewReader.onload = function(e) {
+            document.getElementById('previewImage').src = e.target.result;
+            document.getElementById('uploadPreview').classList.remove('hidden');
         };
-        reader.readAsDataURL(file);
+        previewReader.readAsDataURL(file);
+
+        // Scan using html5-qrcode (ZXing engine)
+        var tempScanner = new Html5Qrcode('uploadScanTemp');
+        tempScanner.scanFile(file, true)
+            .then(function(decodedText) {
+                showResult(decodedText);
+                showToast('QR code scanned successfully!', 'success');
+            })
+            .catch(function() {
+                document.getElementById('uploadError').classList.remove('hidden');
+            });
     }
 
     // Reset upload area
@@ -490,7 +401,7 @@
     }
 
     // Drag and drop
-    const uploadZone = document.getElementById('uploadZone');
+    var uploadZone = document.getElementById('uploadZone');
     uploadZone.addEventListener('dragover', function(e) {
         e.preventDefault();
         this.classList.add('drag-over');
@@ -501,7 +412,7 @@
     uploadZone.addEventListener('drop', function(e) {
         e.preventDefault();
         this.classList.remove('drag-over');
-        const file = e.dataTransfer.files[0];
+        var file = e.dataTransfer.files[0];
         if (file && file.type.startsWith('image/')) {
             document.getElementById('fileInput').files = e.dataTransfer.files;
             scanUploadedImage({ target: { files: [file] } });
@@ -513,12 +424,11 @@
         document.getElementById('resultText').textContent = data;
         document.getElementById('resultSection').classList.remove('hidden');
 
-        // Smooth scroll to result on mobile
         setTimeout(function() {
             document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 100);
 
-        const openLinkBtn = document.getElementById('openLinkBtn');
+        var openLinkBtn = document.getElementById('openLinkBtn');
         try {
             new URL(data);
             openLinkBtn.href = data;
@@ -530,10 +440,10 @@
 
     // Copy result
     function copyResult(e) {
-        const text = document.getElementById('resultText').textContent;
+        var text = document.getElementById('resultText').textContent;
         navigator.clipboard.writeText(text).then(function() {
-            const btn = e.target.closest('button');
-            const originalHTML = btn.innerHTML;
+            var btn = e.target.closest('button');
+            var originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
             showToast('Copied to clipboard!', 'success');
             setTimeout(function() { btn.innerHTML = originalHTML; }, 2000);
@@ -549,7 +459,6 @@
         document.getElementById('previewImage').src = '';
         document.getElementById('fileInput').value = '';
 
-        // If on upload tab, open file picker right away for next scan
         if (!document.getElementById('uploadPanel').classList.contains('hidden')) {
             document.getElementById('fileInput').click();
         }
@@ -557,8 +466,8 @@
 
     // FAQ toggle
     function toggleFaq(btn) {
-        const content = btn.nextElementSibling;
-        const icon = btn.querySelector('i');
+        var content = btn.nextElementSibling;
+        var icon = btn.querySelector('i');
         content.classList.toggle('hidden');
         icon.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
     }
