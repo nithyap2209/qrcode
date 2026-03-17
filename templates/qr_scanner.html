@@ -645,34 +645,8 @@
         };
         previewReader.readAsDataURL(file);
 
-        // Try client-side first, then server-side fallback
-        var clientDone = false;
-
-        // Client-side scan (html5-qrcode / ZXing)
-        var tempScanner = new Html5Qrcode('uploadScanTemp');
-        tempScanner.scanFile(file, true)
-            .then(function(decodedText) {
-                clientDone = true;
-                showResult(decodedText);
-                showToast('QR code scanned successfully!', 'success');
-            })
-            .catch(function() {
-                clientDone = true;
-                // Client failed → try server-side
-                tryServerScan(file);
-            });
-
-        // If client-side takes too long (>3s), go to server directly
-        setTimeout(function() {
-            if (!clientDone) {
-                clientDone = true;
-                tryServerScan(file);
-            }
-        }, 3000);
-    }
-
-    function tryServerScan(file) {
-        showToast('Scanning with advanced engine...', 'info');
+        // Send directly to server-side scanner (handles all QR types including styled/colored)
+        showToast('Scanning QR code...', 'info');
         serverSideScan(file).then(function(result) {
             if (result) {
                 showResult(result);
