@@ -3930,6 +3930,11 @@ def service_qr_text():
     """QR Code for Text service page"""
     return render_template('services/qr_text.html')
 
+@app.route('/qr-code-scanner')
+def qr_scanner():
+    """Free QR Code Scanner tool"""
+    return render_template('qr_scanner.html')
+
 def apply_watermark(qr_img, text):
     """Apply text watermark to QR code"""
     # Create a transparent layer for watermark

@@ -1,0 +1,401 @@
+{% extends 'base2.html' %}
+
+{% block title %}Free QR Code Scanner - Scan QR Codes Online | QR Dada{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/qr-scanner.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-primary-50 to-secondary-50 py-10 sm:py-14 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-block p-3 sm:p-4 bg-white rounded-full shadow-lg mb-4 sm:mb-6">
+            <i class="fas fa-qrcode text-4xl sm:text-5xl text-secondary-600"></i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">Free QR Code Scanner</h1>
+        <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-2">
+            Scan any QR code instantly using your camera or by uploading an image. No app required — works directly in your browser.
+        </p>
+    </div>
+</section>
+
+<!-- Scanner Section -->
+<section class="py-10 sm:py-14 md:py-16 bg-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Tabs -->
+        <div class="flex justify-center gap-3 mb-8">
+            <button id="cameraTab" class="scanner-tab active" onclick="switchTab('camera')">
+                <i class="fas fa-camera mr-2"></i>Camera
+            </button>
+            <button id="uploadTab" class="scanner-tab" onclick="switchTab('upload')">
+                <i class="fas fa-upload mr-2"></i>Upload Image
+            </button>
+        </div>
+
+        <!-- Camera Scanner -->
+        <div id="cameraPanel" class="scanner-container mb-6">
+            <div class="scanner-video-wrapper">
+                <video id="scannerVideo" autoplay playsinline muted></video>
+                <div class="scanner-overlay">
+                    <div class="scanner-frame">
+                        <span class="corner top-left"></span>
+                        <span class="corner top-right"></span>
+                        <span class="corner bottom-left"></span>
+                        <span class="corner bottom-right"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 sm:p-6 text-center">
+                <button id="startCameraBtn" class="scanner-btn scanner-btn-primary" onclick="startCamera()">
+                    <i class="fas fa-video"></i> Start Camera
+                </button>
+                <button id="stopCameraBtn" class="scanner-btn scanner-btn-outline hidden" onclick="stopCamera()">
+                    <i class="fas fa-stop"></i> Stop Camera
+                </button>
+                <p class="text-sm text-gray-500 mt-3">Point your camera at a QR code to scan it</p>
+            </div>
+        </div>
+
+        <!-- Upload Scanner -->
+        <div id="uploadPanel" class="hidden mb-6">
+            <div class="scanner-container">
+                <div class="p-6 sm:p-8">
+                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                        <p class="text-gray-600 font-medium mb-1">Click to upload or drag & drop</p>
+                        <p class="text-sm text-gray-400">Supports JPG, PNG, GIF, WebP</p>
+                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="scanUploadedImage(event)">
+                    </div>
+                    <div id="uploadPreview" class="hidden mt-4">
+                        <img id="previewImage" class="w-full rounded-lg" alt="Uploaded QR code">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultSection" class="hidden">
+            <div class="scanner-result has-result">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 mt-1">
+                        <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-500 mb-1">Scanned Result</p>
+                        <p id="resultText" class="text-base sm:text-lg text-gray-800 break-all"></p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3 mt-4">
+                    <button class="scanner-btn scanner-btn-primary text-sm" onclick="copyResult()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <a id="openLinkBtn" href="#" target="_blank" class="scanner-btn scanner-btn-outline text-sm hidden">
+                        <i class="fas fa-external-link-alt"></i> Open Link
+                    </a>
+                    <button class="scanner-btn scanner-btn-outline text-sm" onclick="resetScanner()">
+                        <i class="fas fa-redo"></i> Scan Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-10 sm:py-14 md:py-16 bg-gray-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10 sm:mb-12">How It Works</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm text-center">
+                <div class="step-number mx-auto mb-4">1</div>
+                <h3 class="font-bold text-gray-900 mb-2">Choose Method</h3>
+                <p class="text-sm text-gray-600">Use your camera for live scanning or upload an image containing a QR code.</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm text-center">
+                <div class="step-number mx-auto mb-4">2</div>
+                <h3 class="font-bold text-gray-900 mb-2">Scan QR Code</h3>
+                <p class="text-sm text-gray-600">Point your camera at the QR code or select an image file from your device.</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm text-center">
+                <div class="step-number mx-auto mb-4">3</div>
+                <h3 class="font-bold text-gray-900 mb-2">Get Results</h3>
+                <p class="text-sm text-gray-600">Instantly see the decoded content — copy it, open links, or scan another code.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-10 sm:py-14 md:py-16 bg-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10 sm:mb-12">Why Use Our QR Scanner?</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-gray-50 rounded-xl p-6">
+                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-bolt text-secondary-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Instant Scanning</h3>
+                <p class="text-sm text-gray-600">Decode any QR code in milliseconds with our fast scanning engine.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-6">
+                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-lock text-secondary-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">100% Private</h3>
+                <p class="text-sm text-gray-600">All scanning happens in your browser. No data is uploaded to any server.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-6">
+                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-mobile-alt text-secondary-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Mobile Friendly</h3>
+                <p class="text-sm text-gray-600">Works perfectly on smartphones, tablets, and desktop browsers.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-6">
+                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-dollar-sign text-secondary-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Completely Free</h3>
+                <p class="text-sm text-gray-600">No sign-up, no subscription, no limits. Scan as many QR codes as you need.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-6">
+                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-image text-secondary-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Image Upload</h3>
+                <p class="text-sm text-gray-600">Upload screenshots or photos containing QR codes to scan them.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-6">
+                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-download text-secondary-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">No App Needed</h3>
+                <p class="text-sm text-gray-600">Works directly in your browser — no downloads or installations required.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-10 sm:py-14 md:py-16 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10 sm:mb-12">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <button class="w-full text-left px-6 py-4 flex items-center justify-between" onclick="toggleFaq(this)">
+                    <span class="font-semibold text-gray-900">Is this QR scanner really free?</span>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                </button>
+                <div class="px-6 pb-4 hidden">
+                    <p class="text-gray-600">Yes, our QR code scanner is completely free with no limits. You can scan as many QR codes as you want without signing up or paying anything.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <button class="w-full text-left px-6 py-4 flex items-center justify-between" onclick="toggleFaq(this)">
+                    <span class="font-semibold text-gray-900">Is my data safe when scanning QR codes?</span>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                </button>
+                <div class="px-6 pb-4 hidden">
+                    <p class="text-gray-600">Absolutely. All scanning is done locally in your browser. No images or scan data are ever sent to our servers. Your privacy is fully protected.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <button class="w-full text-left px-6 py-4 flex items-center justify-between" onclick="toggleFaq(this)">
+                    <span class="font-semibold text-gray-900">What types of QR codes can I scan?</span>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                </button>
+                <div class="px-6 pb-4 hidden">
+                    <p class="text-gray-600">Our scanner supports all standard QR code types including URLs, text, vCards, WiFi credentials, email addresses, phone numbers, and more.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <button class="w-full text-left px-6 py-4 flex items-center justify-between" onclick="toggleFaq(this)">
+                    <span class="font-semibold text-gray-900">Does it work on mobile phones?</span>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                </button>
+                <div class="px-6 pb-4 hidden">
+                    <p class="text-gray-600">Yes, our scanner works on all modern smartphones and tablets. Simply open the page in your mobile browser and grant camera access to start scanning.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <button class="w-full text-left px-6 py-4 flex items-center justify-between" onclick="toggleFaq(this)">
+                    <span class="font-semibold text-gray-900">Can I scan a QR code from a screenshot?</span>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                </button>
+                <div class="px-6 pb-4 hidden">
+                    <p class="text-gray-600">Yes! Switch to the "Upload Image" tab and select a screenshot or photo containing a QR code. Our scanner will detect and decode it instantly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-10 sm:py-14 md:py-16 bg-gradient-to-r from-secondary-600 to-secondary-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">Need to Create QR Codes?</h2>
+        <p class="text-lg text-secondary-100 mb-8">Generate custom, branded QR codes with QR Dada — free to get started.</p>
+        <a href="{{ url_for('create_qr') }}" class="inline-block bg-white text-secondary-700 px-8 py-3 rounded-lg font-semibold hover:bg-secondary-50 transition-colors shadow-lg text-sm sm:text-base">
+            Create QR Code Free
+        </a>
+    </div>
+</section>
+
+<!-- jsQR Library -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+<script>
+    let videoStream = null;
+    let scanInterval = null;
+    const video = document.getElementById('scannerVideo');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    // Tab switching
+    function switchTab(tab) {
+        document.getElementById('cameraTab').classList.toggle('active', tab === 'camera');
+        document.getElementById('uploadTab').classList.toggle('active', tab === 'upload');
+        document.getElementById('cameraPanel').classList.toggle('hidden', tab !== 'camera');
+        document.getElementById('uploadPanel').classList.toggle('hidden', tab !== 'upload');
+        if (tab === 'upload') stopCamera();
+    }
+
+    // Camera scanner
+    async function startCamera() {
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+            });
+            video.srcObject = videoStream;
+            document.getElementById('startCameraBtn').classList.add('hidden');
+            document.getElementById('stopCameraBtn').classList.remove('hidden');
+            scanInterval = setInterval(scanFrame, 200);
+        } catch (err) {
+            alert('Unable to access camera. Please allow camera permission and try again.');
+        }
+    }
+
+    function stopCamera() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        if (scanInterval) {
+            clearInterval(scanInterval);
+            scanInterval = null;
+        }
+        video.srcObject = null;
+        document.getElementById('startCameraBtn').classList.remove('hidden');
+        document.getElementById('stopCameraBtn').classList.add('hidden');
+    }
+
+    function scanFrame() {
+        if (!video.videoWidth) return;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'dontInvert'
+        });
+        if (code) {
+            showResult(code.data);
+            stopCamera();
+        }
+    }
+
+    // Image upload scanner
+    function scanUploadedImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: 'attemptBoth'
+                });
+
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('uploadPreview').classList.remove('hidden');
+
+                if (code) {
+                    showResult(code.data);
+                } else {
+                    alert('No QR code found in the image. Please try another image.');
+                }
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Drag and drop
+    const uploadZone = document.getElementById('uploadZone');
+    uploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', function() {
+        this.classList.remove('drag-over');
+    });
+    uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            document.getElementById('fileInput').files = e.dataTransfer.files;
+            scanUploadedImage({ target: { files: [file] } });
+        }
+    });
+
+    // Show result
+    function showResult(data) {
+        document.getElementById('resultText').textContent = data;
+        document.getElementById('resultSection').classList.remove('hidden');
+
+        const openLinkBtn = document.getElementById('openLinkBtn');
+        try {
+            new URL(data);
+            openLinkBtn.href = data;
+            openLinkBtn.classList.remove('hidden');
+        } catch {
+            openLinkBtn.classList.add('hidden');
+        }
+    }
+
+    // Copy result
+    function copyResult() {
+        const text = document.getElementById('resultText').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+        });
+    }
+
+    // Reset scanner
+    function resetScanner() {
+        document.getElementById('resultSection').classList.add('hidden');
+        document.getElementById('resultText').textContent = '';
+        document.getElementById('uploadPreview').classList.add('hidden');
+        document.getElementById('fileInput').value = '';
+    }
+
+    // FAQ toggle
+    function toggleFaq(btn) {
+        const content = btn.nextElementSibling;
+        const icon = btn.querySelector('i');
+        content.classList.toggle('hidden');
+        icon.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    }
+</script>
+{% endblock %}

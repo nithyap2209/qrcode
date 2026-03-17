@@ -1,0 +1,239 @@
+/* QR Code Scanner Page Styles */
+
+/* Scanner Container */
+.scanner-container {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+/* Video Preview */
+.scanner-video-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #1a1a2e;
+    overflow: hidden;
+}
+
+.scanner-video-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Scanning Overlay */
+.scanner-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.scanner-frame {
+    width: 65%;
+    aspect-ratio: 1 / 1;
+    border: 3px solid rgba(124, 58, 237, 0.7);
+    border-radius: 1rem;
+    position: relative;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+}
+
+.scanner-frame::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #7c3aed, transparent);
+    animation: scanLine 2s ease-in-out infinite;
+}
+
+@keyframes scanLine {
+    0%, 100% { top: 0; }
+    50% { top: calc(100% - 3px); }
+}
+
+/* Corner markers */
+.scanner-frame .corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: #7c3aed;
+    border-style: solid;
+    border-width: 0;
+}
+
+.scanner-frame .corner.top-left {
+    top: -2px;
+    left: -2px;
+    border-top-width: 4px;
+    border-left-width: 4px;
+    border-top-left-radius: 8px;
+}
+
+.scanner-frame .corner.top-right {
+    top: -2px;
+    right: -2px;
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-top-right-radius: 8px;
+}
+
+.scanner-frame .corner.bottom-left {
+    bottom: -2px;
+    left: -2px;
+    border-bottom-width: 4px;
+    border-left-width: 4px;
+    border-bottom-left-radius: 8px;
+}
+
+.scanner-frame .corner.bottom-right {
+    bottom: -2px;
+    right: -2px;
+    border-bottom-width: 4px;
+    border-right-width: 4px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Result Box */
+.scanner-result {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    word-break: break-all;
+    transition: all 0.3s ease;
+}
+
+.scanner-result.has-result {
+    border-color: #7c3aed;
+    background: #f5f3ff;
+}
+
+.scanner-result a {
+    color: #7c3aed;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.scanner-result a:hover {
+    color: #6d28d9;
+}
+
+/* Upload Zone */
+.upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+    border-color: #7c3aed;
+    background: #f5f3ff;
+}
+
+/* Tab Buttons */
+.scanner-tab {
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.scanner-tab.active {
+    background: #7c3aed;
+    color: #ffffff;
+    border-color: #7c3aed;
+}
+
+.scanner-tab:not(.active) {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.scanner-tab:not(.active):hover {
+    background: #e2e8f0;
+}
+
+/* Action Buttons */
+.scanner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.scanner-btn-primary {
+    background: #7c3aed;
+    color: #ffffff;
+}
+
+.scanner-btn-primary:hover {
+    background: #6d28d9;
+}
+
+.scanner-btn-outline {
+    background: transparent;
+    color: #7c3aed;
+    border: 2px solid #7c3aed;
+}
+
+.scanner-btn-outline:hover {
+    background: #f5f3ff;
+}
+
+/* How It Works Steps */
+.step-number {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .scanner-container {
+        border-radius: 0.75rem;
+    }
+
+    .scanner-frame {
+        width: 75%;
+    }
+
+    .upload-zone {
+        padding: 1.25rem;
+    }
+
+    .scanner-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+    }
+}
