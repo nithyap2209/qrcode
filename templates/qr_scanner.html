@@ -542,6 +542,11 @@
     // Camera scanner using html5-qrcode
     async function startCamera() {
         try {
+            // Clear old results when starting camera
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('resultText').textContent = '';
+            document.getElementById('rawDataSection').classList.add('hidden');
+
             var videoWrapper = document.getElementById('scannerVideo');
             document.getElementById('cameraPlaceholder').classList.add('hidden');
 
@@ -552,11 +557,14 @@
             await html5QrScanner.start(
                 { facingMode: 'environment' },
                 {
-                    fps: 10,
+                    fps: 15,
                     qrbox: function(viewfinderWidth, viewfinderHeight) {
-                        var size = Math.min(viewfinderWidth, viewfinderHeight) * 0.65;
+                        // Use 85% of viewport for bigger scan area
+                        var size = Math.min(viewfinderWidth, viewfinderHeight) * 0.85;
                         return { width: size, height: size };
-                    }
+                    },
+                    aspectRatio: 1.0,
+                    disableFlip: false
                 },
                 function(decodedText) {
                     showResult(decodedText);
@@ -903,13 +911,20 @@
 
     // Reset scanner
     function resetScanner() {
+        // Clear all results and previews
         document.getElementById('resultSection').classList.add('hidden');
         document.getElementById('resultText').textContent = '';
+        document.getElementById('rawDataSection').classList.add('hidden');
         document.getElementById('uploadPreview').classList.add('hidden');
         document.getElementById('uploadError').classList.add('hidden');
         document.getElementById('previewImage').src = '';
         document.getElementById('fileInput').value = '';
 
+        // If on camera tab, restart camera for next scan
+        if (!document.getElementById('cameraPanel').classList.contains('hidden')) {
+            startCamera();
+        }
+        // If on upload tab, open file picker for next scan
         if (!document.getElementById('uploadPanel').classList.contains('hidden')) {
             document.getElementById('fileInput').click();
         }
