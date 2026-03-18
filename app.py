@@ -3959,20 +3959,32 @@ def api_scan_qr():
         if img_raw is None:
             return jsonify({'success': False, 'error': 'Invalid image'}), 400
 
-        # Handle transparent PNG: replace alpha with white background
+        # Handle transparent PNG: composite onto white background
         if len(img_raw.shape) == 3 and img_raw.shape[2] == 4:
-            # Image has alpha channel (RGBA)
-            alpha = img_raw[:, :, 3] / 255.0
-            white_bg = np.ones_like(img_raw[:, :, :3], dtype=np.uint8) * 255
-            for c in range(3):
-                white_bg[:, :, c] = (img_raw[:, :, c] * alpha + 255 * (1 - alpha)).astype(np.uint8)
-            img = white_bg
+            # RGBA image — composite onto white
+            bgr = img_raw[:, :, :3]
+            alpha_ch = img_raw[:, :, 3]
+            alpha_f = alpha_ch.astype(np.float32) / 255.0
+            alpha_3ch = np.stack([alpha_f, alpha_f, alpha_f], axis=2)
+            white = np.full_like(bgr, 255, dtype=np.float32)
+            img = (bgr.astype(np.float32) * alpha_3ch + white * (1.0 - alpha_3ch)).astype(np.uint8)
+            logging.info(f"QR scan: converted RGBA to RGB with white bg, alpha range=[{alpha_ch.min()},{alpha_ch.max()}]")
+        elif len(img_raw.shape) == 2:
+            img = cv2.cvtColor(img_raw, cv2.COLOR_GRAY2BGR)
         else:
-            img = img_raw if len(img_raw.shape) == 3 else cv2.cvtColor(img_raw, cv2.COLOR_GRAY2BGR)
+            img = img_raw
+
+        # Also try reading as simple BGR (ignoring alpha) as a fallback candidate
+        img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         decoded_data = None
         h, w = img.shape[:2]
-        logging.info(f"QR scan: image size={w}x{h}, original_channels={img_raw.shape[2] if len(img_raw.shape)==3 else 1}, file={file.filename}")
+        channels = img_raw.shape[2] if len(img_raw.shape) == 3 else 1
+        logging.info(f"QR scan: image size={w}x{h}, channels={channels}, file={file.filename}")
+
+        # Save debug copy to check exact file (remove after debugging)
+        debug_path = os.path.join(os.path.dirname(__file__), 'static', 'debug_upload.png')
+        cv2.imwrite(debug_path, img)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         detector = cv2.QRCodeDetector()
 
@@ -4052,13 +4064,45 @@ def api_scan_qr():
             big_bw[big_white > 0] = 255
             decoded_data = try_cv_detect(big_bw)
 
-        # Strategy 10: Try pyzbar as fallback (works on Linux/EC2)
+        # Strategy 10: Try BGR version (black background for transparent PNGs)
+        if not decoded_data and img_bgr is not None:
+            decoded_data = try_cv_detect(img_bgr)
+
+        # Strategy 11: BGR grayscale + invert (white-on-black to black-on-white)
+        if not decoded_data and img_bgr is not None:
+            bgr_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+            _, bgr_bin = cv2.threshold(bgr_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            decoded_data = try_cv_detect(bgr_bin)
+            if not decoded_data:
+                decoded_data = try_cv_detect(cv2.bitwise_not(bgr_bin))
+
+        # Strategy 12: Scale up all versions for small images
+        if not decoded_data and max(h, w) < 600:
+            scale = 1500 / max(h, w)
+            for src in [img, img_bgr, gray]:
+                if src is None:
+                    continue
+                big = cv2.resize(src, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+                decoded_data = try_cv_detect(big)
+                if decoded_data:
+                    break
+                # Also try with blur
+                if len(big.shape) == 2:
+                    big_blur = cv2.GaussianBlur(big, (5, 5), 0)
+                    _, big_bin = cv2.threshold(big_blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                    decoded_data = try_cv_detect(big_bin)
+                    if decoded_data:
+                        break
+
+        # Strategy 13: Try pyzbar as fallback (works on Linux/EC2)
         if not decoded_data:
             decoded_data = try_pyzbar(img)
         if not decoded_data:
             decoded_data = try_pyzbar(gray)
-        if not decoded_data:
-            decoded_data = try_pyzbar(binary)
+        if not decoded_data and img_bgr is not None:
+            decoded_data = try_pyzbar(img_bgr)
+
+        logging.info(f"QR scan result: {'found' if decoded_data else 'not found'}")
 
         if decoded_data:
             return jsonify({'success': True, 'data': decoded_data})
