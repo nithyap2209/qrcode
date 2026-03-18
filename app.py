@@ -3982,10 +3982,26 @@ def api_scan_qr():
         channels = img_raw.shape[2] if len(img_raw.shape) == 3 else 1
         logging.info(f"QR scan: image size={w}x{h}, channels={channels}, file={file.filename}")
 
-        # Save debug copy to check exact file (remove after debugging)
-        debug_path = os.path.join(os.path.dirname(__file__), 'static', 'debug_upload.png')
-        cv2.imwrite(debug_path, img)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # PRIMARY: Try zxing-cpp first (best for styled/colored QR codes)
+        try:
+            import zxingcpp
+            from PIL import Image as PILImage
+            # Convert BGR to RGB for PIL
+            rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            pil_img = PILImage.fromarray(rgb)
+            results = zxingcpp.read_barcodes(pil_img)
+            if results:
+                decoded_data = results[0].text
+                logging.info(f"QR scan: decoded by zxing-cpp: {decoded_data[:60]}")
+                return jsonify({'success': True, 'data': decoded_data})
+        except ImportError:
+            logging.warning("zxing-cpp not installed, falling back to OpenCV")
+        except Exception as e:
+            logging.warning(f"zxing-cpp error: {e}")
+
+        # FALLBACK: OpenCV strategies
         detector = cv2.QRCodeDetector()
 
         # Helper: try OpenCV QR detector
